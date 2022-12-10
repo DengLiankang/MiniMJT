@@ -6,8 +6,8 @@
 /*********************
  *      INCLUDES
  *********************/
-#include "lv_demo_encoder.h"
-#include "lv_port_indev.h"
+#include "driver/lv_demo_encoder.h"
+#include "driver/lv_port_indev.h"
 
 // /*********************
 //  *      DEFINES

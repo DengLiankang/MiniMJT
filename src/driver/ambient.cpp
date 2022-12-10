@@ -1,4 +1,4 @@
-#include "ambient.h"
+#include "driver/ambient.h"
 #include "common.h"
 
 void Ambient::init(int mode)

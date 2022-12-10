@@ -1,7 +1,7 @@
-#include "app_controller.h"
-#include "app_controller_gui.h"
+#include "sys/app_controller.h"
+#include "sys/app_controller_gui.h"
 #include "common.h"
-#include "interface.h"
+#include "sys/interface.h"
 #include "Arduino.h"
 
 const char *app_event_type_info[] = {"APP_MESSAGE_WIFI_CONN", "APP_MESSAGE_WIFI_AP",

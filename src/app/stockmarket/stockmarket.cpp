@@ -1,7 +1,7 @@
 #include "stockmarket.h"
 #include "stockmarket_gui.h"
 #include "sys/app_controller.h"
-#include "../../common.h"
+#include "common.h"
 
 // STOCKmarket的持久化配置
 #define B_CONFIG_PATH "/stockmarket.cfg"

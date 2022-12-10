@@ -1,7 +1,7 @@
 #include "bilibili.h"
 #include "bilibili_gui.h"
 #include "sys/app_controller.h"
-#include "../../common.h"
+#include "common.h"
 
 #define FANS_API "https://api.bilibili.com/x/relation/stat?vmid="
 #define OTHER_API "https://api.bilibili.com/x/space/upstat?mid="

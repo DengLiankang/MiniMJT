@@ -3,7 +3,7 @@
 // #include <LittleFS.h>
 #include <SPIFFS.h>
 #include <time.h>
-#include "flash_fs.h"
+#include "driver/flash_fs.h"
 
 /* You only need to format SPIFFS the first time you run a
    test or else use the LITTLEFS plugin to create a partition

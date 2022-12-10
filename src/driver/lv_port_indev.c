@@ -8,7 +8,7 @@
 /*********************
  *      INCLUDES
  *********************/
-#include "lv_port_indev.h"
+#include "driver/lv_port_indev.h"
 
 static void encoder_init(void);
 static bool encoder_read(lv_indev_drv_t* indev_drv, lv_indev_data_t* data);

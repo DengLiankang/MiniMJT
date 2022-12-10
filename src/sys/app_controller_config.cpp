@@ -1,6 +1,6 @@
-#include "app_controller.h"
+#include "sys/app_controller.h"
 #include "common.h"
-#include "interface.h"
+#include "sys/interface.h"
 #include "Arduino.h"
 
 #define APP_CTRL_CONFIG_PATH "/sys.cfg"
