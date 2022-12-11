@@ -69,7 +69,7 @@ void setup()
 {
     Serial.begin(115200);
 
-    Serial.println(F("\nAIO (All in one) version " AIO_VERSION "\n"));
+    Serial.println(F("\nMiniMJT version " AIO_VERSION "\n"));
     Serial.flush();
     // MAC ID可用作芯片唯一标识
     Serial.print(F("ChipID(EfuseMac): "));
