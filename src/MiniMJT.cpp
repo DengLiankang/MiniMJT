@@ -25,7 +25,6 @@
 #include "app/media_player/media_player.h"
 #include "app/screen_share/screen_share.h"
 #include "app/file_manager/file_manager.h"
-#include "app/weather_old/weather_old.h"
 #include "app/anniversary/anniversary.h"
 #include "app/heartbeat/heartbeat.h"
 #include "app/stockmarket/stockmarket.h"
@@ -146,7 +145,6 @@ void setup()
 
     // 将APP"安装"到controller里
     app_controller->app_install(&weather_app);
-    app_controller->app_install(&weather_old_app);
     app_controller->app_install(&picture_app);
     app_controller->app_install(&media_app);
     app_controller->app_install(&screen_share_app);
