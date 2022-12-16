@@ -16,7 +16,6 @@
 #include "sys/app_controller.h"
 
 #include "app/weather/weather.h"
-#include "app/bilibili_fans/bilibili.h"
 #include "app/server/server.h"
 #include "app/idea_anim/idea.h"
 #include "app/settings/settings.h"
@@ -151,7 +150,6 @@ void setup()
     app_controller->app_install(&file_manager_app);
     app_controller->app_install(&server_app);
     app_controller->app_install(&idea_app);
-    app_controller->app_install(&bilibili_app);
     app_controller->app_install(&settings_app);
     app_controller->app_install(&game_2048_app);
     app_controller->app_install(&anniversary_app);
