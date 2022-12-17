@@ -101,15 +101,10 @@ void setup()
     // config_read(NULL, &g_cfg);   // 旧的配置文件读取方式
     app_controller->read_config(&app_controller->sys_cfg);
     app_controller->read_config(&app_controller->mpu_cfg);
-    app_controller->read_config(&app_controller->rgb_cfg);
 
     /*** Init screen ***/
     screen.init(app_controller->sys_cfg.rotation,
                 app_controller->sys_cfg.backLight);
-
-    /*** Init on-board RGB ***/
-    rgb.init();
-    rgb.setBrightness(0.05).setRGB(0, 64, 64);
 
     /*** Init ambient-light sensor ***/
     ambLight.init(ONE_TIME_H_RESOLUTION_MODE);
@@ -169,18 +164,6 @@ void setup()
              app_controller->sys_cfg.auto_calibration_mpu,
              &app_controller->mpu_cfg); // 初始化比较耗时
 
-    /*** 以此作为MPU6050初始化完成的标志 ***/
-    RgbConfig *rgb_cfg = &app_controller->rgb_cfg;
-    // 初始化RGB灯 HSV色彩模式
-    RgbParam rgb_setting = {LED_MODE_HSV,
-                            rgb_cfg->min_value_0, rgb_cfg->min_value_1, rgb_cfg->min_value_2,
-                            rgb_cfg->max_value_0, rgb_cfg->max_value_1, rgb_cfg->max_value_2,
-                            rgb_cfg->step_0, rgb_cfg->step_1, rgb_cfg->step_2,
-                            rgb_cfg->min_brightness, rgb_cfg->max_brightness,
-                            rgb_cfg->brightness_step, rgb_cfg->time};
-    // 运行RGB任务
-    set_rgb_and_run(&rgb_setting, RUN_MODE_TASK);
-
     // 先初始化一次动作数据 防空指针
     act_info = mpu.getAction();
     // 定义一个mpu6050的动作检测定时器
@@ -214,5 +197,4 @@ void loop()
     }
     app_controller->main_process(act_info); // 运行当前进程
     // Serial.println(ambLight.getLux() / 50.0);
-    // rgb.setBrightness(ambLight.getLux() / 500.0);
 }

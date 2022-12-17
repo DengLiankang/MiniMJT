@@ -78,7 +78,7 @@ void AppController::Display()
 
 AppController::~AppController()
 {
-    rgb_stop();
+
 }
 
 int AppController::app_is_legal(const APP_OBJ *app_obj)
@@ -417,16 +417,6 @@ void AppController::app_exit()
     app_control_display_scr(appList[cur_app_index]->app_image,
                             appList[cur_app_index]->app_name,
                             LV_SCR_LOAD_ANIM_NONE, true);
-
-    // 恢复RGB灯  HSV色彩模式
-    RgbConfig *cfg = &rgb_cfg;
-    RgbParam rgb_setting = {LED_MODE_HSV,
-                            cfg->min_value_0, cfg->min_value_1, cfg->min_value_2,
-                            cfg->max_value_0, cfg->max_value_1, cfg->max_value_2,
-                            cfg->step_0, cfg->step_1, cfg->step_2,
-                            cfg->min_brightness, cfg->max_brightness,
-                            cfg->brightness_step, cfg->time};
-    set_rgb_and_run(&rgb_setting);
 
     // 设置CPU主频
     if (1 == this->sys_cfg.power_mode)

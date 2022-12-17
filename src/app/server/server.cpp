@@ -33,10 +33,7 @@ void start_web_config()
     server.on("/delete_result", delete_result);
 
     server.on("/sys_setting", sys_setting);
-    server.on("/rgb_setting", rgb_setting);
     server.on("/weather_setting", weather_setting);
-    server.on("/weather_old_setting", weather_old_setting);
-    server.on("/bili_setting", bili_setting);
     server.on("/stock_setting", stock_setting);
     server.on("/picture_setting", picture_setting);
     server.on("/media_setting", media_setting);
@@ -51,10 +48,7 @@ void start_web_config()
 
     // 连接
     server.on("/saveSysConf", saveSysConf);
-    server.on("/saveRgbConf", saveRgbConf);
     server.on("/saveWeatherConf", saveWeatherConf);
-    server.on("/saveWeatherOldConf", saveWeatherOldConf);
-    server.on("/saveBiliConf", saveBiliConf);
     server.on("/saveStockConf", saveStockConf);
     server.on("/savePictureConf", savePictureConf);
     server.on("/saveMediaConf", saveMediaConf);

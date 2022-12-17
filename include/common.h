@@ -6,7 +6,6 @@
 // #define GET_SYS_MILLIS millis            // 获取系统毫秒数
 
 #include "Arduino.h"
-#include "driver/rgb_led.h"
 #include "driver/flash_fs.h"
 #include "driver/sd_card.h"
 #include "driver/display.h"
@@ -20,7 +19,6 @@
 
 extern IMU mpu; // 原则上只提供给主程序调用
 extern SdCard tf;
-extern Pixel rgb;
 // extern Config g_cfg;       // 全局配置文件
 extern Network g_network;  // 网络连接
 extern FlashFS g_flashCfg; // flash中的文件系统（替代原先的Preferences）
@@ -55,9 +53,8 @@ boolean doDelayMillisTime(unsigned long interval,
 
 #define LCD_BL_PWM_CHANNEL 0
 
-// 优先级定义(数值越小优先级越低)
+// 优先级定义(数值越小优先级越高)
 // 最高为 configMAX_PRIORITIES-1
-#define TASK_RGB_PRIORITY 0  // RGB的任务优先级
 #define TASK_LVGL_PRIORITY 2 // LVGL的页面优先级
 
 // lvgl 操作的锁

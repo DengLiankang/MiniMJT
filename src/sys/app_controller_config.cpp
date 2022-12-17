@@ -5,7 +5,6 @@
 
 #define APP_CTRL_CONFIG_PATH "/sys.cfg"
 #define MPU_CONFIG_PATH "/mpu.cfg"
-#define RGB_CONFIG_PATH "/rgb.cfg"
 
 void AppController::read_config(SysUtilConfig *cfg)
 {
@@ -150,143 +149,6 @@ void AppController::write_config(SysMpuConfig *cfg)
     g_flashCfg.writeFile(MPU_CONFIG_PATH, w_data.c_str());
 }
 
-void AppController::read_config(RgbConfig *cfg)
-{
-    // 如果有需要持久化配置文件 可以调用此函数将数据存在flash中
-    // 配置文件名最好以APP名为开头 以".cfg"结尾，以免多个APP读取混乱
-    char info[128] = {0};
-    uint16_t size = g_flashCfg.readFile(RGB_CONFIG_PATH, (uint8_t *)info);
-    info[size] = 0;
-    if (size == 0)
-    {
-        // 默认值
-        cfg->mode = 1;
-        cfg->min_value_0 = 1;
-        cfg->min_value_1 = 32;
-        cfg->min_value_2 = 255;
-        cfg->max_value_0 = 255;
-        cfg->max_value_1 = 255;
-        cfg->max_value_2 = 255;
-        cfg->step_0 = 1;
-        cfg->step_1 = 1;
-        cfg->step_2 = 1;
-        cfg->min_brightness = 0.15;
-        cfg->max_brightness = 0.25;
-        cfg->brightness_step = 0.001;
-        cfg->time = 30;
-
-        this->write_config(cfg);
-    }
-    else
-    {
-        // 解析数据
-        char *param[14] = {0};
-        analyseParam(info, 14, param);
-        cfg->mode = atol(param[0]);
-        cfg->min_value_0 = atol(param[1]);
-        cfg->min_value_1 = atol(param[2]);
-        cfg->min_value_2 = atol(param[3]);
-        cfg->max_value_0 = atol(param[4]);
-        cfg->max_value_1 = atol(param[5]);
-        cfg->max_value_2 = atol(param[6]);
-        cfg->step_0 = atol(param[7]);
-        cfg->step_1 = atol(param[8]);
-        cfg->step_2 = atol(param[9]);
-        cfg->min_brightness = atof(param[10]);
-        cfg->max_brightness = atof(param[11]);
-        cfg->brightness_step = atof(param[12]);
-        cfg->time = atol(param[13]);
-    }
-}
-
-void AppController::write_config(RgbConfig *cfg)
-{
-    char tmp[25];
-    // 将配置数据保存在文件中（持久化）
-    String w_data;
-    memset(tmp, 0, 25);
-    snprintf(tmp, 25, "%u\n", cfg->mode);
-    w_data += tmp;
-
-    memset(tmp, 0, 25);
-    snprintf(tmp, 25, "%u\n", cfg->min_value_0);
-    w_data += tmp;
-
-    memset(tmp, 0, 25);
-    snprintf(tmp, 25, "%u\n", cfg->min_value_1);
-    w_data += tmp;
-
-    memset(tmp, 0, 25);
-    snprintf(tmp, 25, "%u\n", cfg->min_value_2);
-    w_data += tmp;
-
-    memset(tmp, 0, 25);
-    snprintf(tmp, 25, "%u\n", cfg->max_value_0);
-    w_data += tmp;
-
-    memset(tmp, 0, 25);
-    snprintf(tmp, 25, "%u\n", cfg->max_value_1);
-    w_data += tmp;
-
-    memset(tmp, 0, 25);
-    snprintf(tmp, 25, "%u\n", cfg->max_value_2);
-    w_data += tmp;
-
-    memset(tmp, 0, 25);
-    snprintf(tmp, 25, "%d\n", cfg->step_0);
-    w_data += tmp;
-
-    memset(tmp, 0, 25);
-    snprintf(tmp, 25, "%d\n", cfg->step_1);
-    w_data += tmp;
-
-    memset(tmp, 0, 25);
-    snprintf(tmp, 25, "%d\n", cfg->step_2);
-    w_data += tmp;
-
-    if (cfg->min_brightness < 0.01)
-    {
-        // 限制
-        cfg->min_brightness = 0.01;
-    }
-    memset(tmp, 0, 25);
-    snprintf(tmp, 25, "%f\n", cfg->min_brightness);
-    w_data += tmp;
-
-    if (cfg->max_brightness < 0.01)
-    {
-        // 限制
-        cfg->max_brightness = 0.01;
-    }
-    memset(tmp, 0, 25);
-    snprintf(tmp, 25, "%f\n", cfg->max_brightness);
-    w_data += tmp;
-
-    memset(tmp, 0, 25);
-    snprintf(tmp, 25, "%f\n", cfg->brightness_step);
-    w_data += tmp;
-
-    if (cfg->time < 10)
-    {
-        cfg->time = 10;
-    }
-    memset(tmp, 0, 25);
-    snprintf(tmp, 25, "%d\n", cfg->time);
-    w_data += tmp;
-
-    g_flashCfg.writeFile(RGB_CONFIG_PATH, w_data.c_str());
-
-    // 初始化RGB灯 HSV色彩模式
-    RgbParam rgb_setting = {LED_MODE_HSV,
-                            rgb_cfg.min_value_0, rgb_cfg.min_value_1, rgb_cfg.min_value_2,
-                            rgb_cfg.max_value_0, rgb_cfg.max_value_1, rgb_cfg.max_value_2,
-                            rgb_cfg.step_0, rgb_cfg.step_1, rgb_cfg.step_2,
-                            rgb_cfg.min_brightness, rgb_cfg.max_brightness,
-                            rgb_cfg.brightness_step, rgb_cfg.time};
-    // 初始化RGB任务
-    set_rgb_and_run(&rgb_setting);
-}
-
 void AppController::deal_config(APP_MESSAGE_TYPE type,
                                 const char *key, char *value)
 {
@@ -338,18 +200,6 @@ void AppController::deal_config(APP_MESSAGE_TYPE type,
         else if (!strcmp(key, "mpu_order"))
         {
             snprintf(value, 32, "%u", sys_cfg.mpu_order);
-        }
-        else if (!strcmp(key, "min_brightness"))
-        {
-            snprintf(value, 32, "%f", rgb_cfg.min_brightness);
-        }
-        else if (!strcmp(key, "max_brightness"))
-        {
-            snprintf(value, 32, "%f", rgb_cfg.max_brightness);
-        }
-        else if (!strcmp(key, "time"))
-        {
-            snprintf(value, 32, "%u", rgb_cfg.time);
         }
         else if (!strcmp(key, "auto_start_app"))
         {
@@ -407,18 +257,6 @@ void AppController::deal_config(APP_MESSAGE_TYPE type,
         {
             sys_cfg.mpu_order = atol(value);
         }
-        else if (!strcmp(key, "min_brightness"))
-        {
-            rgb_cfg.min_brightness = atof(value);
-        }
-        else if (!strcmp(key, "max_brightness"))
-        {
-            rgb_cfg.max_brightness = atof(value);
-        }
-        else if (!strcmp(key, "time"))
-        {
-            rgb_cfg.time = atol(value);
-        }
         else if (!strcmp(key, "auto_start_app"))
         {
             sys_cfg.auto_start_app = value;
@@ -429,14 +267,12 @@ void AppController::deal_config(APP_MESSAGE_TYPE type,
     {
         read_config(&sys_cfg);
         // read_config(&mpu_cfg);
-        read_config(&rgb_cfg);
     }
     break;
     case APP_MESSAGE_WRITE_CFG:
     {
         write_config(&sys_cfg);
         // write_config(&mpu_cfg);  // 在取消自动校准的时候已经写过一次了
-        write_config(&rgb_cfg);
     }
     break;
     default:

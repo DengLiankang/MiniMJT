@@ -16,10 +16,7 @@ void delete_result(void);
 void handleFileUpload(void);
 
 void sys_setting(void);
-void rgb_setting(void);
 void weather_setting(void);
-void weather_old_setting(void);
-void bili_setting(void);
 void stock_setting(void);
 void picture_setting(void);
 void media_setting(void);
@@ -28,10 +25,7 @@ void heartbeat_setting(void);
 void anniversary_setting(void);
 
 void saveSysConf(void);
-void saveRgbConf(void);
 void saveWeatherConf(void);
-void saveWeatherOldConf(void);
-void saveBiliConf(void);
 void saveStockConf(void);
 void savePictureConf(void);
 void saveMediaConf(void);

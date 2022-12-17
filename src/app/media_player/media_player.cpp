@@ -139,13 +139,6 @@ static void release_player_docoder(void)
 
 static int media_player_init(AppController *sys)
 {
-    // 调整RGB模式  HSV色彩模式
-    RgbParam rgb_setting = {LED_MODE_HSV, 0, 128, 32,
-                            255, 255, 32,
-                            1, 1, 1,
-                            0.15, 0.20, 0.001, 50};
-    set_rgb_and_run(&rgb_setting);
-
     // 获取配置信息
     read_config(&cfg_data);
     // 初始化运行时参数

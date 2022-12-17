@@ -62,12 +62,6 @@ String file_size(int bytes)
                     "<label class=\"input\"><span>开机自启的APP名字</span><input type=\"text\"name=\"auto_start_app\"value=\"%s\"></label>"                                                                                                                      \
                     "</label><input class=\"btn\" type=\"submit\" name=\"submit\" value=\"保存\"></form>"
 
-#define RGB_SETTING "<form method=\"GET\" action=\"saveRgbConf\">"                                                                                             \
-                    "<label class=\"input\"><span>RGB最低亮度（0.00~0.99可选）</span><input type=\"text\"name=\"min_brightness\"value=\"%s\"></label>" \
-                    "<label class=\"input\"><span>RGB最高亮度（0.00~0.99可选）</span><input type=\"text\"name=\"max_brightness\"value=\"%s\"></label>" \
-                    "<label class=\"input\"><span>RGB渐变时间（整数毫秒值）</span><input type=\"text\"name=\"time\"value=\"%s\"></label>"           \
-                    "</label><input class=\"btn\" type=\"submit\" name=\"submit\" value=\"保存\"></form>"
-
 #define WEATHER_SETTING "<form method=\"GET\" action=\"saveWeatherConf\">"                                                                                          \
                         "<label class=\"input\"><span>TianQi AppId</span><input type=\"text\"name=\"tianqi_appid\"value=\"%s\"></label>"                            \
                         "<label class=\"input\"><span>TianQi AppSecret</span><input type=\"text\"name=\"tianqi_appsecret\"value=\"%s\"></label>"                    \
@@ -75,19 +69,6 @@ String file_size(int bytes)
                         "<label class=\"input\"><span>天气更新周期（毫秒）</span><input type=\"text\"name=\"weatherUpdataInterval\"value=\"%s\"></label>" \
                         "<label class=\"input\"><span>日期更新周期（毫秒）</span><input type=\"text\"name=\"timeUpdataInterval\"value=\"%s\"></label>"    \
                         "</label><input class=\"btn\" type=\"submit\" name=\"submit\" value=\"保存\"></form>"
-
-#define WEATHER_OLD_SETTING "<form method=\"GET\" action=\"saveWeatherOldConf\">"                                                                                       \
-                            "<label class=\"input\"><span>知心天气 城市名（拼音）</span><input type=\"text\"name=\"cityname\"value=\"%s\"></label>"          \
-                            "<label class=\"input\"><span>City Language(zh-Hans)</span><input type=\"text\"name=\"language\"value=\"%s\"></label>"                      \
-                            "<label class=\"input\"><span>Weather Key</span><input type=\"text\"name=\"weather_key\"value=\"%s\"></label>"                              \
-                            "<label class=\"input\"><span>天气更新周期（毫秒）</span><input type=\"text\"name=\"weatherUpdataInterval\"value=\"%s\"></label>" \
-                            "<label class=\"input\"><span>日期更新周期（毫秒）</span><input type=\"text\"name=\"timeUpdataInterval\"value=\"%s\"></label>"    \
-                            "</label><input class=\"btn\" type=\"submit\" name=\"submit\" value=\"保存\"></form>"
-
-#define BILIBILI_SETTING "<form method=\"GET\" action=\"saveBiliConf\">"                                                                                      \
-                         "<label class=\"input\"><span>Bili UID</span><input type=\"text\"name=\"bili_uid\"value=\"%s\"></label>"                             \
-                         "<label class=\"input\"><span>数据更新周期（毫秒）</span><input type=\"text\"name=\"updataInterval\"value=\"%s\"></label>" \
-                         "</label><input class=\"btn\" type=\"submit\" name=\"submit\" value=\"保存\"></form>"
 
 #define STOCK_SETTING "<form method=\"GET\" action=\"saveStockConf\">"                                                                                      \
                          "<label class=\"input\"><span>股票代码,例如：sz000001或sh601126</span><input type=\"text\"name=\"stock_id\"value=\"%s\"></label>"                             \
@@ -109,9 +90,9 @@ String file_size(int bytes)
 
 #define HEARTBEAT_SETTING "<form method=\"GET\" action=\"saveHeartbeatConf\">"                                                                            \
                           "<label class=\"input\"><span>Role(0:heart,1:beat)</span><input type=\"text\"name=\"role\"value=\"%s\"></label>"                \
-                          "<label class=\"input\"><span>MQTT ClientID(推荐QQ号)</span><input type=\"text\"name=\"mqtt_client_id\"value=\"%s\"></label>"                    \  
-                          "<label class=\"input\"><span>MQTT SubTopic(推荐对方QQ号)</span><input type=\"text\"name=\"mqtt_subtopic\"value=\"%s\"></label>"                    \  
-                        "<label class=\"input\"><span>MQTT ServerIp</span><input type=\"text\"name=\"mqtt_server\"value=\"%s\"></label>"                    \  
+                          "<label class=\"input\"><span>MQTT ClientID(推荐QQ号)</span><input type=\"text\"name=\"mqtt_client_id\"value=\"%s\"></label>"                    \
+                          "<label class=\"input\"><span>MQTT SubTopic(推荐对方QQ号)</span><input type=\"text\"name=\"mqtt_subtopic\"value=\"%s\"></label>"                    \
+                        "<label class=\"input\"><span>MQTT ServerIp</span><input type=\"text\"name=\"mqtt_server\"value=\"%s\"></label>"                    \
                         "<label class=\"input\"><span>MQTT 端口号(1883)</span><input type=\"text\"name=\"mqtt_port\"value=\"%s\"></label>"             \
                         "<label class=\"input\"><span>MQTT 服务用户名(可不填)</span><input type=\"text\"name=\"mqtt_user\"value=\"%s\"></label>"  \
                         "<label class=\"input\"><span>MQTT 服务密码(可不填)</span><input type=\"text\"name=\"mqtt_password\"value=\"%s\"></label>" \
@@ -169,9 +150,7 @@ void init_page_header()
     webpage_header += F("<li><a href='/upload'>Upload</a></li>");
     webpage_header += F("<li><a href='/delete'>Delete</a></li>");
     webpage_header += F("<li><a href='/sys_setting'>系统设置</a></li>");
-    webpage_header += F("<li><a href='/rgb_setting'>RGB设置</a></li>");
-    webpage_header += F("<li><a href='/weather_setting'>新版天气</a></li>");
-    webpage_header += F("<li><a href='/weather_old_setting'>旧版天气</a></li>");
+    webpage_header += F("<li><a href='/weather_setting'>天气</a></li>");
     webpage_header += F("<li><a href='/bili_setting'>B站</a></li>");
     webpage_header += F("<li><a href='/picture_setting'>相册</a></li>");
     webpage_header += F("<li><a href='/media_setting'>媒体播放器</a></li>");
@@ -258,27 +237,6 @@ void sys_setting()
     Send_HTML(webpage);
 }
 
-void rgb_setting()
-{
-    char buf[2048];
-    char min_brightness[32];
-    char max_brightness[32];
-    char time[32];
-    // 读取数据
-    app_controller->send_to(SERVER_APP_NAME, "AppCtrl", APP_MESSAGE_READ_CFG,
-                            NULL, NULL);
-    app_controller->send_to(SERVER_APP_NAME, "AppCtrl", APP_MESSAGE_GET_PARAM,
-                            (void *)"min_brightness", min_brightness);
-    app_controller->send_to(SERVER_APP_NAME, "AppCtrl", APP_MESSAGE_GET_PARAM,
-                            (void *)"max_brightness", max_brightness);
-    app_controller->send_to(SERVER_APP_NAME, "AppCtrl", APP_MESSAGE_GET_PARAM,
-                            (void *)"time", time);
-    sprintf(buf, RGB_SETTING,
-            min_brightness, max_brightness, time);
-    webpage = buf;
-    Send_HTML(webpage);
-}
-
 void weather_setting()
 {
     char buf[2048];
@@ -304,54 +262,6 @@ void weather_setting()
             tianqi_appsecret, tianqi_addr,
             weatherUpdataInterval,
             timeUpdataInterval);
-    webpage = buf;
-    Send_HTML(webpage);
-}
-
-void weather_old_setting()
-{
-    char buf[2048];
-    char cityname[32];
-    char language[32];
-    char weather_key[32];
-    char weatherUpdataInterval[32];
-    char timeUpdataInterval[32];
-    // 读取数据
-    app_controller->send_to(SERVER_APP_NAME, "Weather Old", APP_MESSAGE_READ_CFG,
-                            NULL, NULL);
-    app_controller->send_to(SERVER_APP_NAME, "Weather Old", APP_MESSAGE_GET_PARAM,
-                            (void *)"cityname", cityname);
-    app_controller->send_to(SERVER_APP_NAME, "Weather Old", APP_MESSAGE_GET_PARAM,
-                            (void *)"language", language);
-    app_controller->send_to(SERVER_APP_NAME, "Weather Old", APP_MESSAGE_GET_PARAM,
-                            (void *)"weather_key", weather_key);
-    app_controller->send_to(SERVER_APP_NAME, "Weather Old", APP_MESSAGE_GET_PARAM,
-                            (void *)"weatherUpdataInterval", weatherUpdataInterval);
-    app_controller->send_to(SERVER_APP_NAME, "Weather Old", APP_MESSAGE_GET_PARAM,
-                            (void *)"timeUpdataInterval", timeUpdataInterval);
-    sprintf(buf, WEATHER_OLD_SETTING,
-            cityname,
-            language,
-            weather_key,
-            weatherUpdataInterval,
-            timeUpdataInterval);
-    webpage = buf;
-    Send_HTML(webpage);
-}
-
-void bili_setting()
-{
-    char buf[2048];
-    char bili_uid[32];
-    char updataInterval[32];
-    // 读取数据
-    app_controller->send_to(SERVER_APP_NAME, "Bili", APP_MESSAGE_READ_CFG,
-                            NULL, NULL);
-    app_controller->send_to(SERVER_APP_NAME, "Bili", APP_MESSAGE_GET_PARAM,
-                            (void *)"bili_uid", bili_uid);
-    app_controller->send_to(SERVER_APP_NAME, "Bili", APP_MESSAGE_GET_PARAM,
-                            (void *)"updataInterval", updataInterval);
-    sprintf(buf, BILIBILI_SETTING, bili_uid, updataInterval);
     webpage = buf;
     Send_HTML(webpage);
 }
@@ -518,27 +428,6 @@ void saveSysConf(void)
                             NULL, NULL);
 }
 
-void saveRgbConf(void)
-{
-    Send_HTML(F("<h1>设置成功! 退出APP或者继续其他设置.</h1>"));
-
-    app_controller->send_to(SERVER_APP_NAME, "AppCtrl",
-                            APP_MESSAGE_SET_PARAM,
-                            (void *)"min_brightness",
-                            (void *)server.arg("min_brightness").c_str());
-    app_controller->send_to(SERVER_APP_NAME, "AppCtrl",
-                            APP_MESSAGE_SET_PARAM,
-                            (void *)"max_brightness",
-                            (void *)server.arg("max_brightness").c_str());
-    app_controller->send_to(SERVER_APP_NAME, "AppCtrl",
-                            APP_MESSAGE_SET_PARAM,
-                            (void *)"time",
-                            (void *)server.arg("time").c_str());
-    // 持久化数据
-    app_controller->send_to(SERVER_APP_NAME, "AppCtrl", APP_MESSAGE_WRITE_CFG,
-                            NULL, NULL);
-}
-
 void saveWeatherConf(void)
 {
     Send_HTML(F("<h1>设置成功! 退出APP或者继续其他设置.</h1>"));
@@ -565,51 +454,6 @@ void saveWeatherConf(void)
                             (void *)server.arg("timeUpdataInterval").c_str());
     // 持久化数据
     app_controller->send_to(SERVER_APP_NAME, "Weather", APP_MESSAGE_WRITE_CFG,
-                            NULL, NULL);
-}
-
-void saveWeatherOldConf(void)
-{
-    Send_HTML(F("<h1>设置成功! 退出APP或者继续其他设置.</h1>"));
-
-    app_controller->send_to(SERVER_APP_NAME, "Weather Old",
-                            APP_MESSAGE_SET_PARAM,
-                            (void *)"cityname",
-                            (void *)server.arg("cityname").c_str());
-    app_controller->send_to(SERVER_APP_NAME, "Weather Old",
-                            APP_MESSAGE_SET_PARAM,
-                            (void *)"language",
-                            (void *)server.arg("language").c_str());
-    app_controller->send_to(SERVER_APP_NAME, "Weather Old",
-                            APP_MESSAGE_SET_PARAM,
-                            (void *)"weather_key",
-                            (void *)server.arg("weather_key").c_str());
-    app_controller->send_to(SERVER_APP_NAME, "Weather Old",
-                            APP_MESSAGE_SET_PARAM,
-                            (void *)"weatherUpdataInterval",
-                            (void *)server.arg("weatherUpdataInterval").c_str());
-    app_controller->send_to(SERVER_APP_NAME, "Weather Old",
-                            APP_MESSAGE_SET_PARAM,
-                            (void *)"timeUpdataInterval",
-                            (void *)server.arg("timeUpdataInterval").c_str());
-    // 持久化数据
-    app_controller->send_to(SERVER_APP_NAME, "Weather Old", APP_MESSAGE_WRITE_CFG,
-                            NULL, NULL);
-}
-
-void saveBiliConf(void)
-{
-    Send_HTML(F("<h1>设置成功! 退出APP或者继续其他设置.</h1>"));
-    app_controller->send_to(SERVER_APP_NAME, "Bili",
-                            APP_MESSAGE_SET_PARAM,
-                            (void *)"bili_uid",
-                            (void *)server.arg("bili_uid").c_str());
-    app_controller->send_to(SERVER_APP_NAME, "Bili",
-                            APP_MESSAGE_SET_PARAM,
-                            (void *)"updataInterval",
-                            (void *)server.arg("updataInterval").c_str());
-    // 持久化数据
-    app_controller->send_to(SERVER_APP_NAME, "Bili", APP_MESSAGE_WRITE_CFG,
                             NULL, NULL);
 }
 

@@ -63,8 +63,6 @@ public:
     void write_config(SysUtilConfig *cfg);
     void read_config(SysMpuConfig *cfg);
     void write_config(SysMpuConfig *cfg);
-    void read_config(RgbConfig *cfg);
-    void write_config(RgbConfig *cfg);
 
 private:
     APP_OBJ *getAppByName(const char *name);
@@ -89,7 +87,6 @@ private:
 public:
     SysUtilConfig sys_cfg;
     SysMpuConfig mpu_cfg;
-    RgbConfig rgb_cfg;
 };
 
 #endif

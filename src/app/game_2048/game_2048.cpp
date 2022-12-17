@@ -140,12 +140,10 @@ static void game_2048_process(AppController *sys,
 
     if (game.judge() == 1)
     {
-        //   rgb.setRGB(0, 255, 0);
         Serial.println("you win!");
     }
     else if (game.judge() == 2)
     {
-        //   rgb.setRGB(255, 0, 0);
         Serial.println("you lose!");
     }
 

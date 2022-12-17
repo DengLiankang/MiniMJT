@@ -161,13 +161,6 @@ static int screen_share_init(AppController *sys)
         setCpuFrequencyMhz(240);
     }
 
-    // 调整RGB模式  HSV色彩模式
-    RgbParam rgb_setting = {LED_MODE_HSV, 0, 128, 32,
-                            255, 255, 32,
-                            1, 1, 1,
-                            0.15, 0.25, 0.001, 30};
-    set_rgb_and_run(&rgb_setting);
-
     screen_share_gui_init();
     // 初始化运行时参数
     run_data = (ScreenShareAppRunData *)calloc(1, sizeof(ScreenShareAppRunData));
@@ -354,14 +347,6 @@ static int screen_exit_callback(void *param)
 
     // 恢复此前的驱动参数
     tft->setSwapBytes(run_data->tftSwapStatus);
-
-    // 恢复RGB灯  HSV色彩模式
-    RgbParam rgb_setting = {LED_MODE_HSV,
-                            1, 32, 255,
-                            255, 255, 255,
-                            1, 1, 1,
-                            0.15, 0.25, 0.001, 30};
-    set_rgb_and_run(&rgb_setting);
 
     // 释放运行数据
     if (NULL != run_data)

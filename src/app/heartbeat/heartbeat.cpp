@@ -263,15 +263,6 @@ static void heartbeat_process(AppController *sys,
             hb_cfg.mqtt_client->publish(hb_cfg.liz_mqtt_pubtopic, "hello!");
             Serial.printf(HEARTBEAT_APP_NAME " sent publish %s successful\n", hb_cfg.liz_mqtt_pubtopic);
         }
-
-        // 发送指示灯
-        // RgbParam rgb_setting = {LED_MODE_RGB,
-        //                     0, 0, 0,
-        //                     240,240,240,
-        //                     60, 60, 60,
-        //                     0.15, 0.25,
-        //                     0.001, 4};
-        // set_rgb_and_run(&rgb_setting);
     }
 
     if (run_data->recv_cnt > 0 && run_data->send_cnt > 0)
@@ -474,14 +465,6 @@ static void heartbeat_message_handle(const char *from, const char *to,
         // }
         heartbeat_set_sr_type(HEART);
         run_data->lastHeartUpdataTime = GET_SYS_MILLIS();
-        /* 亮一下 */
-        // RgbParam rgb_setting = {LED_MODE_RGB,
-        //                     0, 0, 0,
-        //                     3,36,86,
-        //                     1, 1, 1,
-        //                     0.15, 0.25,
-        //                     0.001, 8};
-        // set_rgb_and_run(&rgb_setting);
         run_data->recv_cnt++;
         Serial.println("received heartbeat");
     }
