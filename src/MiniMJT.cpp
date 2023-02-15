@@ -56,11 +56,13 @@ void actionCheckHandle(TimerHandle_t xTimer)
     isCheckAction = true;
 }
 
-void my_print(const char *buf)
+#if LV_USE_LOG
+void minimjt_print(const char *buf)
 {
     Serial.printf("%s", buf);
     Serial.flush();
 }
+#endif
 
 void setup()
 {
@@ -71,10 +73,6 @@ void setup()
     // MAC ID可用作芯片唯一标识
     Serial.print(F("ChipID(EfuseMac): "));
     Serial.println(ESP.getEfuseMac());
-    // flash运行模式
-    // Serial.print(F("FlashChipMode: "));
-    // Serial.println(ESP.getFlashChipMode());
-    // Serial.println(F("FlashChipMode value: FM_QIO = 0, FM_QOUT = 1, FM_DIO = 2, FM_DOUT = 3, FM_FAST_READ = 4, FM_SLOW_READ = 5, FM_UNKNOWN = 255"));
 
     app_controller = new AppController(); // APP控制器
 
@@ -93,6 +91,9 @@ void setup()
     screen.init(app_controller->sys_cfg.rotation,
                 app_controller->sys_cfg.backLight);
 
+    app_controller->init();
+    AIO_LVGL_OPERATE_LOCK(lv_timer_handler();)
+
     /*** Init ambient-light sensor ***/
     ambLight.init(ONE_TIME_H_RESOLUTION_MODE);
 
@@ -101,28 +102,16 @@ void setup()
 
     lv_fs_fatfs_init();
 
-    // Update display in parallel thread.
-    // BaseType_t taskLvglReturned = xTaskCreate(
-    //     TaskLvglUpdate,
-    //     "LvglThread",
-    //     8 * 1024,
-    //     nullptr,
-    //     TASK_LVGL_PRIORITY,
-    //     &handleTaskLvgl);
-    // if (taskLvglReturned != pdPASS)
-    // {
-    //     Serial.println("taskLvglReturned != pdPASS");
-    // }
-    // else
-    // {
-    //     Serial.println("taskLvglReturned == pdPASS");
-    // }
-
 #if LV_USE_LOG
-    lv_log_register_print_cb(my_print);
+    lv_log_register_print_cb(minimjt_print);
 #endif /*LV_USE_LOG*/
 
-    app_controller->init();
+    /*** Init IMU as input device ***/
+    // lv_port_indev_init();
+
+    mpu.init(app_controller->sys_cfg.mpu_order,
+             app_controller->sys_cfg.auto_calibration_mpu,
+             &app_controller->mpu_cfg); // 初始化比较耗时
 
     // 将APP"安装"到controller里
     app_controller->app_install(&weather_app);
@@ -139,16 +128,6 @@ void setup()
 
     // 自启动APP
     app_controller->app_auto_start();
-
-    // 优先显示屏幕 加快视觉上的开机时间
-    app_controller->main_process(&mpu.action_info);
-
-    /*** Init IMU as input device ***/
-    // lv_port_indev_init();
-
-    mpu.init(app_controller->sys_cfg.mpu_order,
-             app_controller->sys_cfg.auto_calibration_mpu,
-             &app_controller->mpu_cfg); // 初始化比较耗时
 
     // 先初始化一次动作数据 防空指针
     act_info = mpu.getAction();
