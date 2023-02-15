@@ -79,11 +79,7 @@ void IMU::setOrder(uint8_t order) // 设置方向
 
 bool IMU::Encoder_GetIsPush(void)
 {
-#ifdef PEAK
-    return (digitalRead(CONFIG_ENCODER_PUSH_PIN) == LOW);
-#else
     return false;
-#endif
 }
 
 ImuAction *IMU::update(int interval)

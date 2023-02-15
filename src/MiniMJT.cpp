@@ -66,7 +66,7 @@ void setup()
 {
     Serial.begin(115200);
 
-    Serial.println(F("\nMiniMJT version " AIO_VERSION "\n"));
+    Serial.println(F("\n==========MiniMJT version " MJT_VERSION "==========\n"));
     Serial.flush();
     // MAC ID可用作芯片唯一标识
     Serial.print(F("ChipID(EfuseMac): "));
@@ -84,18 +84,6 @@ void setup()
         Serial.println("SPIFFS Mount Failed");
         return;
     }
-
-#ifdef PEAK
-    pinMode(CONFIG_BAT_CHG_DET_PIN, INPUT);
-    pinMode(CONFIG_ENCODER_PUSH_PIN, INPUT_PULLUP);
-    /*电源使能保持*/
-    Serial.println("Power: Waiting...");
-    pinMode(CONFIG_POWER_EN_PIN, OUTPUT);
-    digitalWrite(CONFIG_POWER_EN_PIN, LOW);
-    digitalWrite(CONFIG_POWER_EN_PIN, HIGH);
-    Serial.println("Power: ON");
-    log_e("Power: ON");
-#endif
 
     // config_read(NULL, &g_cfg);   // 旧的配置文件读取方式
     app_controller->read_config(&app_controller->sys_cfg);
@@ -175,19 +163,6 @@ void loop()
 {
     screen.routine();
 
-#ifdef PEAK
-    if (!mpu.Encoder_GetIsPush())
-    {
-        Serial.println("mpu.Encoder_GetIsPush()1");
-        delay(1000);
-        if (!mpu.Encoder_GetIsPush())
-        {
-            Serial.println("mpu.Encoder_GetIsPush()2");
-            // 适配Peak的关机功能
-            digitalWrite(CONFIG_POWER_EN_PIN, LOW);
-        }
-    }
-#endif
     if (isCheckAction)
     {
         isCheckAction = false;

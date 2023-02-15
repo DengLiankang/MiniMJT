@@ -5,13 +5,6 @@
 #define VIDEO_HEIGHT 240L
 #define MOVIE_BUFFER_SIZE 28800 // (57600)
 
-#define TFT_MISO -1
-#define TFT_MOSI 23
-#define TFT_SCLK 18
-#define TFT_CS -1 // Not connected
-#define TFT_DC 2
-#define TFT_RST 4 // Connect reset to ensure display initialises
-
 RgbPlayDocoder::RgbPlayDocoder(File *file, bool isUseDMA)
 {
     m_pFile = file;

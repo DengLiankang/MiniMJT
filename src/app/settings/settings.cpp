@@ -153,7 +153,7 @@ static int settings_init(AppController *sys)
     // 初始化运行时的参数
     settings_gui_init();
 
-    display_settings(AIO_VERSION, "v 2.3.0", LV_SCR_LOAD_ANIM_NONE);
+    display_settings(MJT_VERSION, "v 9.9.9", LV_SCR_LOAD_ANIM_NONE);
 
     // 初始化运行时参数
     run_data = (SettingsAppRunData *)calloc(1, sizeof(SettingsAppRunData));

@@ -1,7 +1,7 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-#define AIO_VERSION "1.0.0"
+#define MJT_VERSION "1.0.1"
 #define GET_SYS_MILLIS xTaskGetTickCount // 获取系统毫秒数
 // #define GET_SYS_MILLIS millis            // 获取系统毫秒数
 
@@ -38,18 +38,7 @@ boolean doDelayMillisTime(unsigned long interval,
 #define SCREEN_VER_RES 240 // 竖直
 
 // TFT屏幕接口
-// #define PEAK
-#ifdef PEAK
-#define LCD_BL_PIN 12
-/* Battery */
-#define CONFIG_BAT_DET_PIN 37
-#define CONFIG_BAT_CHG_DET_PIN 38
-/* Power */
-#define CONFIG_POWER_EN_PIN 21
-#define CONFIG_ENCODER_PUSH_PIN 27
-#else
 #define LCD_BL_PIN 5
-#endif
 
 #define LCD_BL_PWM_CHANNEL 0
 
