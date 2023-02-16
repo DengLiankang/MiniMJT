@@ -2,12 +2,11 @@
 #define APP_MEDIA_ICO_H
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
 #include "lvgl.h"
-    extern const lv_img_dsc_t app_movie;
+extern const lv_img_dsc_t app_movie;
 
 #ifdef __cplusplus
 } /* extern "C" */

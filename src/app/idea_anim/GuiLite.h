@@ -4,15 +4,20 @@
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
 
-#define GL_ARGB(a, r, g, b) ((((unsigned int)(a)) << 24) | (((unsigned int)(r)) << 16) | (((unsigned int)(g)) << 8) | ((unsigned int)(b)))
+#define GL_ARGB(a, r, g, b)                                                                                            \
+    ((((unsigned int)(a)) << 24) | (((unsigned int)(r)) << 16) | (((unsigned int)(g)) << 8) | ((unsigned int)(b)))
 #define GL_ARGB_A(rgb) ((((unsigned int)(rgb)) >> 24) & 0xFF)
 
 #define GL_RGB(r, g, b) ((0xFF << 24) | (((unsigned int)(r)) << 16) | (((unsigned int)(g)) << 8) | ((unsigned int)(b)))
 #define GL_RGB_R(rgb) ((((unsigned int)(rgb)) >> 16) & 0xFF)
 #define GL_RGB_G(rgb) ((((unsigned int)(rgb)) >> 8) & 0xFF)
 #define GL_RGB_B(rgb) (((unsigned int)(rgb)) & 0xFF)
-#define GL_RGB_32_to_16(rgb) (((((unsigned int)(rgb)) & 0xFF) >> 3) | ((((unsigned int)(rgb)) & 0xFC00) >> 5) | ((((unsigned int)(rgb)) & 0xF80000) >> 8))
-#define GL_RGB_16_to_32(rgb) ((0xFF << 24) | ((((unsigned int)(rgb)) & 0x1F) << 3) | ((((unsigned int)(rgb)) & 0x7E0) << 5) | ((((unsigned int)(rgb)) & 0xF800) << 8))
+#define GL_RGB_32_to_16(rgb)                                                                                           \
+    (((((unsigned int)(rgb)) & 0xFF) >> 3) | ((((unsigned int)(rgb)) & 0xFC00) >> 5) |                                 \
+     ((((unsigned int)(rgb)) & 0xF80000) >> 8))
+#define GL_RGB_16_to_32(rgb)                                                                                           \
+    ((0xFF << 24) | ((((unsigned int)(rgb)) & 0x1F) << 3) | ((((unsigned int)(rgb)) & 0x7E0) << 5) |                   \
+     ((((unsigned int)(rgb)) & 0xF800) << 8))
 
 #define ALIGN_HCENTER 0x00000000L
 #define ALIGN_LEFT 0x01000000L
@@ -24,8 +29,7 @@
 #define ALIGN_BOTTOM 0x00200000L
 #define ALIGN_VMASK 0x00300000L
 
-typedef struct
-{
+typedef struct {
     unsigned short year;
     unsigned short month;
     unsigned short date;
@@ -37,11 +41,10 @@ typedef struct
 
 void register_debug_function(void (*my_assert)(const char *file, int line), void (*my_log_out)(const char *log));
 void _assert(const char *file, int line);
-#define ASSERT(condition)                \
-    do                                   \
-    {                                    \
-        if (!(condition))                \
-            _assert(__FILE__, __LINE__); \
+#define ASSERT(condition)                                                                                              \
+    do {                                                                                                               \
+        if (!(condition))                                                                                              \
+            _assert(__FILE__, __LINE__);                                                                               \
     } while (0)
 void log_out(const char *log);
 
@@ -77,10 +80,7 @@ class c_rect
 {
 public:
     c_rect() { m_left = m_top = m_right = m_bottom = -1; }
-    c_rect(int left, int top, int width, int height)
-    {
-        set_rect(left, top, width, height);
-    }
+    c_rect(int left, int top, int width, int height) { set_rect(left, top, width, height); }
     void set_rect(int left, int top, int width, int height)
     {
         ASSERT(width > 0 && height > 0);
@@ -89,13 +89,11 @@ public:
         m_right = left + width - 1;
         m_bottom = top + height - 1;
     }
-    bool pt_in_rect(int x, int y) const
-    {
-        return x >= m_left && x <= m_right && y >= m_top && y <= m_bottom;
-    }
+    bool pt_in_rect(int x, int y) const { return x >= m_left && x <= m_right && y >= m_top && y <= m_bottom; }
     int operator==(const c_rect &rect) const
     {
-        return (m_left == rect.m_left) && (m_top == rect.m_top) && (m_right == rect.m_right) && (m_bottom == rect.m_bottom);
+        return (m_left == rect.m_left) && (m_top == rect.m_top) && (m_right == rect.m_right) &&
+               (m_bottom == rect.m_bottom);
     }
     int width() const { return m_right - m_left + 1; }
     int height() const { return m_bottom - m_top + 1; }
@@ -105,30 +103,26 @@ public:
     int m_right;
     int m_bottom;
 };
-//BITMAP
-typedef struct struct_bitmap_info
-{
+// BITMAP
+typedef struct struct_bitmap_info {
     unsigned short width;
     unsigned short height;
-    unsigned short color_bits; //support 16 bits only
+    unsigned short color_bits; // support 16 bits only
     const unsigned short *pixel_color_array;
 } BITMAP_INFO;
-//FONT
-typedef struct struct_lattice
-{
+// FONT
+typedef struct struct_lattice {
     unsigned int utf8_code;
     unsigned char width;
     const unsigned char *pixel_buffer;
 } LATTICE;
-typedef struct struct_lattice_font_info
-{
+typedef struct struct_lattice_font_info {
     unsigned char height;
     unsigned int count;
     LATTICE *lattice_array;
 } LATTICE_FONT_INFO;
-//Rebuild gui library once you change this file
-enum FONT_LIST
-{
+// Rebuild gui library once you change this file
+enum FONT_LIST {
     FONT_NULL,
     FONT_DEFAULT,
     FONT_CUSTOM1,
@@ -139,18 +133,8 @@ enum FONT_LIST
     FONT_CUSTOM6,
     FONT_MAX
 };
-enum IMAGE_LIST
-{
-    IMAGE_CUSTOM1,
-    IMAGE_CUSTOM2,
-    IMAGE_CUSTOM3,
-    IMAGE_CUSTOM4,
-    IMAGE_CUSTOM5,
-    IMAGE_CUSTOM6,
-    IMAGE_MAX
-};
-enum COLOR_LIST
-{
+enum IMAGE_LIST { IMAGE_CUSTOM1, IMAGE_CUSTOM2, IMAGE_CUSTOM3, IMAGE_CUSTOM4, IMAGE_CUSTOM5, IMAGE_CUSTOM6, IMAGE_MAX };
+enum COLOR_LIST {
     COLOR_WND_FONT,
     COLOR_WND_NORMAL,
     COLOR_WND_PUSHED,
@@ -169,8 +153,7 @@ class c_theme
 public:
     static int add_font(FONT_LIST index, const void *font)
     {
-        if (index >= FONT_MAX)
-        {
+        if (index >= FONT_MAX) {
             ASSERT(false);
             return -1;
         }
@@ -179,8 +162,7 @@ public:
     }
     static const void *get_font(FONT_LIST index)
     {
-        if (index >= FONT_MAX)
-        {
+        if (index >= FONT_MAX) {
             ASSERT(false);
             return 0;
         }
@@ -188,8 +170,7 @@ public:
     }
     static int add_image(IMAGE_LIST index, const void *image_info)
     {
-        if (index >= IMAGE_MAX)
-        {
+        if (index >= IMAGE_MAX) {
             ASSERT(false);
             return -1;
         }
@@ -198,8 +179,7 @@ public:
     }
     static const void *get_image(IMAGE_LIST index)
     {
-        if (index >= IMAGE_MAX)
-        {
+        if (index >= IMAGE_MAX) {
             ASSERT(false);
             return 0;
         }
@@ -208,8 +188,7 @@ public:
 
     static int add_color(COLOR_LIST index, const unsigned int color)
     {
-        if (index >= COLOR_MAX)
-        {
+        if (index >= COLOR_MAX) {
             ASSERT(false);
             return -1;
         }
@@ -218,8 +197,7 @@ public:
     }
     static const unsigned int get_color(COLOR_LIST index)
     {
-        if (index >= COLOR_MAX)
-        {
+        if (index >= COLOR_MAX) {
             ASSERT(false);
             return 0;
         }
@@ -231,19 +209,17 @@ private:
     static const void *s_image_map[IMAGE_MAX];
     static unsigned int s_color_map[COLOR_MAX];
 };
-#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#define SURFACE_CNT_MAX 6 //root + pages
-typedef enum
-{
-    Z_ORDER_LEVEL_0, //lowest graphic level
-    Z_ORDER_LEVEL_1, //middle graphic level
-    Z_ORDER_LEVEL_2, //highest graphic level
+#include <string.h>
+#define SURFACE_CNT_MAX 6 // root + pages
+typedef enum {
+    Z_ORDER_LEVEL_0, // lowest graphic level
+    Z_ORDER_LEVEL_1, // middle graphic level
+    Z_ORDER_LEVEL_2, // highest graphic level
     Z_ORDER_LEVEL_MAX
 } Z_ORDER_LEVEL;
-struct EXTERNAL_GFX_OP
-{
+struct EXTERNAL_GFX_OP {
     void (*draw_pixel)(int x, int y, unsigned int rgb);
     void (*fill_rect)(int x0, int y0, int x1, int y1, unsigned int rgb);
 };
@@ -253,25 +229,24 @@ class c_display
     friend class c_surface;
 
 public:
-    inline c_display(void *phy_fb, int display_width, int display_height, int surface_width, int surface_height, unsigned int color_bytes, int surface_cnt, EXTERNAL_GFX_OP *gfx_op = 0); //multiple surface or surface_no_fb
-    inline c_display(void *phy_fb, int display_width, int display_height, c_surface *surface);                                                                                            //single custom surface
-    inline c_surface *alloc_surface(Z_ORDER_LEVEL max_zorder, c_rect layer_rect = c_rect());                                                                                              //for multiple surfaces
+    inline c_display(void *phy_fb, int display_width, int display_height, int surface_width, int surface_height,
+                     unsigned int color_bytes, int surface_cnt,
+                     EXTERNAL_GFX_OP *gfx_op = 0); // multiple surface or surface_no_fb
+    inline c_display(void *phy_fb, int display_width, int display_height, c_surface *surface); // single custom surface
+    inline c_surface *alloc_surface(Z_ORDER_LEVEL max_zorder, c_rect layer_rect = c_rect());   // for multiple surfaces
     inline int swipe_surface(c_surface *s0, c_surface *s1, int x0, int x1, int y0, int y1, int offset);
     int get_width() { return m_width; }
     int get_height() { return m_height; }
     void *get_updated_fb(int *width, int *height, bool force_update = false)
     {
-        if (width && height)
-        {
+        if (width && height) {
             *width = get_width();
             *height = get_height();
         }
-        if (force_update)
-        {
+        if (force_update) {
             return m_phy_fb;
         }
-        if (m_phy_read_index == m_phy_write_index)
-        { //No update
+        if (m_phy_read_index == m_phy_write_index) { // No update
             return 0;
         }
         m_phy_read_index = m_phy_write_index;
@@ -279,22 +254,19 @@ public:
     }
     int snap_shot(const char *file_name)
     {
-        if (!m_phy_fb || (m_color_bytes != 2 && m_color_bytes != 4))
-        {
+        if (!m_phy_fb || (m_color_bytes != 2 && m_color_bytes != 4)) {
             return -1;
         }
         int width = get_width();
         int height = get_height();
-        //16 bits framebuffer
-        if (m_color_bytes == 2)
-        {
+        // 16 bits framebuffer
+        if (m_color_bytes == 2) {
             return build_bmp(file_name, width, height, (unsigned char *)m_phy_fb);
         }
-        //32 bits framebuffer
+        // 32 bits framebuffer
         unsigned short *p_bmp565_data = new unsigned short[width * height];
         unsigned int *p_raw_data = (unsigned int *)m_phy_fb;
-        for (int i = 0; i < width * height; i++)
-        {
+        for (int i = 0; i < width * height; i++) {
             unsigned int rgb = *p_raw_data++;
             p_bmp565_data[i] = GL_RGB_32_to_16(rgb);
         }
@@ -304,22 +276,22 @@ public:
     }
 
 private:
-    int m_width;       //in pixels
-    int m_height;      //in pixels
-    int m_color_bytes; //16 bits, 32 bits only
-    void *m_phy_fb;    //physical framebuffer
+    int m_width;       // in pixels
+    int m_height;      // in pixels
+    int m_color_bytes; // 16 bits, 32 bits only
+    void *m_phy_fb;    // physical framebuffer
     int m_phy_read_index;
     int m_phy_write_index;
     c_surface *m_surface_group[SURFACE_CNT_MAX];
-    int m_surface_cnt; //surface count
+    int m_surface_cnt; // surface count
     int m_surface_index;
 };
 class c_layer
 {
 public:
     c_layer() { fb = 0; }
-    void *fb;    //framebuffer
-    c_rect rect; //framebuffer area
+    void *fb;    // framebuffer
+    c_rect rect; // framebuffer area
 };
 class c_surface
 {
@@ -327,81 +299,73 @@ class c_surface
     friend class c_bitmap_operator;
 
 public:
-    c_surface(unsigned int width, unsigned int height, unsigned int color_bytes, Z_ORDER_LEVEL max_zorder = Z_ORDER_LEVEL_0, c_rect overlpa_rect = c_rect()) : m_width(width), m_height(height), m_color_bytes(color_bytes), m_fb(0), m_is_active(false), m_top_zorder(Z_ORDER_LEVEL_0), m_phy_fb(0), m_phy_write_index(0), m_display(0)
+    c_surface(unsigned int width, unsigned int height, unsigned int color_bytes,
+              Z_ORDER_LEVEL max_zorder = Z_ORDER_LEVEL_0, c_rect overlpa_rect = c_rect())
+        : m_width(width), m_height(height), m_color_bytes(color_bytes), m_fb(0), m_is_active(false),
+          m_top_zorder(Z_ORDER_LEVEL_0), m_phy_fb(0), m_phy_write_index(0), m_display(0)
     {
-        (overlpa_rect == c_rect()) ? set_surface(max_zorder, c_rect(0, 0, width - 1, height - 1)) : set_surface(max_zorder, overlpa_rect);
+        (overlpa_rect == c_rect()) ? set_surface(max_zorder, c_rect(0, 0, width - 1, height - 1))
+                                   : set_surface(max_zorder, overlpa_rect);
     }
     int get_width() { return m_width; }
     int get_height() { return m_height; }
     unsigned int get_pixel(int x, int y, unsigned int z_order)
     {
-        if (x >= m_width || y >= m_height || x < 0 || y < 0 || z_order >= Z_ORDER_LEVEL_MAX)
-        {
+        if (x >= m_width || y >= m_height || x < 0 || y < 0 || z_order >= Z_ORDER_LEVEL_MAX) {
             ASSERT(false);
             return 0;
         }
-        if (m_layers[z_order].fb)
-        {
-            return (m_color_bytes == 4) ? ((unsigned int *)(m_layers[z_order].fb))[y * m_width + x] : GL_RGB_16_to_32(((unsigned short *)(m_layers[z_order].fb))[y * m_width + x]);
-        }
-        else if (m_fb)
-        {
-            return (m_color_bytes == 4) ? ((unsigned int *)m_fb)[y * m_width + x] : GL_RGB_16_to_32(((unsigned short *)m_fb)[y * m_width + x]);
-        }
-        else if (m_phy_fb)
-        {
-            return (m_color_bytes == 4) ? ((unsigned int *)m_phy_fb)[y * m_width + x] : GL_RGB_16_to_32(((unsigned short *)m_phy_fb)[y * m_width + x]);
+        if (m_layers[z_order].fb) {
+            return (m_color_bytes == 4) ? ((unsigned int *)(m_layers[z_order].fb))[y * m_width + x]
+                                        : GL_RGB_16_to_32(((unsigned short *)(m_layers[z_order].fb))[y * m_width + x]);
+        } else if (m_fb) {
+            return (m_color_bytes == 4) ? ((unsigned int *)m_fb)[y * m_width + x]
+                                        : GL_RGB_16_to_32(((unsigned short *)m_fb)[y * m_width + x]);
+        } else if (m_phy_fb) {
+            return (m_color_bytes == 4) ? ((unsigned int *)m_phy_fb)[y * m_width + x]
+                                        : GL_RGB_16_to_32(((unsigned short *)m_phy_fb)[y * m_width + x]);
         }
         return 0;
     }
     virtual void draw_pixel(int x, int y, unsigned int rgb, unsigned int z_order)
     {
-        if (x >= m_width || y >= m_height || x < 0 || y < 0)
-        {
+        if (x >= m_width || y >= m_height || x < 0 || y < 0) {
             return;
         }
-        if (z_order > (unsigned int)m_max_zorder)
-        {
+        if (z_order > (unsigned int)m_max_zorder) {
             ASSERT(false);
             return;
         }
-        if (z_order == m_max_zorder)
-        {
+        if (z_order == m_max_zorder) {
             return draw_pixel_on_fb(x, y, rgb);
         }
 
-        if (z_order > (unsigned int)m_top_zorder)
-        {
+        if (z_order > (unsigned int)m_top_zorder) {
             m_top_zorder = (Z_ORDER_LEVEL)z_order;
         }
-        if (m_layers[z_order].rect.pt_in_rect(x, y))
-        {
+        if (m_layers[z_order].rect.pt_in_rect(x, y)) {
             c_rect layer_rect = m_layers[z_order].rect;
-            if (m_color_bytes == 4)
-            {
-                ((unsigned int *)(m_layers[z_order].fb))[(x - layer_rect.m_left) + (y - layer_rect.m_top) * layer_rect.width()] = rgb;
-            }
-            else
-            {
-                ((unsigned short *)(m_layers[z_order].fb))[(x - layer_rect.m_left) + (y - layer_rect.m_top) * layer_rect.width()] = GL_RGB_32_to_16(rgb);
+            if (m_color_bytes == 4) {
+                ((unsigned int *)(m_layers[z_order].fb))[(x - layer_rect.m_left) +
+                                                         (y - layer_rect.m_top) * layer_rect.width()] = rgb;
+            } else {
+                ((unsigned short *)(m_layers[z_order]
+                                        .fb))[(x - layer_rect.m_left) + (y - layer_rect.m_top) * layer_rect.width()] =
+                    GL_RGB_32_to_16(rgb);
             }
         }
 
-        if (z_order == m_top_zorder)
-        {
+        if (z_order == m_top_zorder) {
             return draw_pixel_on_fb(x, y, rgb);
         }
         bool be_overlapped = false;
-        for (unsigned int tmp_z_order = Z_ORDER_LEVEL_MAX - 1; tmp_z_order > z_order; tmp_z_order--)
-        {
-            if (m_layers[tmp_z_order].rect.pt_in_rect(x, y))
-            {
+        for (unsigned int tmp_z_order = Z_ORDER_LEVEL_MAX - 1; tmp_z_order > z_order; tmp_z_order--) {
+            if (m_layers[tmp_z_order].rect.pt_in_rect(x, y)) {
                 be_overlapped = true;
                 break;
             }
         }
-        if (!be_overlapped)
-        {
+        if (!be_overlapped) {
             draw_pixel_on_fb(x, y, rgb);
         }
     }
@@ -411,50 +375,41 @@ public:
         y0 = (y0 < 0) ? 0 : y0;
         x1 = (x1 > (m_width - 1)) ? (m_width - 1) : x1;
         y1 = (y1 > (m_height - 1)) ? (m_height - 1) : y1;
-        if (z_order == m_max_zorder)
-        {
+        if (z_order == m_max_zorder) {
             return fill_rect_on_fb(x0, y0, x1, y1, rgb);
         }
-        if (z_order == m_top_zorder)
-        {
+        if (z_order == m_top_zorder) {
             int x, y;
             c_rect layer_rect = m_layers[z_order].rect;
             unsigned int rgb_16 = GL_RGB_32_to_16(rgb);
-            for (y = y0; y <= y1; y++)
-            {
-                for (x = x0; x <= x1; x++)
-                {
-                    if (layer_rect.pt_in_rect(x, y))
-                    {
-                        if (m_color_bytes == 4)
-                        {
-                            ((unsigned int *)m_layers[z_order].fb)[(y - layer_rect.m_top) * layer_rect.width() + (x - layer_rect.m_left)] = rgb;
-                        }
-                        else
-                        {
-                            ((unsigned short *)m_layers[z_order].fb)[(y - layer_rect.m_top) * layer_rect.width() + (x - layer_rect.m_left)] = rgb_16;
+            for (y = y0; y <= y1; y++) {
+                for (x = x0; x <= x1; x++) {
+                    if (layer_rect.pt_in_rect(x, y)) {
+                        if (m_color_bytes == 4) {
+                            ((unsigned int *)m_layers[z_order]
+                                 .fb)[(y - layer_rect.m_top) * layer_rect.width() + (x - layer_rect.m_left)] = rgb;
+                        } else {
+                            ((unsigned short *)m_layers[z_order]
+                                 .fb)[(y - layer_rect.m_top) * layer_rect.width() + (x - layer_rect.m_left)] = rgb_16;
                         }
                     }
                 }
             }
             return fill_rect_on_fb(x0, y0, x1, y1, rgb);
         }
-        for (; y0 <= y1; y0++)
-        {
+        for (; y0 <= y1; y0++) {
             draw_hline(x0, x1, y0, rgb, z_order);
         }
     }
     void draw_hline(int x0, int x1, int y, unsigned int rgb, unsigned int z_order)
     {
-        for (; x0 <= x1; x0++)
-        {
+        for (; x0 <= x1; x0++) {
             draw_pixel(x0, y, rgb, z_order);
         }
     }
     void draw_vline(int x, int y0, int y1, unsigned int rgb, unsigned int z_order)
     {
-        for (; y0 <= y1; y0++)
-        {
+        for (; y0 <= y1; y0++) {
             draw_pixel(x, y0, rgb, z_order);
         }
     }
@@ -463,8 +418,7 @@ public:
         int dx, dy, x, y, e;
         (x1 > x2) ? (dx = x1 - x2) : (dx = x2 - x1);
         (y1 > y2) ? (dy = y1 - y2) : (dy = y2 - y1);
-        if (((dx > dy) && (x1 > x2)) || ((dx <= dy) && (y1 > y2)))
-        {
+        if (((dx > dy) && (x1 > x2)) || ((dx <= dy) && (y1 > y2))) {
             x = x2;
             y = y2;
             x2 = x1;
@@ -474,27 +428,20 @@ public:
         }
         x = x1;
         y = y1;
-        if (dx > dy)
-        {
+        if (dx > dy) {
             e = dy - dx / 2;
-            for (; x1 <= x2; ++x1, e += dy)
-            {
+            for (; x1 <= x2; ++x1, e += dy) {
                 draw_pixel(x1, y1, rgb, z_order);
-                if (e > 0)
-                {
+                if (e > 0) {
                     e -= dx;
                     (y > y2) ? --y1 : ++y1;
                 }
             }
-        }
-        else
-        {
+        } else {
             e = dx - dy / 2;
-            for (; y1 <= y2; ++y1, e += dx)
-            {
+            for (; y1 <= y2; ++y1, e += dx) {
                 draw_pixel(x1, y1, rgb, z_order);
-                if (e > 0)
-                {
+                if (e > 0) {
                     e -= dy;
                     (x > x2) ? --x1 : ++x1;
                 }
@@ -503,8 +450,7 @@ public:
     }
     void draw_rect(int x0, int y0, int x1, int y1, unsigned int rgb, unsigned int z_order, unsigned int size = 1)
     {
-        for (unsigned int offset = 0; offset < size; offset++)
-        {
+        for (unsigned int offset = 0; offset < size; offset++) {
             draw_hline(x0 + offset, x1 - offset, y0 + offset, rgb, z_order);
             draw_hline(x0 + offset, x1 - offset, y1 - offset, rgb, z_order);
             draw_vline(x0 + offset, y0 + offset, y1 - offset, rgb, z_order);
@@ -521,13 +467,11 @@ public:
     }
     int flush_screen(int left, int top, int right, int bottom)
     {
-        if (left < 0 || left >= m_width || right < 0 || right >= m_width ||
-            top < 0 || top >= m_height || bottom < 0 || bottom >= m_height)
-        {
+        if (left < 0 || left >= m_width || right < 0 || right >= m_width || top < 0 || top >= m_height || bottom < 0 ||
+            bottom >= m_height) {
             ASSERT(false);
         }
-        if (!m_is_active || (0 == m_phy_fb) || (0 == m_fb))
-        {
+        if (!m_is_active || (0 == m_phy_fb) || (0 == m_fb)) {
             return -1;
         }
         int display_width = m_display->get_width();
@@ -536,8 +480,7 @@ public:
         right = (right >= display_width) ? (display_width - 1) : right;
         top = (top >= display_height) ? (display_height - 1) : top;
         bottom = (bottom >= display_height) ? (display_height - 1) : bottom;
-        for (int y = top; y < bottom; y++)
-        {
+        for (int y = top; y < bottom; y++) {
             void *s_addr = (char *)m_fb + ((y * m_width + left) * m_color_bytes);
             void *d_addr = (char *)m_phy_fb + ((y * display_width + left) * m_color_bytes);
             memcpy(d_addr, s_addr, (right - left) * m_color_bytes);
@@ -555,11 +498,13 @@ public:
                rect.m_top >= layer_rect.m_top && rect.m_bottom <= layer_rect.m_bottom);
         void *fb = m_layers[z_order].fb;
         int width = layer_rect.width();
-        for (int y = rect.m_top; y <= rect.m_bottom; y++)
-        {
-            for (int x = rect.m_left; x <= rect.m_right; x++)
-            {
-                unsigned int rgb = (m_color_bytes == 4) ? ((unsigned int *)fb)[(x - layer_rect.m_left) + (y - layer_rect.m_top) * width] : GL_RGB_16_to_32(((unsigned short *)fb)[(x - layer_rect.m_left) + (y - layer_rect.m_top) * width]);
+        for (int y = rect.m_top; y <= rect.m_bottom; y++) {
+            for (int x = rect.m_left; x <= rect.m_right; x++) {
+                unsigned int rgb =
+                    (m_color_bytes == 4)
+                        ? ((unsigned int *)fb)[(x - layer_rect.m_left) + (y - layer_rect.m_top) * width]
+                        : GL_RGB_16_to_32(
+                              ((unsigned short *)fb)[(x - layer_rect.m_left) + (y - layer_rect.m_top) * width]);
                 draw_pixel_on_fb(x, y, rgb);
             }
         }
@@ -572,48 +517,37 @@ protected:
     {
         int display_width = m_display->get_width();
         int display_height = m_display->get_height();
-        if (m_color_bytes == 4)
-        {
+        if (m_color_bytes == 4) {
             int x;
             unsigned int *fb, *phy_fb;
-            for (; y0 <= y1; y0++)
-            {
+            for (; y0 <= y1; y0++) {
                 x = x0;
                 fb = m_fb ? &((unsigned int *)m_fb)[y0 * m_width + x] : 0;
                 phy_fb = &((unsigned int *)m_phy_fb)[y0 * display_width + x];
                 *m_phy_write_index = *m_phy_write_index + 1;
-                for (; x <= x1; x++)
-                {
-                    if (fb)
-                    {
+                for (; x <= x1; x++) {
+                    if (fb) {
                         *fb++ = rgb;
                     }
-                    if (m_is_active && (x < display_width) && (y0 < display_height))
-                    {
+                    if (m_is_active && (x < display_width) && (y0 < display_height)) {
                         *phy_fb++ = rgb;
                     }
                 }
             }
-        }
-        else if (m_color_bytes == 2)
-        {
+        } else if (m_color_bytes == 2) {
             int x;
             unsigned short *fb, *phy_fb;
             rgb = GL_RGB_32_to_16(rgb);
-            for (; y0 <= y1; y0++)
-            {
+            for (; y0 <= y1; y0++) {
                 x = x0;
                 fb = m_fb ? &((unsigned short *)m_fb)[y0 * m_width + x] : 0;
                 phy_fb = &((unsigned short *)m_phy_fb)[y0 * display_width + x];
                 *m_phy_write_index = *m_phy_write_index + 1;
-                for (; x <= x1; x++)
-                {
-                    if (fb)
-                    {
+                for (; x <= x1; x++) {
+                    if (fb) {
                         *fb++ = rgb;
                     }
-                    if (m_is_active && (x < display_width) && (y0 < display_height))
-                    {
+                    if (m_is_active && (x < display_width) && (y0 < display_height)) {
                         *phy_fb++ = rgb;
                     }
                 }
@@ -622,18 +556,14 @@ protected:
     }
     virtual void draw_pixel_on_fb(int x, int y, unsigned int rgb)
     {
-        if (m_fb)
-        {
-            (m_color_bytes == 4) ? ((unsigned int *)m_fb)[y * m_width + x] = rgb : ((unsigned short *)m_fb)[y * m_width + x] = GL_RGB_32_to_16(rgb);
+        if (m_fb) {
+            (m_color_bytes == 4) ? ((unsigned int *)m_fb)[y * m_width + x] = rgb
+                                 : ((unsigned short *)m_fb)[y * m_width + x] = GL_RGB_32_to_16(rgb);
         }
-        if (m_is_active && (x < m_display->get_width()) && (y < m_display->get_height()))
-        {
-            if (m_color_bytes == 4)
-            {
+        if (m_is_active && (x < m_display->get_width()) && (y < m_display->get_height())) {
+            if (m_color_bytes == 4) {
                 ((unsigned int *)m_phy_fb)[y * (m_display->get_width()) + x] = rgb;
-            }
-            else
-            {
+            } else {
                 ((unsigned short *)m_phy_fb)[y * (m_display->get_width()) + x] = GL_RGB_32_to_16(rgb);
             }
             *m_phy_write_index = *m_phy_write_index + 1;
@@ -649,81 +579,70 @@ protected:
     void set_surface(Z_ORDER_LEVEL max_z_order, c_rect layer_rect)
     {
         m_max_zorder = max_z_order;
-        if (m_display && (m_display->m_surface_cnt > 1))
-        {
+        if (m_display && (m_display->m_surface_cnt > 1)) {
             m_fb = calloc(m_width * m_height, m_color_bytes);
         }
-        for (int i = Z_ORDER_LEVEL_0; i < m_max_zorder; i++)
-        { //Top layber fb always be 0
+        for (int i = Z_ORDER_LEVEL_0; i < m_max_zorder; i++) { // Top layber fb always be 0
             ASSERT(m_layers[i].fb = calloc(layer_rect.width() * layer_rect.height(), m_color_bytes));
             m_layers[i].rect = layer_rect;
         }
     }
-    int m_width;                         //in pixels
-    int m_height;                        //in pixels
-    int m_color_bytes;                   //16 bits, 32 bits only
-    void *m_fb;                          //frame buffer you could see
-    c_layer m_layers[Z_ORDER_LEVEL_MAX]; //all graphic layers
-    bool m_is_active;                    //active flag
-    Z_ORDER_LEVEL m_max_zorder;          //the highest graphic layer the surface will have
-    Z_ORDER_LEVEL m_top_zorder;          //the current highest graphic layer the surface have
-    void *m_phy_fb;                      //physical framebufer
+    int m_width;                         // in pixels
+    int m_height;                        // in pixels
+    int m_color_bytes;                   // 16 bits, 32 bits only
+    void *m_fb;                          // frame buffer you could see
+    c_layer m_layers[Z_ORDER_LEVEL_MAX]; // all graphic layers
+    bool m_is_active;                    // active flag
+    Z_ORDER_LEVEL m_max_zorder;          // the highest graphic layer the surface will have
+    Z_ORDER_LEVEL m_top_zorder;          // the current highest graphic layer the surface have
+    void *m_phy_fb;                      // physical framebufer
     int *m_phy_write_index;
     c_display *m_display;
 };
 class c_surface_no_fb : public c_surface
-{ //No physical framebuffer, render with external graphic interface
+{ // No physical framebuffer, render with external graphic interface
     friend class c_display;
 
 public:
-    c_surface_no_fb(unsigned int width, unsigned int height, unsigned int color_bytes, struct EXTERNAL_GFX_OP *gfx_op, Z_ORDER_LEVEL max_zorder = Z_ORDER_LEVEL_0, c_rect overlpa_rect = c_rect()) : c_surface(width, height, color_bytes, max_zorder, overlpa_rect), m_gfx_op(gfx_op) {}
+    c_surface_no_fb(unsigned int width, unsigned int height, unsigned int color_bytes, struct EXTERNAL_GFX_OP *gfx_op,
+                    Z_ORDER_LEVEL max_zorder = Z_ORDER_LEVEL_0, c_rect overlpa_rect = c_rect())
+        : c_surface(width, height, color_bytes, max_zorder, overlpa_rect), m_gfx_op(gfx_op)
+    {
+    }
 
 protected:
     virtual void fill_rect_on_fb(int x0, int y0, int x1, int y1, unsigned int rgb)
     {
-        if (!m_gfx_op)
-        {
+        if (!m_gfx_op) {
             return;
         }
-        if (m_gfx_op->fill_rect)
-        {
+        if (m_gfx_op->fill_rect) {
             return m_gfx_op->fill_rect(x0, y0, x1, y1, rgb);
         }
-        if (m_gfx_op->draw_pixel && m_is_active)
-        {
-            for (int y = y0; y <= y1; y++)
-            {
-                for (int x = x0; x <= x1; x++)
-                {
+        if (m_gfx_op->draw_pixel && m_is_active) {
+            for (int y = y0; y <= y1; y++) {
+                for (int x = x0; x <= x1; x++) {
                     m_gfx_op->draw_pixel(x, y, rgb);
                 }
             }
         }
-        if (!m_fb)
-        {
+        if (!m_fb) {
             return;
         }
-        if (m_color_bytes == 4)
-        {
+        if (m_color_bytes == 4) {
             unsigned int *fb;
-            for (int y = y0; y <= y1; y++)
-            {
+            for (int y = y0; y <= y1; y++) {
                 fb = &((unsigned int *)m_fb)[y0 * m_width + x0];
-                for (int x = x0; x <= x1; x++)
-                {
+                for (int x = x0; x <= x1; x++) {
                     *fb++ = rgb;
                 }
             }
-        }
-        else if (m_color_bytes == 2)
-        {
+        } else if (m_color_bytes == 2) {
             unsigned short *fb;
             rgb = GL_RGB_32_to_16(rgb);
-            for (int y = y0; y <= y1; y++)
-            {
+            for (int y = y0; y <= y1; y++) {
                 fb = &((unsigned short *)m_fb)[y0 * m_width + x0];
-                for (int x = x0; x <= x1; x++)
-                {
+                for (int x = x0; x <= x1; x++) {
                     *fb++ = rgb;
                 }
             }
@@ -731,38 +650,38 @@ protected:
     }
     virtual void draw_pixel_on_fb(int x, int y, unsigned int rgb)
     {
-        if (m_gfx_op && m_gfx_op->draw_pixel && m_is_active)
-        {
+        if (m_gfx_op && m_gfx_op->draw_pixel && m_is_active) {
             m_gfx_op->draw_pixel(x, y, rgb);
         }
-        if (!m_fb)
-        {
+        if (!m_fb) {
             return;
         }
-        if (m_color_bytes == 4)
-        {
+        if (m_color_bytes == 4) {
             ((unsigned int *)m_fb)[y * m_width + x] = rgb;
-        }
-        else if (m_color_bytes == 2)
-        {
+        } else if (m_color_bytes == 2) {
             ((unsigned short *)m_fb)[y * m_width + x] = GL_RGB_32_to_16(rgb);
         }
     }
-    struct EXTERNAL_GFX_OP *m_gfx_op; //Rendering by external method
+    struct EXTERNAL_GFX_OP *m_gfx_op; // Rendering by external method
 };
-inline c_display::c_display(void *phy_fb, int display_width, int display_height, int surface_width, int surface_height, unsigned int color_bytes, int surface_cnt, EXTERNAL_GFX_OP *gfx_op) : m_width(display_width), m_height(display_height), m_color_bytes(color_bytes), m_phy_fb(phy_fb), m_phy_read_index(0), m_phy_write_index(0), m_surface_cnt(surface_cnt), m_surface_index(0)
+inline c_display::c_display(void *phy_fb, int display_width, int display_height, int surface_width, int surface_height,
+                            unsigned int color_bytes, int surface_cnt, EXTERNAL_GFX_OP *gfx_op)
+    : m_width(display_width), m_height(display_height), m_color_bytes(color_bytes), m_phy_fb(phy_fb),
+      m_phy_read_index(0), m_phy_write_index(0), m_surface_cnt(surface_cnt), m_surface_index(0)
 {
     ASSERT(color_bytes == 2 || color_bytes == 4);
     ASSERT(m_surface_cnt <= SURFACE_CNT_MAX);
     memset(m_surface_group, 0, sizeof(m_surface_group));
 
-    for (int i = 0; i < m_surface_cnt; i++)
-    {
-        m_surface_group[i] = (phy_fb) ? new c_surface(surface_width, surface_height, color_bytes) : new c_surface_no_fb(surface_width, surface_height, color_bytes, gfx_op);
+    for (int i = 0; i < m_surface_cnt; i++) {
+        m_surface_group[i] = (phy_fb) ? new c_surface(surface_width, surface_height, color_bytes)
+                                      : new c_surface_no_fb(surface_width, surface_height, color_bytes, gfx_op);
         m_surface_group[i]->attach_display(this);
     }
 }
-inline c_display::c_display(void *phy_fb, int display_width, int display_height, c_surface *surface) : m_width(display_width), m_height(display_height), m_phy_fb(phy_fb), m_phy_read_index(0), m_phy_write_index(0), m_surface_cnt(1), m_surface_index(0)
+inline c_display::c_display(void *phy_fb, int display_width, int display_height, c_surface *surface)
+    : m_width(display_width), m_height(display_height), m_phy_fb(phy_fb), m_phy_read_index(0), m_phy_write_index(0),
+      m_surface_cnt(1), m_surface_index(0)
 {
     m_color_bytes = surface->m_color_bytes;
     surface->m_is_active = true;
@@ -771,22 +690,22 @@ inline c_display::c_display(void *phy_fb, int display_width, int display_height,
 inline c_surface *c_display::alloc_surface(Z_ORDER_LEVEL max_zorder, c_rect layer_rect)
 {
     ASSERT(max_zorder < Z_ORDER_LEVEL_MAX && m_surface_index < m_surface_cnt);
-    (layer_rect == c_rect()) ? m_surface_group[m_surface_index]->set_surface(max_zorder, c_rect(0, 0, m_width - 1, m_height - 1)) : m_surface_group[m_surface_index]->set_surface(max_zorder, layer_rect);
+    (layer_rect == c_rect())
+        ? m_surface_group[m_surface_index]->set_surface(max_zorder, c_rect(0, 0, m_width - 1, m_height - 1))
+        : m_surface_group[m_surface_index]->set_surface(max_zorder, layer_rect);
     return m_surface_group[m_surface_index++];
 }
 inline int c_display::swipe_surface(c_surface *s0, c_surface *s1, int x0, int x1, int y0, int y1, int offset)
 {
     int surface_width = s0->get_width();
     int surface_height = s0->get_height();
-    if (offset < 0 || offset > surface_width || y0 < 0 || y0 >= surface_height ||
-        y1 < 0 || y1 >= surface_height || x0 < 0 || x0 >= surface_width || x1 < 0 || x1 >= surface_width)
-    {
+    if (offset < 0 || offset > surface_width || y0 < 0 || y0 >= surface_height || y1 < 0 || y1 >= surface_height ||
+        x0 < 0 || x0 >= surface_width || x1 < 0 || x1 >= surface_width) {
         ASSERT(false);
         return -1;
     }
     int width = (x1 - x0 + 1);
-    if (width < 0 || width > surface_width || width < offset)
-    {
+    if (width < 0 || width > surface_width || width < offset) {
         ASSERT(false);
         return -1;
     }
@@ -794,50 +713,38 @@ inline int c_display::swipe_surface(c_surface *s0, c_surface *s1, int x0, int x1
     x1 = (x1 >= m_width) ? (m_width - 1) : x1;
     y0 = (y0 >= m_height) ? (m_height - 1) : y0;
     y1 = (y1 >= m_height) ? (m_height - 1) : y1;
-    if (m_phy_fb)
-    {
-        for (int y = y0; y <= y1; y++)
-        {
-            //Left surface
+    if (m_phy_fb) {
+        for (int y = y0; y <= y1; y++) {
+            // Left surface
             char *addr_s = ((char *)(s0->m_fb) + (y * (s0->get_width()) + x0 + offset) * m_color_bytes);
             char *addr_d = ((char *)(m_phy_fb) + (y * m_width + x0) * m_color_bytes);
             memcpy(addr_d, addr_s, (width - offset) * m_color_bytes);
-            //Right surface
+            // Right surface
             addr_s = ((char *)(s1->m_fb) + (y * (s1->get_width()) + x0) * m_color_bytes);
             addr_d = ((char *)(m_phy_fb) + (y * m_width + x0 + (width - offset)) * m_color_bytes);
             memcpy(addr_d, addr_s, offset * m_color_bytes);
         }
-    }
-    else if (m_color_bytes == 4)
-    {
+    } else if (m_color_bytes == 4) {
         void (*draw_pixel)(int x, int y, unsigned int rgb) = ((c_surface_no_fb *)s0)->m_gfx_op->draw_pixel;
-        for (int y = y0; y <= y1; y++)
-        {
-            //Left surface
-            for (int x = x0; x <= (x1 - offset); x++)
-            {
+        for (int y = y0; y <= y1; y++) {
+            // Left surface
+            for (int x = x0; x <= (x1 - offset); x++) {
                 draw_pixel(x, y, ((unsigned int *)s0->m_fb)[y * m_width + x + offset]);
             }
-            //Right surface
-            for (int x = x1 - offset; x <= x1; x++)
-            {
+            // Right surface
+            for (int x = x1 - offset; x <= x1; x++) {
                 draw_pixel(x, y, ((unsigned int *)s1->m_fb)[y * m_width + x + offset - x1 + x0]);
             }
         }
-    }
-    else if (m_color_bytes == 2)
-    {
+    } else if (m_color_bytes == 2) {
         void (*draw_pixel)(int x, int y, unsigned int rgb) = ((c_surface_no_fb *)s0)->m_gfx_op->draw_pixel;
-        for (int y = y0; y <= y1; y++)
-        {
-            //Left surface
-            for (int x = x0; x <= (x1 - offset); x++)
-            {
+        for (int y = y0; y <= y1; y++) {
+            // Left surface
+            for (int x = x0; x <= (x1 - offset); x++) {
                 draw_pixel(x, y, GL_RGB_16_to_32(((unsigned short *)s0->m_fb)[y * m_width + x + offset]));
             }
-            //Right surface
-            for (int x = x1 - offset; x <= x1; x++)
-            {
+            // Right surface
+            for (int x = x1 - offset; x <= x1; x++) {
                 draw_pixel(x, y, GL_RGB_16_to_32(((unsigned short *)s1->m_fb)[y * m_width + x + offset - x1 + x0]));
             }
         }
@@ -845,17 +752,23 @@ inline int c_display::swipe_surface(c_surface *s0, c_surface *s1, int x0, int x1
     m_phy_write_index++;
     return 0;
 }
-#include <string.h>
 #include <stdio.h>
+#include <string.h>
 #define VALUE_STR_LEN 16
 class c_surface;
 class c_font_operator
 {
 public:
-    virtual void draw_string(c_surface *surface, int z_order, const void *string, int x, int y, const void *font, unsigned int font_color, unsigned int bg_color) = 0;
-    virtual void draw_string_in_rect(c_surface *surface, int z_order, const void *string, c_rect rect, const void *font, unsigned int font_color, unsigned int bg_color, unsigned int align_type = ALIGN_LEFT) = 0;
-    virtual void draw_value(c_surface *surface, int z_order, int value, int dot_position, int x, int y, const void *font, unsigned int font_color, unsigned int bg_color) = 0;
-    virtual void draw_value_in_rect(c_surface *surface, int z_order, int value, int dot_position, c_rect rect, const void *font, unsigned int font_color, unsigned int bg_color, unsigned int align_type = ALIGN_LEFT) = 0;
+    virtual void draw_string(c_surface *surface, int z_order, const void *string, int x, int y, const void *font,
+                             unsigned int font_color, unsigned int bg_color) = 0;
+    virtual void draw_string_in_rect(c_surface *surface, int z_order, const void *string, c_rect rect, const void *font,
+                                     unsigned int font_color, unsigned int bg_color,
+                                     unsigned int align_type = ALIGN_LEFT) = 0;
+    virtual void draw_value(c_surface *surface, int z_order, int value, int dot_position, int x, int y,
+                            const void *font, unsigned int font_color, unsigned int bg_color) = 0;
+    virtual void draw_value_in_rect(c_surface *surface, int z_order, int value, int dot_position, c_rect rect,
+                                    const void *font, unsigned int font_color, unsigned int bg_color,
+                                    unsigned int align_type = ALIGN_LEFT) = 0;
     virtual int get_str_size(const void *string, const void *font, int &width, int &height) = 0;
     void get_string_pos(const void *string, const void *font, c_rect rect, unsigned int align_type, int &x, int &y)
     {
@@ -864,108 +777,103 @@ public:
         int height = rect.m_bottom - rect.m_top + 1;
         int width = rect.m_right - rect.m_left + 1;
         x = y = 0;
-        switch (align_type & ALIGN_HMASK)
-        {
-        case ALIGN_HCENTER:
-            //m_text_org_x=0
-            if (width > x_size)
-            {
-                x = (width - x_size) / 2;
-            }
-            break;
-        case ALIGN_LEFT:
-            x = 0;
-            break;
-        case ALIGN_RIGHT:
-            //m_text_org_x=0
-            if (width > x_size)
-            {
-                x = width - x_size;
-            }
-            break;
-        default:
-            ASSERT(0);
-            break;
+        switch (align_type & ALIGN_HMASK) {
+            case ALIGN_HCENTER:
+                // m_text_org_x=0
+                if (width > x_size) {
+                    x = (width - x_size) / 2;
+                }
+                break;
+            case ALIGN_LEFT:
+                x = 0;
+                break;
+            case ALIGN_RIGHT:
+                // m_text_org_x=0
+                if (width > x_size) {
+                    x = width - x_size;
+                }
+                break;
+            default:
+                ASSERT(0);
+                break;
         }
-        switch (align_type & ALIGN_VMASK)
-        {
-        case ALIGN_VCENTER:
-            //m_text_org_y=0
-            if (height > y_size)
-            {
-                y = (height - y_size) / 2;
-            }
-            break;
-        case ALIGN_TOP:
-            y = 0;
-            break;
-        case ALIGN_BOTTOM:
-            //m_text_org_y=0
-            if (height > y_size)
-            {
-                y = height - y_size;
-            }
-            break;
-        default:
-            ASSERT(0);
-            break;
+        switch (align_type & ALIGN_VMASK) {
+            case ALIGN_VCENTER:
+                // m_text_org_y=0
+                if (height > y_size) {
+                    y = (height - y_size) / 2;
+                }
+                break;
+            case ALIGN_TOP:
+                y = 0;
+                break;
+            case ALIGN_BOTTOM:
+                // m_text_org_y=0
+                if (height > y_size) {
+                    y = height - y_size;
+                }
+                break;
+            default:
+                ASSERT(0);
+                break;
         }
     }
 };
 class c_lattice_font_op : public c_font_operator
 {
 public:
-    void draw_string(c_surface *surface, int z_order, const void *string, int x, int y, const void *font, unsigned int font_color, unsigned int bg_color)
+    void draw_string(c_surface *surface, int z_order, const void *string, int x, int y, const void *font,
+                     unsigned int font_color, unsigned int bg_color)
     {
         const char *s = (const char *)string;
-        if (0 == s)
-        {
+        if (0 == s) {
             return;
         }
         int offset = 0;
         unsigned int utf8_code;
-        while (*s)
-        {
+        while (*s) {
             s += get_utf8_code(s, utf8_code);
-            offset += draw_single_char(surface, z_order, utf8_code, (x + offset), y, (const LATTICE_FONT_INFO *)font, font_color, bg_color);
+            offset += draw_single_char(surface, z_order, utf8_code, (x + offset), y, (const LATTICE_FONT_INFO *)font,
+                                       font_color, bg_color);
         }
     }
-    void draw_string_in_rect(c_surface *surface, int z_order, const void *string, c_rect rect, const void *font, unsigned int font_color, unsigned int bg_color, unsigned int align_type = ALIGN_LEFT)
+    void draw_string_in_rect(c_surface *surface, int z_order, const void *string, c_rect rect, const void *font,
+                             unsigned int font_color, unsigned int bg_color, unsigned int align_type = ALIGN_LEFT)
     {
         const char *s = (const char *)string;
-        if (0 == s)
-        {
+        if (0 == s) {
             return;
         }
         int x, y;
         get_string_pos(s, (const LATTICE_FONT_INFO *)font, rect, align_type, x, y);
         draw_string(surface, z_order, string, rect.m_left + x, rect.m_top + y, font, font_color, bg_color);
     }
-    void draw_value(c_surface *surface, int z_order, int value, int dot_position, int x, int y, const void *font, unsigned int font_color, unsigned int bg_color)
+    void draw_value(c_surface *surface, int z_order, int value, int dot_position, int x, int y, const void *font,
+                    unsigned int font_color, unsigned int bg_color)
     {
         char buf[VALUE_STR_LEN];
         value_2_string(value, dot_position, buf, VALUE_STR_LEN);
         draw_string(surface, z_order, buf, x, y, (const LATTICE_FONT_INFO *)font, font_color, bg_color);
     }
-    void draw_value_in_rect(c_surface *surface, int z_order, int value, int dot_position, c_rect rect, const void *font, unsigned int font_color, unsigned int bg_color, unsigned int align_type = ALIGN_LEFT)
+    void draw_value_in_rect(c_surface *surface, int z_order, int value, int dot_position, c_rect rect, const void *font,
+                            unsigned int font_color, unsigned int bg_color, unsigned int align_type = ALIGN_LEFT)
     {
         char buf[VALUE_STR_LEN];
         value_2_string(value, dot_position, buf, VALUE_STR_LEN);
-        draw_string_in_rect(surface, z_order, buf, rect, (const LATTICE_FONT_INFO *)font, font_color, bg_color, align_type);
+        draw_string_in_rect(surface, z_order, buf, rect, (const LATTICE_FONT_INFO *)font, font_color, bg_color,
+                            align_type);
     }
     int get_str_size(const void *string, const void *font, int &width, int &height)
     {
         const char *s = (const char *)string;
-        if (0 == s || 0 == font)
-        {
+        if (0 == s || 0 == font) {
             width = height = 0;
             return -1;
         }
         int lattice_width = 0;
         unsigned int utf8_code;
         int utf8_bytes;
-        while (*s)
-        {
+        while (*s) {
             utf8_bytes = get_utf8_code(s, utf8_code);
             const LATTICE *p_lattice = get_lattice((const LATTICE_FONT_INFO *)font, utf8_code);
             lattice_width += p_lattice ? p_lattice->width : ((const LATTICE_FONT_INFO *)font)->height;
@@ -980,55 +888,53 @@ private:
     void value_2_string(int value, int dot_position, char *buf, int len)
     {
         memset(buf, 0, len);
-        switch (dot_position)
-        {
-        case 0:
-            sprintf(buf, "%d", value);
-            break;
-        case 1:
-            sprintf(buf, "%.1f", value * 1.0 / 10);
-            break;
-        case 2:
-            sprintf(buf, "%.2f", value * 1.0 / 100);
-            break;
-        case 3:
-            sprintf(buf, "%.3f", value * 1.0 / 1000);
-            break;
-        default:
-            ASSERT(false);
-            break;
+        switch (dot_position) {
+            case 0:
+                sprintf(buf, "%d", value);
+                break;
+            case 1:
+                sprintf(buf, "%.1f", value * 1.0 / 10);
+                break;
+            case 2:
+                sprintf(buf, "%.2f", value * 1.0 / 100);
+                break;
+            case 3:
+                sprintf(buf, "%.3f", value * 1.0 / 1000);
+                break;
+            default:
+                ASSERT(false);
+                break;
         }
     }
-    int draw_single_char(c_surface *surface, int z_order, unsigned int utf8_code, int x, int y, const LATTICE_FONT_INFO *font, unsigned int font_color, unsigned int bg_color)
+    int draw_single_char(c_surface *surface, int z_order, unsigned int utf8_code, int x, int y,
+                         const LATTICE_FONT_INFO *font, unsigned int font_color, unsigned int bg_color)
     {
         unsigned int error_color = 0xFFFFFFFF;
-        if (font)
-        {
+        if (font) {
             const LATTICE *p_lattice = get_lattice(font, utf8_code);
-            if (p_lattice)
-            {
-                draw_lattice(surface, z_order, x, y, p_lattice->width, font->height, p_lattice->pixel_buffer, font_color, bg_color);
+            if (p_lattice) {
+                draw_lattice(surface, z_order, x, y, p_lattice->width, font->height, p_lattice->pixel_buffer,
+                             font_color, bg_color);
                 return p_lattice->width;
             }
-        }
-        else
-        {
+        } else {
             error_color = GL_RGB(255, 0, 0);
         }
-        //lattice/font not found, draw "X"
+        // lattice/font not found, draw "X"
         int len = 16;
-        for (int y_ = 0; y_ < len; y_++)
-        {
-            for (int x_ = 0; x_ < len; x_++)
-            {
+        for (int y_ = 0; y_ < len; y_++) {
+            for (int x_ = 0; x_ < len; x_++) {
                 int diff = (x_ - y_);
                 int sum = (x_ + y_);
-                (diff == 0 || diff == -1 || diff == 1 || sum == len || sum == (len - 1) || sum == (len + 1)) ? surface->draw_pixel((x + x_), (y + y_), error_color, z_order) : surface->draw_pixel((x + x_), (y + y_), 0, z_order);
+                (diff == 0 || diff == -1 || diff == 1 || sum == len || sum == (len - 1) || sum == (len + 1))
+                    ? surface->draw_pixel((x + x_), (y + y_), error_color, z_order)
+                    : surface->draw_pixel((x + x_), (y + y_), 0, z_order);
             }
         }
         return len;
     }
-    void draw_lattice(c_surface *surface, int z_order, int x, int y, int width, int height, const unsigned char *p_data, unsigned int font_color, unsigned int bg_color)
+    void draw_lattice(c_surface *surface, int z_order, int x, int y, int width, int height, const unsigned char *p_data,
+                      unsigned int font_color, unsigned int bg_color)
     {
         unsigned int r, g, b, rgb;
         unsigned char blk_value = *p_data++;
@@ -1037,24 +943,17 @@ private:
         g = (GL_RGB_G(font_color) * blk_value + GL_RGB_G(bg_color) * (255 - blk_value)) >> 8;
         r = (GL_RGB_R(font_color) * blk_value + GL_RGB_R(bg_color) * (255 - blk_value)) >> 8;
         rgb = GL_RGB(r, g, b);
-        for (int y_ = 0; y_ < height; y_++)
-        {
-            for (int x_ = 0; x_ < width; x_++)
-            {
+        for (int y_ = 0; y_ < height; y_++) {
+            for (int x_ = 0; x_ < width; x_++) {
                 ASSERT(blk_cnt);
-                if (0x00 == blk_value)
-                {
-                    if (GL_ARGB_A(bg_color))
-                    {
+                if (0x00 == blk_value) {
+                    if (GL_ARGB_A(bg_color)) {
                         surface->draw_pixel(x + x_, y + y_, bg_color, z_order);
                     }
-                }
-                else
-                {
+                } else {
                     surface->draw_pixel((x + x_), (y + y_), rgb, z_order);
                 }
-                if (--blk_cnt == 0)
-                { //reload new block
+                if (--blk_cnt == 0) { // reload new block
                     blk_value = *p_data++;
                     blk_cnt = *p_data++;
                     b = (GL_RGB_B(font_color) * blk_value + GL_RGB_B(bg_color) * (255 - blk_value)) >> 8;
@@ -1071,16 +970,12 @@ private:
         int first = 0;
         int last = font->count - 1;
         int middle = (first + last) / 2;
-        while (first <= last)
-        {
+        while (first <= last) {
             if (font->lattice_array[middle].utf8_code < utf8_code)
                 first = middle + 1;
-            else if (font->lattice_array[middle].utf8_code == utf8_code)
-            {
+            else if (font->lattice_array[middle].utf8_code == utf8_code) {
                 return &font->lattice_array[middle];
-            }
-            else
-            {
+            } else {
                 last = middle - 1;
             }
             middle = (first + last) / 2;
@@ -1090,43 +985,33 @@ private:
 
     static int get_utf8_code(const char *s, unsigned int &output_utf8_code)
     {
-        static unsigned char s_utf8_length_table[256] =
-            {
-                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-                2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-                2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-                3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-                4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 1, 1};
+        static unsigned char s_utf8_length_table[256] = {
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+            2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+            3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 1, 1};
         unsigned char *us = (unsigned char *)s;
         int utf8_bytes = s_utf8_length_table[*us];
-        switch (utf8_bytes)
-        {
-        case 1:
-            output_utf8_code = *us;
-            break;
-        case 2:
-            output_utf8_code = (*us << 8) | (*(us + 1));
-            break;
-        case 3:
-            output_utf8_code = (*us << 16) | ((*(us + 1)) << 8) | *(us + 2);
-            break;
-        case 4:
-            output_utf8_code = (*us << 24) | ((*(us + 1)) << 16) | (*(us + 2) << 8) | *(us + 3);
-            break;
-        default:
-            ASSERT(false);
-            break;
+        switch (utf8_bytes) {
+            case 1:
+                output_utf8_code = *us;
+                break;
+            case 2:
+                output_utf8_code = (*us << 8) | (*(us + 1));
+                break;
+            case 3:
+                output_utf8_code = (*us << 16) | ((*(us + 1)) << 8) | *(us + 2);
+                break;
+            case 4:
+                output_utf8_code = (*us << 24) | ((*(us + 1)) << 16) | (*(us + 2) << 8) | *(us + 3);
+                break;
+            default:
+                ASSERT(false);
+                break;
         }
         return utf8_bytes;
     }
@@ -1134,19 +1019,26 @@ private:
 class c_word
 {
 public:
-    static void draw_string(c_surface *surface, int z_order, const void *string, int x, int y, const void *font, unsigned int font_color, unsigned int bg_color) //string: char or wchar_t
+    static void draw_string(c_surface *surface, int z_order, const void *string, int x, int y, const void *font,
+                            unsigned int font_color, unsigned int bg_color) // string: char or wchar_t
     {
         fontOperator->draw_string(surface, z_order, string, x, y, font, font_color, bg_color);
     }
-    static void draw_string_in_rect(c_surface *surface, int z_order, const void *string, c_rect rect, const void *font, unsigned int font_color, unsigned int bg_color, unsigned int align_type = ALIGN_LEFT) //string: char or wchar_t
+    static void draw_string_in_rect(c_surface *surface, int z_order, const void *string, c_rect rect, const void *font,
+                                    unsigned int font_color, unsigned int bg_color,
+                                    unsigned int align_type = ALIGN_LEFT) // string: char or wchar_t
     {
         fontOperator->draw_string_in_rect(surface, z_order, string, rect, font, font_color, bg_color, align_type);
     }
-    static void draw_value_in_rect(c_surface *surface, int z_order, int value, int dot_position, c_rect rect, const void *font, unsigned int font_color, unsigned int bg_color, unsigned int align_type = ALIGN_LEFT)
+    static void draw_value_in_rect(c_surface *surface, int z_order, int value, int dot_position, c_rect rect,
+                                   const void *font, unsigned int font_color, unsigned int bg_color,
+                                   unsigned int align_type = ALIGN_LEFT)
     {
-        fontOperator->draw_value_in_rect(surface, z_order, value, dot_position, rect, font, font_color, bg_color, align_type);
+        fontOperator->draw_value_in_rect(surface, z_order, value, dot_position, rect, font, font_color, bg_color,
+                                         align_type);
     }
-    static void draw_value(c_surface *surface, int z_order, int value, int dot_position, int x, int y, const void *font, unsigned int font_color, unsigned int bg_color)
+    static void draw_value(c_surface *surface, int z_order, int value, int dot_position, int x, int y, const void *font,
+                           unsigned int font_color, unsigned int bg_color)
     {
         fontOperator->draw_value(surface, z_order, value, dot_position, x, y, font, font_color, bg_color);
     }
@@ -1162,13 +1054,16 @@ class c_surface;
 class c_image_operator
 {
 public:
-    virtual void draw_image(c_surface *surface, int z_order, const void *image_info, int x, int y, unsigned int mask_rgb = DEFAULT_MASK_COLOR) = 0;
-    virtual void draw_image(c_surface *surface, int z_order, const void *image_info, int x, int y, int src_x, int src_y, int width, int height, unsigned int mask_rgb = DEFAULT_MASK_COLOR) = 0;
+    virtual void draw_image(c_surface *surface, int z_order, const void *image_info, int x, int y,
+                            unsigned int mask_rgb = DEFAULT_MASK_COLOR) = 0;
+    virtual void draw_image(c_surface *surface, int z_order, const void *image_info, int x, int y, int src_x, int src_y,
+                            int width, int height, unsigned int mask_rgb = DEFAULT_MASK_COLOR) = 0;
 };
 class c_bitmap_operator : public c_image_operator
 {
 public:
-    virtual void draw_image(c_surface *surface, int z_order, const void *image_info, int x, int y, unsigned int mask_rgb = DEFAULT_MASK_COLOR)
+    virtual void draw_image(c_surface *surface, int z_order, const void *image_info, int x, int y,
+                            unsigned int mask_rgb = DEFAULT_MASK_COLOR)
     {
         ASSERT(image_info);
         BITMAP_INFO *pBitmap = (BITMAP_INFO *)image_info;
@@ -1176,8 +1071,7 @@ public:
         unsigned int *lower_fb_32 = 0;
         int lower_fb_width = 0;
         c_rect lower_fb_rect;
-        if (z_order >= Z_ORDER_LEVEL_1)
-        {
+        if (z_order >= Z_ORDER_LEVEL_1) {
             lower_fb_16 = (unsigned short *)surface->m_layers[z_order - 1].fb;
             lower_fb_32 = (unsigned int *)surface->m_layers[z_order - 1].fb;
             lower_fb_rect = surface->m_layers[z_order - 1].rect;
@@ -1188,39 +1082,38 @@ public:
         int ysize = pBitmap->height;
         const unsigned short *pData = (const unsigned short *)pBitmap->pixel_color_array;
         int color_bytes = surface->m_color_bytes;
-        for (int y_ = y; y_ < y + ysize; y_++)
-        {
-            for (int x_ = x; x_ < x + xsize; x_++)
-            {
+        for (int y_ = y; y_ < y + ysize; y_++) {
+            for (int x_ = x; x_ < x + xsize; x_++) {
                 unsigned int rgb = *pData++;
-                if (mask_rgb_16 == rgb)
-                {
-                    if (lower_fb_rect.pt_in_rect(x_, y_))
-                    { //show lower layer
-                        surface->draw_pixel(x_, y_, (color_bytes == 4) ? lower_fb_32[(y_ - lower_fb_rect.m_top) * lower_fb_width + (x_ - lower_fb_rect.m_left)] : GL_RGB_16_to_32(lower_fb_16[(y_ - lower_fb_rect.m_top) * lower_fb_width + (x_ - lower_fb_rect.m_left)]), z_order);
+                if (mask_rgb_16 == rgb) {
+                    if (lower_fb_rect.pt_in_rect(x_, y_)) { // show lower layer
+                        surface->draw_pixel(
+                            x_, y_,
+                            (color_bytes == 4)
+                                ? lower_fb_32[(y_ - lower_fb_rect.m_top) * lower_fb_width + (x_ - lower_fb_rect.m_left)]
+                                : GL_RGB_16_to_32(lower_fb_16[(y_ - lower_fb_rect.m_top) * lower_fb_width +
+                                                              (x_ - lower_fb_rect.m_left)]),
+                            z_order);
                     }
-                }
-                else
-                {
+                } else {
                     surface->draw_pixel(x_, y_, GL_RGB_16_to_32(rgb), z_order);
                 }
             }
         }
     }
-    virtual void draw_image(c_surface *surface, int z_order, const void *image_info, int x, int y, int src_x, int src_y, int width, int height, unsigned int mask_rgb = DEFAULT_MASK_COLOR)
+    virtual void draw_image(c_surface *surface, int z_order, const void *image_info, int x, int y, int src_x, int src_y,
+                            int width, int height, unsigned int mask_rgb = DEFAULT_MASK_COLOR)
     {
         ASSERT(image_info);
         BITMAP_INFO *pBitmap = (BITMAP_INFO *)image_info;
-        if (0 == pBitmap || (src_x + width > pBitmap->width) || (src_y + height > pBitmap->height))
-        {
+        if (0 == pBitmap || (src_x + width > pBitmap->width) || (src_y + height > pBitmap->height)) {
             return;
         }
         unsigned short *lower_fb_16 = 0;
         unsigned int *lower_fb_32 = 0;
         int lower_fb_width = 0;
         c_rect lower_fb_rect;
-        if (z_order >= Z_ORDER_LEVEL_1)
-        {
+        if (z_order >= Z_ORDER_LEVEL_1) {
             lower_fb_16 = (unsigned short *)surface->m_layers[z_order - 1].fb;
             lower_fb_32 = (unsigned int *)surface->m_layers[z_order - 1].fb;
             lower_fb_rect = surface->m_layers[z_order - 1].rect;
@@ -1229,21 +1122,22 @@ public:
         unsigned int mask_rgb_16 = GL_RGB_32_to_16(mask_rgb);
         const unsigned short *pData = (const unsigned short *)pBitmap->pixel_color_array;
         int color_bytes = surface->m_color_bytes;
-        for (int y_ = 0; y_ < height; y_++)
-        {
+        for (int y_ = 0; y_ < height; y_++) {
             const unsigned short *p = &pData[src_x + (src_y + y_) * pBitmap->width];
-            for (int x_ = 0; x_ < width; x_++)
-            {
+            for (int x_ = 0; x_ < width; x_++) {
                 unsigned int rgb = *p++;
-                if (mask_rgb_16 == rgb)
-                {
-                    if (lower_fb_rect.pt_in_rect(x + x_, y + y_))
-                    { //show lower layer
-                        surface->draw_pixel(x + x_, y + y_, (color_bytes == 4) ? lower_fb_32[(y + y_ - lower_fb_rect.m_top) * lower_fb_width + x + x_ - lower_fb_rect.m_left] : GL_RGB_16_to_32(lower_fb_16[(y + y_ - lower_fb_rect.m_top) * lower_fb_width + x + x_ - lower_fb_rect.m_left]), z_order);
+                if (mask_rgb_16 == rgb) {
+                    if (lower_fb_rect.pt_in_rect(x + x_, y + y_)) { // show lower layer
+                        surface->draw_pixel(
+                            x + x_, y + y_,
+                            (color_bytes == 4)
+                                ? lower_fb_32[(y + y_ - lower_fb_rect.m_top) * lower_fb_width + x + x_ -
+                                              lower_fb_rect.m_left]
+                                : GL_RGB_16_to_32(lower_fb_16[(y + y_ - lower_fb_rect.m_top) * lower_fb_width + x + x_ -
+                                                              lower_fb_rect.m_left]),
+                            z_order);
                     }
-                }
-                else
-                {
+                } else {
                     surface->draw_pixel(x + x_, y + y_, GL_RGB_16_to_32(rgb), z_order);
                 }
             }
@@ -1253,11 +1147,13 @@ public:
 class c_image
 {
 public:
-    static void draw_image(c_surface *surface, int z_order, const void *image_info, int x, int y, unsigned int mask_rgb = DEFAULT_MASK_COLOR)
+    static void draw_image(c_surface *surface, int z_order, const void *image_info, int x, int y,
+                           unsigned int mask_rgb = DEFAULT_MASK_COLOR)
     {
         image_operator->draw_image(surface, z_order, image_info, x, y, mask_rgb);
     }
-    static void draw_image(c_surface *surface, int z_order, const void *image_info, int x, int y, int src_x, int src_y, int width, int height, unsigned int mask_rgb = DEFAULT_MASK_COLOR)
+    static void draw_image(c_surface *surface, int z_order, const void *image_info, int x, int y, int src_x, int src_y,
+                           int width, int height, unsigned int mask_rgb = DEFAULT_MASK_COLOR)
     {
         image_operator->draw_image(surface, z_order, image_info, x, y, src_x, src_y, width, height, mask_rgb);
     }
@@ -1266,54 +1162,37 @@ public:
 };
 class c_wnd;
 class c_surface;
-typedef enum
-{
+typedef enum {
     ATTR_VISIBLE = 0x40000000L,
     ATTR_FOCUS = 0x20000000L,
     ATTR_PRIORITY = 0x10000000L // Handle touch action at high priority
 } WND_ATTRIBUTION;
-typedef enum
-{
-    STATUS_NORMAL,
-    STATUS_PUSHED,
-    STATUS_FOCUSED,
-    STATUS_DISABLED
-} WND_STATUS;
-typedef enum
-{
-    NAV_FORWARD,
-    NAV_BACKWARD,
-    NAV_ENTER
-} NAVIGATION_KEY;
-typedef enum
-{
-    TOUCH_DOWN,
-    TOUCH_UP
-} TOUCH_ACTION;
-typedef struct struct_wnd_tree
-{
-    c_wnd *p_wnd;             //window instance
-    unsigned int resource_id; //ID
-    const char *str;          //caption
-    short x;                  //position x
-    short y;                  //position y
+typedef enum { STATUS_NORMAL, STATUS_PUSHED, STATUS_FOCUSED, STATUS_DISABLED } WND_STATUS;
+typedef enum { NAV_FORWARD, NAV_BACKWARD, NAV_ENTER } NAVIGATION_KEY;
+typedef enum { TOUCH_DOWN, TOUCH_UP } TOUCH_ACTION;
+typedef struct struct_wnd_tree {
+    c_wnd *p_wnd;             // window instance
+    unsigned int resource_id; // ID
+    const char *str;          // caption
+    short x;                  // position x
+    short y;                  // position y
     short width;
     short height;
-    struct struct_wnd_tree *p_child_tree; //sub tree
+    struct struct_wnd_tree *p_child_tree; // sub tree
 } WND_TREE;
 typedef void (c_wnd::*WND_CALLBACK)(int, int);
 class c_wnd
 {
 public:
-    c_wnd() : m_status(STATUS_NORMAL), m_attr((WND_ATTRIBUTION)(ATTR_VISIBLE | ATTR_FOCUS)), m_parent(0), 
-    m_top_child(0), m_prev_sibling(0), m_next_sibling(0),
-              m_str(0), m_font_color(0), m_bg_color(0), m_id(0), m_z_order(Z_ORDER_LEVEL_0), m_focus_child(0), m_surface(0){};
+    c_wnd()
+        : m_status(STATUS_NORMAL), m_attr((WND_ATTRIBUTION)(ATTR_VISIBLE | ATTR_FOCUS)), m_parent(0), m_top_child(0),
+          m_prev_sibling(0), m_next_sibling(0), m_str(0), m_font_color(0), m_bg_color(0), m_id(0),
+          m_z_order(Z_ORDER_LEVEL_0), m_focus_child(0), m_surface(0){};
     virtual ~c_wnd(){};
-    virtual int connect(c_wnd *parent, unsigned short resource_id, const char *str,
-                        short x, short y, short width, short height, WND_TREE *p_child_tree = 0)
+    virtual int connect(c_wnd *parent, unsigned short resource_id, const char *str, short x, short y, short width,
+                        short height, WND_TREE *p_child_tree = 0)
     {
-        if (0 == resource_id)
-        {
+        if (0 == resource_id) {
             ASSERT(false);
             return -1;
         }
@@ -1321,13 +1200,11 @@ public:
         set_str(str);
         m_parent = parent;
         m_status = STATUS_NORMAL;
-        if (parent)
-        {
+        if (parent) {
             m_z_order = parent->m_z_order;
             m_surface = parent->m_surface;
         }
-        if (0 == m_surface)
-        {
+        if (0 == m_surface) {
             ASSERT(false);
             return -2;
         }
@@ -1337,35 +1214,29 @@ public:
         m_wnd_rect.m_right = (x + width - 1);
         m_wnd_rect.m_bottom = (y + height - 1);
         pre_create_wnd();
-        if (0 != parent)
-        {
+        if (0 != parent) {
             parent->add_child_2_tail(this);
         }
-        if (load_child_wnd(p_child_tree) >= 0)
-        {
+        if (load_child_wnd(p_child_tree) >= 0) {
             on_init_children();
         }
         return 0;
     }
     void disconnect()
     {
-        if (0 == m_id)
-        {
+        if (0 == m_id) {
             return;
         }
-        if (0 != m_top_child)
-        {
+        if (0 != m_top_child) {
             c_wnd *child = m_top_child;
             c_wnd *next_child = 0;
-            while (child)
-            {
+            while (child) {
                 next_child = child->m_next_sibling;
                 child->disconnect();
                 child = next_child;
             }
         }
-        if (0 != m_parent)
-        {
+        if (0 != m_parent) {
             m_parent->unlink_child(this);
         }
         m_focus_child = 0;
@@ -1375,14 +1246,11 @@ public:
     virtual void on_paint() {}
     virtual void show_window()
     {
-        if (ATTR_VISIBLE == (m_attr & ATTR_VISIBLE))
-        {
+        if (ATTR_VISIBLE == (m_attr & ATTR_VISIBLE)) {
             on_paint();
             c_wnd *child = m_top_child;
-            if (0 != child)
-            {
-                while (child)
-                {
+            if (0 != child) {
+                while (child) {
                     child->show_window();
                     child = child->m_next_sibling;
                 }
@@ -1394,10 +1262,8 @@ public:
     c_wnd *get_wnd_ptr(unsigned short id) const
     {
         c_wnd *child = m_top_child;
-        while (child)
-        {
-            if (child->get_id() == id)
-            {
+        while (child) {
+            if (child->get_id() == id) {
                 break;
             }
             child = child->m_next_sibling;
@@ -1407,10 +1273,7 @@ public:
     unsigned int get_attr() const { return m_attr; }
     void set_str(const char *str) { m_str = str; }
     void set_attr(WND_ATTRIBUTION attr) { m_attr = attr; }
-    bool is_focus_wnd() const
-    {
-        return ((m_attr & ATTR_VISIBLE) && (m_attr & ATTR_FOCUS)) ? true : false;
-    }
+    bool is_focus_wnd() const { return ((m_attr & ATTR_VISIBLE) && (m_attr & ATTR_FOCUS)) ? true : false; }
     void set_font_color(unsigned int color) { m_font_color = color; }
     unsigned int get_font_color() { return m_font_color; }
     void set_bg_color(unsigned int color) { m_bg_color = color; }
@@ -1437,12 +1300,9 @@ public:
         ASSERT(0 != focus_child);
         ASSERT(focus_child->m_parent == this);
         c_wnd *old_focus_child = m_focus_child;
-        if (focus_child->is_focus_wnd())
-        {
-            if (focus_child != old_focus_child)
-            {
-                if (old_focus_child)
-                {
+        if (focus_child->is_focus_wnd()) {
+            if (focus_child != old_focus_child) {
+                if (old_focus_child) {
                     old_focus_child->on_kill_focus();
                 }
                 m_focus_child = focus_child;
@@ -1454,47 +1314,36 @@ public:
     c_wnd *get_parent() const { return m_parent; }
     c_wnd *get_last_child() const
     {
-        if (0 == m_top_child)
-        {
+        if (0 == m_top_child) {
             return 0;
         }
         c_wnd *child = m_top_child;
-        while (child->m_next_sibling)
-        {
+        while (child->m_next_sibling) {
             child = child->m_next_sibling;
         }
         return child;
     }
     int unlink_child(c_wnd *child)
     {
-        if ((0 == child) || (this != child->m_parent))
-        {
+        if ((0 == child) || (this != child->m_parent)) {
             return -1;
         }
-        if (0 == m_top_child)
-        {
+        if (0 == m_top_child) {
             return -2;
         }
         bool find = false;
         c_wnd *tmp_child = m_top_child;
-        if (tmp_child == child)
-        {
+        if (tmp_child == child) {
             m_top_child = child->m_next_sibling;
-            if (0 != child->m_next_sibling)
-            {
+            if (0 != child->m_next_sibling) {
                 child->m_next_sibling->m_prev_sibling = 0;
             }
             find = true;
-        }
-        else
-        {
-            while (tmp_child->m_next_sibling)
-            {
-                if (child == tmp_child->m_next_sibling)
-                {
+        } else {
+            while (tmp_child->m_next_sibling) {
+                if (child == tmp_child->m_next_sibling) {
                     tmp_child->m_next_sibling = child->m_next_sibling;
-                    if (0 != child->m_next_sibling)
-                    {
+                    if (0 != child->m_next_sibling) {
                         child->m_next_sibling->m_prev_sibling = tmp_child;
                     }
                     find = true;
@@ -1503,18 +1352,14 @@ public:
                 tmp_child = tmp_child->m_next_sibling;
             }
         }
-        if (true == find)
-        {
-            if (m_focus_child == child)
-            {
+        if (true == find) {
+            if (m_focus_child == child) {
                 m_focus_child = 0;
             }
             child->m_next_sibling = 0;
             child->m_prev_sibling = 0;
             return 1;
-        }
-        else
-        {
+        } else {
             return 0;
         }
     }
@@ -1526,28 +1371,22 @@ public:
         y -= m_wnd_rect.m_top;
         c_wnd *priority_wnd = 0;
         c_wnd *tmp_child = m_top_child;
-        while (tmp_child)
-        {
-            if ((tmp_child->m_attr & ATTR_PRIORITY) && (tmp_child->m_attr & ATTR_VISIBLE))
-            {
+        while (tmp_child) {
+            if ((tmp_child->m_attr & ATTR_PRIORITY) && (tmp_child->m_attr & ATTR_VISIBLE)) {
                 priority_wnd = tmp_child;
                 break;
             }
             tmp_child = tmp_child->m_next_sibling;
         }
-        if (priority_wnd)
-        {
+        if (priority_wnd) {
             return priority_wnd->on_touch(x, y, action);
         }
         c_wnd *child = m_top_child;
-        while (child)
-        {
-            if (child->is_focus_wnd())
-            {
+        while (child) {
+            if (child->is_focus_wnd()) {
                 c_rect rect;
                 child->get_wnd_rect(rect);
-                if (true == rect.pt_in_rect(x, y))
-                {
+                if (true == rect.pt_in_rect(x, y)) {
                     return child->on_touch(x, y, action);
                 }
             }
@@ -1558,27 +1397,21 @@ public:
     {
         c_wnd *priority_wnd = 0;
         c_wnd *tmp_child = m_top_child;
-        while (tmp_child)
-        {
-            if ((tmp_child->m_attr & ATTR_PRIORITY) && (tmp_child->m_attr & ATTR_VISIBLE))
-            {
+        while (tmp_child) {
+            if ((tmp_child->m_attr & ATTR_PRIORITY) && (tmp_child->m_attr & ATTR_VISIBLE)) {
                 priority_wnd = tmp_child;
                 break;
             }
             tmp_child = tmp_child->m_next_sibling;
         }
-        if (priority_wnd)
-        {
+        if (priority_wnd) {
             return priority_wnd->on_navigate(key);
         }
-        if (!is_focus_wnd())
-        {
+        if (!is_focus_wnd()) {
             return;
         }
-        if (key != NAV_BACKWARD && key != NAV_FORWARD)
-        {
-            if (m_focus_child)
-            {
+        if (key != NAV_BACKWARD && key != NAV_FORWARD) {
+            if (m_focus_child) {
                 m_focus_child->on_navigate(key);
             }
             return;
@@ -1586,14 +1419,11 @@ public:
         // Move focus
         c_wnd *old_focus_wnd = m_focus_child;
         // No current focus wnd, new one.
-        if (!old_focus_wnd)
-        {
+        if (!old_focus_wnd) {
             c_wnd *child = m_top_child;
             c_wnd *new_focus_wnd = 0;
-            while (child)
-            {
-                if (child->is_focus_wnd())
-                {
+            while (child) {
+                if (child->is_focus_wnd()) {
                     new_focus_wnd = child;
                     new_focus_wnd->m_parent->set_child_focus(new_focus_wnd);
                     child = child->m_top_child;
@@ -1605,20 +1435,17 @@ public:
         }
         // Move focus from old wnd to next wnd
         c_wnd *next_focus_wnd = (key == NAV_FORWARD) ? old_focus_wnd->m_next_sibling : old_focus_wnd->m_prev_sibling;
-        while (next_focus_wnd && (!next_focus_wnd->is_focus_wnd()))
-        { // Search neighbor of old focus wnd
+        while (next_focus_wnd && (!next_focus_wnd->is_focus_wnd())) { // Search neighbor of old focus wnd
             next_focus_wnd = (key == NAV_FORWARD) ? next_focus_wnd->m_next_sibling : next_focus_wnd->m_prev_sibling;
         }
-        if (!next_focus_wnd)
-        { // Search whole brother wnd
-            next_focus_wnd = (key == NAV_FORWARD) ? old_focus_wnd->m_parent->m_top_child : old_focus_wnd->m_parent->get_last_child();
-            while (next_focus_wnd && (!next_focus_wnd->is_focus_wnd()))
-            {
+        if (!next_focus_wnd) { // Search whole brother wnd
+            next_focus_wnd =
+                (key == NAV_FORWARD) ? old_focus_wnd->m_parent->m_top_child : old_focus_wnd->m_parent->get_last_child();
+            while (next_focus_wnd && (!next_focus_wnd->is_focus_wnd())) {
                 next_focus_wnd = (key == NAV_FORWARD) ? next_focus_wnd->m_next_sibling : next_focus_wnd->m_prev_sibling;
             }
         }
-        if (next_focus_wnd)
-        {
+        if (next_focus_wnd) {
             next_focus_wnd->m_parent->set_child_focus(next_focus_wnd);
         }
     }
@@ -1633,17 +1460,13 @@ protected:
             return;
         if (child == get_wnd_ptr(child->m_id))
             return;
-        if (0 == m_top_child)
-        {
+        if (0 == m_top_child) {
             m_top_child = child;
             child->m_prev_sibling = 0;
             child->m_next_sibling = 0;
-        }
-        else
-        {
+        } else {
             c_wnd *last_child = get_last_child();
-            if (0 == last_child)
-            {
+            if (0 == last_child) {
                 ASSERT(false);
             }
             last_child->m_next_sibling = child;
@@ -1657,8 +1480,7 @@ protected:
         c_rect rect;
         x += m_wnd_rect.m_left;
         y += m_wnd_rect.m_top;
-        while (0 != parent)
-        {
+        while (0 != parent) {
             parent->get_wnd_rect(rect);
             x += rect.m_left;
             y += rect.m_top;
@@ -1667,23 +1489,18 @@ protected:
     }
     int load_child_wnd(WND_TREE *p_child_tree)
     {
-        if (0 == p_child_tree)
-        {
+        if (0 == p_child_tree) {
             return 0;
         }
         int sum = 0;
         WND_TREE *p_cur = p_child_tree;
-        while (p_cur->p_wnd)
-        {
-            if (0 != p_cur->p_wnd->m_id)
-            { //This wnd has been used! Do not share!
+        while (p_cur->p_wnd) {
+            if (0 != p_cur->p_wnd->m_id) { // This wnd has been used! Do not share!
                 ASSERT(false);
                 return -1;
-            }
-            else
-            {
-                p_cur->p_wnd->connect(this, p_cur->resource_id, p_cur->str,
-                                      p_cur->x, p_cur->y, p_cur->width, p_cur->height, p_cur->p_child_tree);
+            } else {
+                p_cur->p_wnd->connect(this, p_cur->resource_id, p_cur->str, p_cur->x, p_cur->y, p_cur->width,
+                                      p_cur->height, p_cur->p_child_tree);
             }
             p_cur++;
             sum++;
@@ -1713,19 +1530,19 @@ public:
 
     WND_STATUS m_status;
     WND_ATTRIBUTION m_attr;
-    c_wnd *m_parent;       //parent window
-    c_wnd *m_top_child;    //the first sub window would be navigated
-    c_wnd *m_prev_sibling; //previous brother
-    c_wnd *m_next_sibling; //next brother
-    const char *m_str;     //caption
+    c_wnd *m_parent;       // parent window
+    c_wnd *m_top_child;    // the first sub window would be navigated
+    c_wnd *m_prev_sibling; // previous brother
+    c_wnd *m_next_sibling; // next brother
+    const char *m_str;     // caption
     unsigned int m_font_color;
     unsigned int m_bg_color;
     unsigned short m_id;
-    int m_z_order; //the graphic level for rendering
-    c_wnd *m_focus_child;  //current focused window
+    int m_z_order;        // the graphic level for rendering
+    c_wnd *m_focus_child; // current focused window
     c_surface *m_surface;
-    c_rect m_wnd_rect;     //position relative to parent window.
-    const void *m_font;    //font face
+    c_rect m_wnd_rect;  // position relative to parent window.
+    const void *m_font; // font face
 };
 class c_button : public c_wnd
 {
@@ -1737,33 +1554,32 @@ protected:
     {
         c_rect rect;
         get_screen_rect(rect);
-        switch (m_status)
-        {
-        case STATUS_NORMAL:
-            m_surface->fill_rect(rect, c_theme::get_color(COLOR_WND_NORMAL), m_z_order);
-            if (m_str)
-            {
-                c_word::draw_string_in_rect(m_surface, m_z_order, m_str, rect, m_font, m_font_color, c_theme::get_color(COLOR_WND_NORMAL), ALIGN_HCENTER | ALIGN_VCENTER);
-            }
-            break;
-        case STATUS_FOCUSED:
-            m_surface->fill_rect(rect, c_theme::get_color(COLOR_WND_FOCUS), m_z_order);
-            if (m_str)
-            {
-                c_word::draw_string_in_rect(m_surface, m_z_order, m_str, rect, m_font, m_font_color, c_theme::get_color(COLOR_WND_FOCUS), ALIGN_HCENTER | ALIGN_VCENTER);
-            }
-            break;
-        case STATUS_PUSHED:
-            m_surface->fill_rect(rect, c_theme::get_color(COLOR_WND_PUSHED), m_z_order);
-            m_surface->draw_rect(rect, c_theme::get_color(COLOR_WND_BORDER), 2, m_z_order);
-            if (m_str)
-            {
-                c_word::draw_string_in_rect(m_surface, m_z_order, m_str, rect, m_font, m_font_color, c_theme::get_color(COLOR_WND_PUSHED), ALIGN_HCENTER | ALIGN_VCENTER);
-            }
-            break;
-        default:
-            ASSERT(false);
-            break;
+        switch (m_status) {
+            case STATUS_NORMAL:
+                m_surface->fill_rect(rect, c_theme::get_color(COLOR_WND_NORMAL), m_z_order);
+                if (m_str) {
+                    c_word::draw_string_in_rect(m_surface, m_z_order, m_str, rect, m_font, m_font_color,
+                                                c_theme::get_color(COLOR_WND_NORMAL), ALIGN_HCENTER | ALIGN_VCENTER);
+                }
+                break;
+            case STATUS_FOCUSED:
+                m_surface->fill_rect(rect, c_theme::get_color(COLOR_WND_FOCUS), m_z_order);
+                if (m_str) {
+                    c_word::draw_string_in_rect(m_surface, m_z_order, m_str, rect, m_font, m_font_color,
+                                                c_theme::get_color(COLOR_WND_FOCUS), ALIGN_HCENTER | ALIGN_VCENTER);
+                }
+                break;
+            case STATUS_PUSHED:
+                m_surface->fill_rect(rect, c_theme::get_color(COLOR_WND_PUSHED), m_z_order);
+                m_surface->draw_rect(rect, c_theme::get_color(COLOR_WND_BORDER), 2, m_z_order);
+                if (m_str) {
+                    c_word::draw_string_in_rect(m_surface, m_z_order, m_str, rect, m_font, m_font_color,
+                                                c_theme::get_color(COLOR_WND_PUSHED), ALIGN_HCENTER | ALIGN_VCENTER);
+                }
+                break;
+            default:
+                ASSERT(false);
+                break;
         }
     }
     virtual void on_focus()
@@ -1785,33 +1601,28 @@ protected:
     }
     virtual void on_touch(int x, int y, TOUCH_ACTION action)
     {
-        if (action == TOUCH_DOWN)
-        {
+        if (action == TOUCH_DOWN) {
             m_parent->set_child_focus(this);
             m_status = STATUS_PUSHED;
             on_paint();
-        }
-        else
-        {
+        } else {
             m_status = STATUS_FOCUSED;
             on_paint();
-            if (on_click)
-            {
+            if (on_click) {
                 (m_parent->*(on_click))(m_id, 0);
             }
         }
     }
     virtual void on_navigate(NAVIGATION_KEY key)
     {
-        switch (key)
-        {
-        case NAV_ENTER:
-            on_touch(m_wnd_rect.m_left, m_wnd_rect.m_top, TOUCH_DOWN);
-            on_touch(m_wnd_rect.m_left, m_wnd_rect.m_top, TOUCH_UP);
-            break;
-        case NAV_FORWARD:
-        case NAV_BACKWARD:
-            break;
+        switch (key) {
+            case NAV_ENTER:
+                on_touch(m_wnd_rect.m_left, m_wnd_rect.m_top, TOUCH_DOWN);
+                on_touch(m_wnd_rect.m_left, m_wnd_rect.m_top, TOUCH_UP);
+                break;
+            case NAV_FORWARD:
+            case NAV_BACKWARD:
+                break;
         }
         return c_wnd::on_navigate(key);
     }
@@ -1819,8 +1630,7 @@ protected:
 };
 class c_surface;
 class c_dialog;
-typedef struct
-{
+typedef struct {
     c_dialog *dialog;
     c_surface *surface;
 } DIALOG_ARRAY;
@@ -1829,21 +1639,19 @@ class c_dialog : public c_wnd
 public:
     static int open_dialog(c_dialog *p_dlg, bool modal_mode = true)
     {
-        if (0 == p_dlg)
-        {
+        if (0 == p_dlg) {
             ASSERT(false);
             return 0;
         }
         c_dialog *cur_dlg = get_the_dialog(p_dlg->get_surface());
-        if (cur_dlg == p_dlg)
-        {
+        if (cur_dlg == p_dlg) {
             return 1;
         }
-        if (cur_dlg)
-        {
+        if (cur_dlg) {
             cur_dlg->set_attr(WND_ATTRIBUTION(0));
         }
-        p_dlg->set_attr(modal_mode ? (WND_ATTRIBUTION)(ATTR_VISIBLE | ATTR_FOCUS | ATTR_PRIORITY) : (WND_ATTRIBUTION)(ATTR_VISIBLE | ATTR_FOCUS));
+        p_dlg->set_attr(modal_mode ? (WND_ATTRIBUTION)(ATTR_VISIBLE | ATTR_FOCUS | ATTR_PRIORITY)
+                                   : (WND_ATTRIBUTION)(ATTR_VISIBLE | ATTR_FOCUS));
         p_dlg->show_window();
         p_dlg->set_me_the_dialog();
         return 1;
@@ -1851,19 +1659,16 @@ public:
     static int close_dialog(c_surface *surface)
     {
         c_dialog *dlg = get_the_dialog(surface);
-        if (0 == dlg)
-        {
+        if (0 == dlg) {
             return 0;
         }
         c_rect rc;
         dlg->get_screen_rect(rc);
         dlg->set_attr(WND_ATTRIBUTION(0));
         surface->show_layer(rc, dlg->m_z_order - 1);
-        //clear the dialog
-        for (int i = 0; i < SURFACE_CNT_MAX; i++)
-        {
-            if (ms_the_dialogs[i].surface == surface)
-            {
+        // clear the dialog
+        for (int i = 0; i < SURFACE_CNT_MAX; i++) {
+            if (ms_the_dialogs[i].surface == surface) {
                 ms_the_dialogs[i].dialog = 0;
                 return 1;
             }
@@ -1873,10 +1678,8 @@ public:
     }
     static c_dialog *get_the_dialog(c_surface *surface)
     {
-        for (int i = 0; i < SURFACE_CNT_MAX; i++)
-        {
-            if (ms_the_dialogs[i].surface == surface)
-            {
+        for (int i = 0; i < SURFACE_CNT_MAX; i++) {
+            if (ms_the_dialogs[i].surface == surface) {
                 return ms_the_dialogs[i].dialog;
             }
         }
@@ -1895,9 +1698,9 @@ protected:
         c_rect rect;
         get_screen_rect(rect);
         m_surface->fill_rect(rect, m_bg_color, m_z_order);
-        if (m_str)
-        {
-            c_word::draw_string(m_surface, m_z_order, m_str, rect.m_left + 35, rect.m_top, c_theme::get_font(FONT_DEFAULT), GL_RGB(255, 255, 255), GL_ARGB(0, 0, 0, 0));
+        if (m_str) {
+            c_word::draw_string(m_surface, m_z_order, m_str, rect.m_left + 35, rect.m_top,
+                                c_theme::get_font(FONT_DEFAULT), GL_RGB(255, 255, 255), GL_ARGB(0, 0, 0, 0));
         }
     }
 
@@ -1905,18 +1708,14 @@ private:
     int set_me_the_dialog()
     {
         c_surface *surface = get_surface();
-        for (int i = 0; i < SURFACE_CNT_MAX; i++)
-        {
-            if (ms_the_dialogs[i].surface == surface)
-            {
+        for (int i = 0; i < SURFACE_CNT_MAX; i++) {
+            if (ms_the_dialogs[i].surface == surface) {
                 ms_the_dialogs[i].dialog = this;
                 return 0;
             }
         }
-        for (int i = 0; i < SURFACE_CNT_MAX; i++)
-        {
-            if (ms_the_dialogs[i].surface == 0)
-            {
+        for (int i = 0; i < SURFACE_CNT_MAX; i++) {
+            if (ms_the_dialogs[i].surface == 0) {
                 ms_the_dialogs[i].dialog = this;
                 ms_the_dialogs[i].surface = surface;
                 return 1;
@@ -1928,7 +1727,7 @@ private:
     static DIALOG_ARRAY ms_the_dialogs[SURFACE_CNT_MAX];
 };
 #include <string.h>
-//Changing key width/height will change the width/height of keyboard
+// Changing key width/height will change the width/height of keyboard
 #define KEY_WIDTH 65
 #define KEY_HEIGHT 38
 #define KEYBOARD_WIDTH ((KEY_WIDTH + 2) * 10)
@@ -1945,24 +1744,10 @@ private:
 #define POS_X(c) ((KEY_WIDTH * c) + (c + 1) * 2)
 #define POS_Y(r) ((KEY_HEIGHT * r) + (r + 1) * 2)
 #define KEYBORAD_CLICK 0x5014
-#define ON_KEYBORAD_UPDATE(func) \
-    {MSG_TYPE_WND, KEYBORAD_CLICK, 0, msgCallback(&func)},
-typedef enum
-{
-    STATUS_UPPERCASE,
-    STATUS_LOWERCASE
-} KEYBOARD_STATUS;
-typedef enum
-{
-    STYLE_ALL_BOARD,
-    STYLE_NUM_BOARD
-} KEYBOARD_STYLE;
-typedef enum
-{
-    CLICK_CHAR,
-    CLICK_ENTER,
-    CLICK_ESC
-} CLICK_STATUS;
+#define ON_KEYBORAD_UPDATE(func) {MSG_TYPE_WND, KEYBORAD_CLICK, 0, msgCallback(&func)},
+typedef enum { STATUS_UPPERCASE, STATUS_LOWERCASE } KEYBOARD_STATUS;
+typedef enum { STYLE_ALL_BOARD, STYLE_NUM_BOARD } KEYBOARD_STYLE;
+typedef enum { CLICK_CHAR, CLICK_ENTER, CLICK_ESC } CLICK_STATUS;
 extern WND_TREE g_key_board_children[];
 extern WND_TREE g_number_board_children[];
 class c_keyboard : public c_wnd
@@ -1972,18 +1757,16 @@ public:
     {
         c_rect user_rect;
         user->get_wnd_rect(user_rect);
-        if (style == STYLE_ALL_BOARD)
-        { //Place keyboard at the bottom of user's parent window.
+        if (style == STYLE_ALL_BOARD) { // Place keyboard at the bottom of user's parent window.
             c_rect user_parent_rect;
             user->get_parent()->get_wnd_rect(user_parent_rect);
-            return c_wnd::connect(user, resource_id, 0, (0 - user_rect.m_left), (user_parent_rect.height() - user_rect.m_top - KEYBOARD_HEIGHT - 1), KEYBOARD_WIDTH, KEYBOARD_HEIGHT, g_key_board_children);
-        }
-        else if (style == STYLE_NUM_BOARD)
-        { //Place keyboard below the user window.
-            return c_wnd::connect(user, resource_id, 0, 0, user_rect.height(), NUM_BOARD_WIDTH, NUM_BOARD_HEIGHT, g_number_board_children);
-        }
-        else
-        {
+            return c_wnd::connect(user, resource_id, 0, (0 - user_rect.m_left),
+                                  (user_parent_rect.height() - user_rect.m_top - KEYBOARD_HEIGHT - 1), KEYBOARD_WIDTH,
+                                  KEYBOARD_HEIGHT, g_key_board_children);
+        } else if (style == STYLE_NUM_BOARD) { // Place keyboard below the user window.
+            return c_wnd::connect(user, resource_id, 0, 0, user_rect.height(), NUM_BOARD_WIDTH, NUM_BOARD_HEIGHT,
+                                  g_number_board_children);
+        } else {
             ASSERT(false);
         }
         return -1;
@@ -1991,10 +1774,8 @@ public:
     virtual void on_init_children()
     {
         c_wnd *child = m_top_child;
-        if (0 != child)
-        {
-            while (child)
-            {
+        if (0 != child) {
+            while (child) {
                 ((c_button *)child)->set_on_click(WND_CALLBACK(&c_keyboard::on_key_clicked));
                 child = child->get_next_sibling();
             }
@@ -2020,39 +1801,34 @@ protected:
     }
     void on_key_clicked(int id, int param)
     {
-        switch (id)
-        {
-        case 0x14:
-            on_caps_clicked(id, param);
-            break;
-        case '\n':
-            on_enter_clicked(id, param);
-            break;
-        case 0x1B:
-            on_esc_clicked(id, param);
-            break;
-        case 0x7F:
-            on_del_clicked(id, param);
-            break;
-        default:
-            on_char_clicked(id, param);
-            break;
+        switch (id) {
+            case 0x14:
+                on_caps_clicked(id, param);
+                break;
+            case '\n':
+                on_enter_clicked(id, param);
+                break;
+            case 0x1B:
+                on_esc_clicked(id, param);
+                break;
+            case 0x7F:
+                on_del_clicked(id, param);
+                break;
+            default:
+                on_char_clicked(id, param);
+                break;
         }
     }
     void on_char_clicked(int id, int param)
-    { //id = char ascii code.
-        if (m_str_len >= sizeof(m_str))
-        {
+    { // id = char ascii code.
+        if (m_str_len >= sizeof(m_str)) {
             return;
         }
-        if ((id >= '0' && id <= '9') || id == ' ' || id == '.')
-        {
+        if ((id >= '0' && id <= '9') || id == ' ' || id == '.') {
             goto InputChar;
         }
-        if (id >= 'A' && id <= 'Z')
-        {
-            if (STATUS_LOWERCASE == m_cap_status)
-            {
+        if (id >= 'A' && id <= 'Z') {
+            if (STATUS_LOWERCASE == m_cap_status) {
                 id += 0x20;
             }
             goto InputChar;
@@ -2064,8 +1840,7 @@ protected:
     }
     void on_del_clicked(int id, int param)
     {
-        if (m_str_len <= 0)
-        {
+        if (m_str_len <= 0) {
             return;
         }
         m_str[--m_str_len] = 0;
@@ -2100,60 +1875,51 @@ protected:
     {
         c_rect rect;
         get_screen_rect(rect);
-        switch (m_status)
-        {
-        case STATUS_NORMAL:
-            m_surface->fill_rect(rect, c_theme::get_color(COLOR_WND_NORMAL), m_z_order);
-            break;
-        case STATUS_FOCUSED:
-            m_surface->fill_rect(rect, c_theme::get_color(COLOR_WND_FOCUS), m_z_order);
-            break;
-        case STATUS_PUSHED:
-            m_surface->fill_rect(rect, c_theme::get_color(COLOR_WND_PUSHED), m_z_order);
-            m_surface->draw_rect(rect, c_theme::get_color(COLOR_WND_BORDER), 2, m_z_order);
-            break;
-        default:
-            ASSERT(false);
-            break;
+        switch (m_status) {
+            case STATUS_NORMAL:
+                m_surface->fill_rect(rect, c_theme::get_color(COLOR_WND_NORMAL), m_z_order);
+                break;
+            case STATUS_FOCUSED:
+                m_surface->fill_rect(rect, c_theme::get_color(COLOR_WND_FOCUS), m_z_order);
+                break;
+            case STATUS_PUSHED:
+                m_surface->fill_rect(rect, c_theme::get_color(COLOR_WND_PUSHED), m_z_order);
+                m_surface->draw_rect(rect, c_theme::get_color(COLOR_WND_BORDER), 2, m_z_order);
+                break;
+            default:
+                ASSERT(false);
+                break;
         }
-        if (m_id == 0x14)
-        {
-            return c_word::draw_string_in_rect(m_surface, m_z_order, "Caps", rect, m_font, m_font_color, GL_ARGB(0, 0, 0, 0), m_attr);
-        }
-        else if (m_id == 0x1B)
-        {
-            return c_word::draw_string_in_rect(m_surface, m_z_order, "Esc", rect, m_font, m_font_color, GL_ARGB(0, 0, 0, 0), m_attr);
-        }
-        else if (m_id == ' ')
-        {
-            return c_word::draw_string_in_rect(m_surface, m_z_order, "Space", rect, m_font, m_font_color, GL_ARGB(0, 0, 0, 0), m_attr);
-        }
-        else if (m_id == '\n')
-        {
-            return c_word::draw_string_in_rect(m_surface, m_z_order, "Enter", rect, m_font, m_font_color, GL_ARGB(0, 0, 0, 0), m_attr);
-        }
-        else if (m_id == '.')
-        {
-            return c_word::draw_string_in_rect(m_surface, m_z_order, ".", rect, m_font, m_font_color, GL_ARGB(0, 0, 0, 0), m_attr);
-        }
-        else if (m_id == 0x7F)
-        {
-            return c_word::draw_string_in_rect(m_surface, m_z_order, "Back", rect, m_font, m_font_color, GL_ARGB(0, 0, 0, 0), m_attr);
-        }
-        else if (m_id == 0x90)
-        {
-            return c_word::draw_string_in_rect(m_surface, m_z_order, "?123", rect, m_font, m_font_color, GL_ARGB(0, 0, 0, 0), m_attr);
+        if (m_id == 0x14) {
+            return c_word::draw_string_in_rect(m_surface, m_z_order, "Caps", rect, m_font, m_font_color,
+                                               GL_ARGB(0, 0, 0, 0), m_attr);
+        } else if (m_id == 0x1B) {
+            return c_word::draw_string_in_rect(m_surface, m_z_order, "Esc", rect, m_font, m_font_color,
+                                               GL_ARGB(0, 0, 0, 0), m_attr);
+        } else if (m_id == ' ') {
+            return c_word::draw_string_in_rect(m_surface, m_z_order, "Space", rect, m_font, m_font_color,
+                                               GL_ARGB(0, 0, 0, 0), m_attr);
+        } else if (m_id == '\n') {
+            return c_word::draw_string_in_rect(m_surface, m_z_order, "Enter", rect, m_font, m_font_color,
+                                               GL_ARGB(0, 0, 0, 0), m_attr);
+        } else if (m_id == '.') {
+            return c_word::draw_string_in_rect(m_surface, m_z_order, ".", rect, m_font, m_font_color,
+                                               GL_ARGB(0, 0, 0, 0), m_attr);
+        } else if (m_id == 0x7F) {
+            return c_word::draw_string_in_rect(m_surface, m_z_order, "Back", rect, m_font, m_font_color,
+                                               GL_ARGB(0, 0, 0, 0), m_attr);
+        } else if (m_id == 0x90) {
+            return c_word::draw_string_in_rect(m_surface, m_z_order, "?123", rect, m_font, m_font_color,
+                                               GL_ARGB(0, 0, 0, 0), m_attr);
         }
         char letter[] = {0, 0};
-        if (m_id >= 'A' && m_id <= 'Z')
-        {
+        if (m_id >= 'A' && m_id <= 'Z') {
             letter[0] = (((c_keyboard *)m_parent)->get_cap_status() == STATUS_UPPERCASE) ? m_id : (m_id + 0x20);
-        }
-        else if (m_id >= '0' && m_id <= '9')
-        {
+        } else if (m_id >= '0' && m_id <= '9') {
             letter[0] = (char)m_id;
         }
-        c_word::draw_string_in_rect(m_surface, m_z_order, letter, rect, m_font, m_font_color, GL_ARGB(0, 0, 0, 0), m_attr);
+        c_word::draw_string_in_rect(m_surface, m_z_order, letter, rect, m_font, m_font_color, GL_ARGB(0, 0, 0, 0),
+                                    m_attr);
     }
 };
 #include <string.h>
@@ -2167,8 +1933,7 @@ public:
     const char *get_text() { return m_str; }
     void set_text(const char *str)
     {
-        if (str != 0 && strlen(str) < sizeof(m_str))
-        {
+        if (str != 0 && strlen(str) < sizeof(m_str)) {
             strcpy(m_str, str);
         }
     }
@@ -2190,43 +1955,48 @@ protected:
         c_rect rect, kb_rect;
         get_screen_rect(rect);
         s_keyboard.get_screen_rect(kb_rect);
-        switch (m_status)
-        {
-        case STATUS_NORMAL:
-            if (m_z_order > m_parent->get_z_order())
-            {
-                s_keyboard.disconnect();
-                m_z_order = m_parent->get_z_order();
-                m_surface->show_layer(kb_rect, m_z_order);
-                m_attr = (WND_ATTRIBUTION)(ATTR_VISIBLE | ATTR_FOCUS);
-            }
-            m_surface->fill_rect(rect, c_theme::get_color(COLOR_WND_NORMAL), m_z_order);
-            c_word::draw_string_in_rect(m_surface, m_parent->get_z_order(), m_str, rect, m_font, m_font_color, c_theme::get_color(COLOR_WND_NORMAL), ALIGN_HCENTER | ALIGN_VCENTER);
-            break;
-        case STATUS_FOCUSED:
-            if (m_z_order > m_parent->get_z_order())
-            {
-                s_keyboard.disconnect();
-                m_z_order = m_parent->get_z_order();
-                m_surface->show_layer(kb_rect, m_z_order);
-                m_attr = (WND_ATTRIBUTION)(ATTR_VISIBLE | ATTR_FOCUS);
-            }
-            m_surface->fill_rect(rect, c_theme::get_color(COLOR_WND_FOCUS), m_z_order);
-            c_word::draw_string_in_rect(m_surface, m_parent->get_z_order(), m_str, rect, m_font, m_font_color, c_theme::get_color(COLOR_WND_FOCUS), ALIGN_HCENTER | ALIGN_VCENTER);
-            break;
-        case STATUS_PUSHED:
-            if (m_z_order == m_parent->get_z_order())
-            {
-                m_z_order++;
-                m_attr = (WND_ATTRIBUTION)(ATTR_VISIBLE | ATTR_FOCUS | ATTR_PRIORITY);
-                show_keyboard();
-            }
-            m_surface->fill_rect(rect.m_left, rect.m_top, rect.m_right, rect.m_bottom, c_theme::get_color(COLOR_WND_PUSHED), m_parent->get_z_order());
-            m_surface->draw_rect(rect.m_left, rect.m_top, rect.m_right, rect.m_bottom, c_theme::get_color(COLOR_WND_BORDER), m_parent->get_z_order(), 2);
-            strlen(m_str_input) ? c_word::draw_string_in_rect(m_surface, m_parent->get_z_order(), m_str_input, rect, m_font, m_font_color, c_theme::get_color(COLOR_WND_PUSHED), ALIGN_HCENTER | ALIGN_VCENTER) : c_word::draw_string_in_rect(m_surface, m_parent->get_z_order(), m_str, rect, m_font, m_font_color, c_theme::get_color(COLOR_WND_PUSHED), ALIGN_HCENTER | ALIGN_VCENTER);
-            break;
-        default:
-            ASSERT(false);
+        switch (m_status) {
+            case STATUS_NORMAL:
+                if (m_z_order > m_parent->get_z_order()) {
+                    s_keyboard.disconnect();
+                    m_z_order = m_parent->get_z_order();
+                    m_surface->show_layer(kb_rect, m_z_order);
+                    m_attr = (WND_ATTRIBUTION)(ATTR_VISIBLE | ATTR_FOCUS);
+                }
+                m_surface->fill_rect(rect, c_theme::get_color(COLOR_WND_NORMAL), m_z_order);
+                c_word::draw_string_in_rect(m_surface, m_parent->get_z_order(), m_str, rect, m_font, m_font_color,
+                                            c_theme::get_color(COLOR_WND_NORMAL), ALIGN_HCENTER | ALIGN_VCENTER);
+                break;
+            case STATUS_FOCUSED:
+                if (m_z_order > m_parent->get_z_order()) {
+                    s_keyboard.disconnect();
+                    m_z_order = m_parent->get_z_order();
+                    m_surface->show_layer(kb_rect, m_z_order);
+                    m_attr = (WND_ATTRIBUTION)(ATTR_VISIBLE | ATTR_FOCUS);
+                }
+                m_surface->fill_rect(rect, c_theme::get_color(COLOR_WND_FOCUS), m_z_order);
+                c_word::draw_string_in_rect(m_surface, m_parent->get_z_order(), m_str, rect, m_font, m_font_color,
+                                            c_theme::get_color(COLOR_WND_FOCUS), ALIGN_HCENTER | ALIGN_VCENTER);
+                break;
+            case STATUS_PUSHED:
+                if (m_z_order == m_parent->get_z_order()) {
+                    m_z_order++;
+                    m_attr = (WND_ATTRIBUTION)(ATTR_VISIBLE | ATTR_FOCUS | ATTR_PRIORITY);
+                    show_keyboard();
+                }
+                m_surface->fill_rect(rect.m_left, rect.m_top, rect.m_right, rect.m_bottom,
+                                     c_theme::get_color(COLOR_WND_PUSHED), m_parent->get_z_order());
+                m_surface->draw_rect(rect.m_left, rect.m_top, rect.m_right, rect.m_bottom,
+                                     c_theme::get_color(COLOR_WND_BORDER), m_parent->get_z_order(), 2);
+                strlen(m_str_input)
+                    ? c_word::draw_string_in_rect(m_surface, m_parent->get_z_order(), m_str_input, rect, m_font,
+                                                  m_font_color, c_theme::get_color(COLOR_WND_PUSHED),
+                                                  ALIGN_HCENTER | ALIGN_VCENTER)
+                    : c_word::draw_string_in_rect(m_surface, m_parent->get_z_order(), m_str, rect, m_font, m_font_color,
+                                                  c_theme::get_color(COLOR_WND_PUSHED), ALIGN_HCENTER | ALIGN_VCENTER);
+                break;
+            default:
+                ASSERT(false);
         }
     }
     virtual void on_focus()
@@ -2241,14 +2011,15 @@ protected:
     }
     virtual void on_navigate(NAVIGATION_KEY key)
     {
-        switch (key)
-        {
-        case NAV_ENTER:
-            (m_status == STATUS_PUSHED) ? s_keyboard.on_navigate(key) : (on_touch(m_wnd_rect.m_left, m_wnd_rect.m_top, TOUCH_DOWN), on_touch(m_wnd_rect.m_left, m_wnd_rect.m_top, TOUCH_UP));
-            return;
-        case NAV_BACKWARD:
-        case NAV_FORWARD:
-            return (m_status == STATUS_PUSHED) ? s_keyboard.on_navigate(key) : c_wnd::on_navigate(key);
+        switch (key) {
+            case NAV_ENTER:
+                (m_status == STATUS_PUSHED) ? s_keyboard.on_navigate(key)
+                                            : (on_touch(m_wnd_rect.m_left, m_wnd_rect.m_top, TOUCH_DOWN),
+                                               on_touch(m_wnd_rect.m_left, m_wnd_rect.m_top, TOUCH_UP));
+                return;
+            case NAV_BACKWARD:
+            case NAV_FORWARD:
+                return (m_status == STATUS_PUSHED) ? s_keyboard.on_navigate(key) : c_wnd::on_navigate(key);
         }
     }
     virtual void on_touch(int x, int y, TOUCH_ACTION action)
@@ -2257,28 +2028,26 @@ protected:
     }
     void on_key_board_click(int id, int param)
     {
-        switch (param)
-        {
-        case CLICK_CHAR:
-            strcpy(m_str_input, s_keyboard.get_str());
-            on_paint();
-            break;
-        case CLICK_ENTER:
-            if (strlen(m_str_input))
-            {
-                memcpy(m_str, m_str_input, sizeof(m_str_input));
-            }
-            m_status = STATUS_FOCUSED;
-            on_paint();
-            break;
-        case CLICK_ESC:
-            memset(m_str_input, 0, sizeof(m_str_input));
-            m_status = STATUS_FOCUSED;
-            on_paint();
-            break;
-        default:
-            ASSERT(false);
-            break;
+        switch (param) {
+            case CLICK_CHAR:
+                strcpy(m_str_input, s_keyboard.get_str());
+                on_paint();
+                break;
+            case CLICK_ENTER:
+                if (strlen(m_str_input)) {
+                    memcpy(m_str, m_str_input, sizeof(m_str_input));
+                }
+                m_status = STATUS_FOCUSED;
+                on_paint();
+                break;
+            case CLICK_ESC:
+                memset(m_str_input, 0, sizeof(m_str_input));
+                m_status = STATUS_FOCUSED;
+                on_paint();
+                break;
+            default:
+                ASSERT(false);
+                break;
         }
     }
 
@@ -2297,21 +2066,14 @@ private:
         kb_rect_relate_2_edit_parent.m_right += m_wnd_rect.m_left;
         kb_rect_relate_2_edit_parent.m_top += m_wnd_rect.m_top;
         kb_rect_relate_2_edit_parent.m_bottom += m_wnd_rect.m_top;
-        if (m_wnd_rect.pt_in_rect(x, y))
-        { //click edit box
-            if (STATUS_NORMAL == m_status)
-            {
+        if (m_wnd_rect.pt_in_rect(x, y)) { // click edit box
+            if (STATUS_NORMAL == m_status) {
                 m_parent->set_child_focus(this);
             }
-        }
-        else if (kb_rect_relate_2_edit_parent.pt_in_rect(x, y))
-        { //click key board
+        } else if (kb_rect_relate_2_edit_parent.pt_in_rect(x, y)) { // click key board
             c_wnd::on_touch(x, y, TOUCH_DOWN);
-        }
-        else
-        {
-            if (STATUS_PUSHED == m_status)
-            {
+        } else {
+            if (STATUS_PUSHED == m_status) {
                 m_status = STATUS_FOCUSED;
                 on_paint();
             }
@@ -2319,20 +2081,14 @@ private:
     }
     void on_touch_up(int x, int y)
     {
-        if (STATUS_FOCUSED == m_status)
-        {
+        if (STATUS_FOCUSED == m_status) {
             m_status = STATUS_PUSHED;
             on_paint();
-        }
-        else if (STATUS_PUSHED == m_status)
-        {
-            if (m_wnd_rect.pt_in_rect(x, y))
-            { //click edit box
+        } else if (STATUS_PUSHED == m_status) {
+            if (m_wnd_rect.pt_in_rect(x, y)) { // click edit box
                 m_status = STATUS_FOCUSED;
                 on_paint();
-            }
-            else
-            {
+            } else {
                 c_wnd::on_touch(x, y, TOUCH_UP);
             }
         }
@@ -2350,10 +2106,10 @@ public:
         c_rect rect;
         unsigned int bg_color = m_bg_color ? m_bg_color : m_parent->get_bg_color();
         get_screen_rect(rect);
-        if (m_str)
-        {
+        if (m_str) {
             m_surface->fill_rect(rect.m_left, rect.m_top, rect.m_right, rect.m_bottom, bg_color, m_z_order);
-            c_word::draw_string_in_rect(m_surface, m_z_order, m_str, rect, m_font, m_font_color, bg_color, ALIGN_LEFT | ALIGN_VCENTER);
+            c_word::draw_string_in_rect(m_surface, m_z_order, m_str, rect, m_font, m_font_color, bg_color,
+                                        ALIGN_LEFT | ALIGN_VCENTER);
         }
     }
 
@@ -2375,8 +2131,7 @@ public:
     short get_item_count() { return m_item_total; }
     int add_item(char *str)
     {
-        if (m_item_total >= MAX_ITEM_NUM)
-        {
+        if (m_item_total >= MAX_ITEM_NUM) {
             ASSERT(false);
             return -1;
         }
@@ -2392,8 +2147,7 @@ public:
     }
     void select_item(short index)
     {
-        if (index < 0 || index >= m_item_total)
-        {
+        if (index < 0 || index >= m_item_total) {
             ASSERT(false);
         }
         m_selected_item = index;
@@ -2413,45 +2167,45 @@ protected:
     {
         c_rect rect;
         get_screen_rect(rect);
-        switch (m_status)
-        {
-        case STATUS_NORMAL:
-            if (m_z_order > m_parent->get_z_order())
-            {
-                m_z_order = m_parent->get_z_order();
-                m_surface->show_layer(m_list_screen_rect, m_z_order);
-                m_attr = (WND_ATTRIBUTION)(ATTR_VISIBLE | ATTR_FOCUS);
-            }
-            m_surface->fill_rect(rect, c_theme::get_color(COLOR_WND_NORMAL), m_z_order);
-            c_word::draw_string_in_rect(m_surface, m_z_order, m_item_array[m_selected_item], rect, m_font, m_font_color, c_theme::get_color(COLOR_WND_NORMAL), ALIGN_HCENTER | ALIGN_VCENTER);
-            break;
-        case STATUS_FOCUSED:
-            if (m_z_order > m_parent->get_z_order())
-            {
-                m_z_order = m_parent->get_z_order();
-                m_surface->show_layer(m_list_screen_rect, m_z_order);
-                m_attr = (WND_ATTRIBUTION)(ATTR_VISIBLE | ATTR_FOCUS);
-            }
-            m_surface->fill_rect(rect, c_theme::get_color(COLOR_WND_FOCUS), m_z_order);
-            c_word::draw_string_in_rect(m_surface, m_z_order, m_item_array[m_selected_item], rect, m_font, m_font_color, c_theme::get_color(COLOR_WND_FOCUS), ALIGN_HCENTER | ALIGN_VCENTER);
-            break;
-        case STATUS_PUSHED:
-            m_surface->fill_rect(rect, c_theme::get_color(COLOR_WND_PUSHED), m_z_order);
-            m_surface->draw_rect(rect, c_theme::get_color(COLOR_WND_BORDER), 2, m_z_order);
-            c_word::draw_string_in_rect(m_surface, m_z_order, m_item_array[m_selected_item], rect, m_font, GL_RGB(2, 124, 165), GL_ARGB(0, 0, 0, 0), ALIGN_HCENTER | ALIGN_VCENTER);
-            //draw list
-            if (m_item_total > 0)
-            {
-                if (m_z_order == m_parent->get_z_order())
-                {
-                    m_z_order++;
+        switch (m_status) {
+            case STATUS_NORMAL:
+                if (m_z_order > m_parent->get_z_order()) {
+                    m_z_order = m_parent->get_z_order();
+                    m_surface->show_layer(m_list_screen_rect, m_z_order);
+                    m_attr = (WND_ATTRIBUTION)(ATTR_VISIBLE | ATTR_FOCUS);
                 }
-                m_attr = (WND_ATTRIBUTION)(ATTR_VISIBLE | ATTR_FOCUS | ATTR_PRIORITY);
-                show_list();
-            }
-            break;
-        default:
-            ASSERT(false);
+                m_surface->fill_rect(rect, c_theme::get_color(COLOR_WND_NORMAL), m_z_order);
+                c_word::draw_string_in_rect(m_surface, m_z_order, m_item_array[m_selected_item], rect, m_font,
+                                            m_font_color, c_theme::get_color(COLOR_WND_NORMAL),
+                                            ALIGN_HCENTER | ALIGN_VCENTER);
+                break;
+            case STATUS_FOCUSED:
+                if (m_z_order > m_parent->get_z_order()) {
+                    m_z_order = m_parent->get_z_order();
+                    m_surface->show_layer(m_list_screen_rect, m_z_order);
+                    m_attr = (WND_ATTRIBUTION)(ATTR_VISIBLE | ATTR_FOCUS);
+                }
+                m_surface->fill_rect(rect, c_theme::get_color(COLOR_WND_FOCUS), m_z_order);
+                c_word::draw_string_in_rect(m_surface, m_z_order, m_item_array[m_selected_item], rect, m_font,
+                                            m_font_color, c_theme::get_color(COLOR_WND_FOCUS),
+                                            ALIGN_HCENTER | ALIGN_VCENTER);
+                break;
+            case STATUS_PUSHED:
+                m_surface->fill_rect(rect, c_theme::get_color(COLOR_WND_PUSHED), m_z_order);
+                m_surface->draw_rect(rect, c_theme::get_color(COLOR_WND_BORDER), 2, m_z_order);
+                c_word::draw_string_in_rect(m_surface, m_z_order, m_item_array[m_selected_item], rect, m_font,
+                                            GL_RGB(2, 124, 165), GL_ARGB(0, 0, 0, 0), ALIGN_HCENTER | ALIGN_VCENTER);
+                // draw list
+                if (m_item_total > 0) {
+                    if (m_z_order == m_parent->get_z_order()) {
+                        m_z_order++;
+                    }
+                    m_attr = (WND_ATTRIBUTION)(ATTR_VISIBLE | ATTR_FOCUS | ATTR_PRIORITY);
+                    show_list();
+                }
+                break;
+            default:
+                ASSERT(false);
         }
     }
     virtual void on_focus()
@@ -2466,26 +2220,23 @@ protected:
     }
     virtual void on_navigate(NAVIGATION_KEY key)
     {
-        switch (key)
-        {
-        case NAV_ENTER:
-            on_touch(m_wnd_rect.m_left, m_wnd_rect.m_top, TOUCH_DOWN);
-            on_touch(m_wnd_rect.m_left, m_wnd_rect.m_top, TOUCH_UP);
-            return;
-        case NAV_BACKWARD:
-            if (m_status != STATUS_PUSHED)
-            {
-                return c_wnd::on_navigate(key);
-            }
-            m_selected_item = (m_selected_item > 0) ? (m_selected_item - 1) : m_selected_item;
-            return show_list();
-        case NAV_FORWARD:
-            if (m_status != STATUS_PUSHED)
-            {
-                return c_wnd::on_navigate(key);
-            }
-            m_selected_item = (m_selected_item < (m_item_total - 1)) ? (m_selected_item + 1) : m_selected_item;
-            return show_list();
+        switch (key) {
+            case NAV_ENTER:
+                on_touch(m_wnd_rect.m_left, m_wnd_rect.m_top, TOUCH_DOWN);
+                on_touch(m_wnd_rect.m_left, m_wnd_rect.m_top, TOUCH_UP);
+                return;
+            case NAV_BACKWARD:
+                if (m_status != STATUS_PUSHED) {
+                    return c_wnd::on_navigate(key);
+                }
+                m_selected_item = (m_selected_item > 0) ? (m_selected_item - 1) : m_selected_item;
+                return show_list();
+            case NAV_FORWARD:
+                if (m_status != STATUS_PUSHED) {
+                    return c_wnd::on_navigate(key);
+                }
+                m_selected_item = (m_selected_item < (m_item_total - 1)) ? (m_selected_item + 1) : m_selected_item;
+                return show_list();
         }
     }
     virtual void on_touch(int x, int y, TOUCH_ACTION action)
@@ -2505,47 +2256,37 @@ private:
     }
     void show_list()
     {
-        //draw all items
+        // draw all items
         c_rect tmp_rect;
-        for (int i = 0; i < m_item_total; i++)
-        {
+        for (int i = 0; i < m_item_total; i++) {
             tmp_rect.m_left = m_list_screen_rect.m_left;
             tmp_rect.m_right = m_list_screen_rect.m_right;
             tmp_rect.m_top = m_list_screen_rect.m_top + i * ITEM_HEIGHT;
             tmp_rect.m_bottom = tmp_rect.m_top + ITEM_HEIGHT;
-            if (m_selected_item == i)
-            {
+            if (m_selected_item == i) {
                 m_surface->fill_rect(tmp_rect, c_theme::get_color(COLOR_WND_FOCUS), m_z_order);
-                c_word::draw_string_in_rect(m_surface, m_z_order, m_item_array[i], tmp_rect, m_font, m_font_color, c_theme::get_color(COLOR_WND_FOCUS), ALIGN_HCENTER | ALIGN_VCENTER);
-            }
-            else
-            {
+                c_word::draw_string_in_rect(m_surface, m_z_order, m_item_array[i], tmp_rect, m_font, m_font_color,
+                                            c_theme::get_color(COLOR_WND_FOCUS), ALIGN_HCENTER | ALIGN_VCENTER);
+            } else {
                 m_surface->fill_rect(tmp_rect, GL_RGB(17, 17, 17), m_z_order);
-                c_word::draw_string_in_rect(m_surface, m_z_order, m_item_array[i], tmp_rect, m_font, m_font_color, GL_RGB(17, 17, 17), ALIGN_HCENTER | ALIGN_VCENTER);
+                c_word::draw_string_in_rect(m_surface, m_z_order, m_item_array[i], tmp_rect, m_font, m_font_color,
+                                            GL_RGB(17, 17, 17), ALIGN_HCENTER | ALIGN_VCENTER);
             }
         }
     }
     void on_touch_down(int x, int y)
     {
-        if (m_wnd_rect.pt_in_rect(x, y))
-        { //click base
-            if (STATUS_NORMAL == m_status)
-            {
+        if (m_wnd_rect.pt_in_rect(x, y)) { // click base
+            if (STATUS_NORMAL == m_status) {
                 m_parent->set_child_focus(this);
             }
-        }
-        else if (m_list_wnd_rect.pt_in_rect(x, y))
-        { //click extend list
+        } else if (m_list_wnd_rect.pt_in_rect(x, y)) { // click extend list
             c_wnd::on_touch(x, y, TOUCH_DOWN);
-        }
-        else
-        {
-            if (STATUS_PUSHED == m_status)
-            {
+        } else {
+            if (STATUS_PUSHED == m_status) {
                 m_status = STATUS_FOCUSED;
                 on_paint();
-                if (on_change)
-                {
+                if (on_change) {
                     (m_parent->*(on_change))(m_id, m_selected_item);
                 }
             }
@@ -2553,30 +2294,21 @@ private:
     }
     void on_touch_up(int x, int y)
     {
-        if (STATUS_FOCUSED == m_status)
-        {
+        if (STATUS_FOCUSED == m_status) {
             m_status = STATUS_PUSHED;
             on_paint();
-        }
-        else if (STATUS_PUSHED == m_status)
-        {
-            if (m_wnd_rect.pt_in_rect(x, y))
-            { //click base
+        } else if (STATUS_PUSHED == m_status) {
+            if (m_wnd_rect.pt_in_rect(x, y)) { // click base
                 m_status = STATUS_FOCUSED;
                 on_paint();
-            }
-            else if (m_list_wnd_rect.pt_in_rect(x, y))
-            { //click extend list
+            } else if (m_list_wnd_rect.pt_in_rect(x, y)) { // click extend list
                 m_status = STATUS_FOCUSED;
                 select_item((y - m_list_wnd_rect.m_top) / ITEM_HEIGHT);
                 on_paint();
-                if (on_change)
-                {
+                if (on_change) {
                     (m_parent->*(on_change))(m_id, m_selected_item);
                 }
-            }
-            else
-            {
+            } else {
                 c_wnd::on_touch(x, y, TOUCH_UP);
             }
         }
@@ -2584,8 +2316,8 @@ private:
     short m_selected_item;
     short m_item_total;
     char *m_item_array[MAX_ITEM_NUM];
-    c_rect m_list_wnd_rect;    //rect relative to parent wnd.
-    c_rect m_list_screen_rect; //rect relative to physical screen(frame buffer)
+    c_rect m_list_wnd_rect;    // rect relative to parent wnd.
+    c_rect m_list_screen_rect; // rect relative to physical screen(frame buffer)
     WND_CALLBACK on_change;
 };
 #include <stdlib.h>
@@ -2597,34 +2329,26 @@ public:
     inline c_slide_group();
     int set_active_slide(int index, bool is_redraw = true)
     {
-        if (index >= MAX_PAGES || index < 0)
-        {
+        if (index >= MAX_PAGES || index < 0) {
             return -1;
         }
-        if (0 == m_slides[index])
-        {
+        if (0 == m_slides[index]) {
             return -2;
         }
         m_active_slide_index = index;
-        for (int i = 0; i < MAX_PAGES; i++)
-        {
-            if (m_slides[i] == 0)
-            {
+        for (int i = 0; i < MAX_PAGES; i++) {
+            if (m_slides[i] == 0) {
                 continue;
             }
-            if (i == index)
-            {
+            if (i == index) {
                 m_slides[i]->get_surface()->set_active(true);
                 add_child_2_tail(m_slides[i]);
-                if (is_redraw)
-                {
+                if (is_redraw) {
                     c_rect rc;
                     get_screen_rect(rc);
                     m_slides[i]->get_surface()->flush_screen(rc.m_left, rc.m_top, rc.m_right, rc.m_bottom);
                 }
-            }
-            else
-            {
+            } else {
                 m_slides[i]->get_surface()->set_active(false);
             }
         }
@@ -2633,10 +2357,10 @@ public:
     c_wnd *get_slide(int index) { return m_slides[index]; }
     c_wnd *get_active_slide() { return m_slides[m_active_slide_index]; }
     int get_active_slide_index() { return m_active_slide_index; }
-    int add_slide(c_wnd *slide, unsigned short resource_id, short x, short y, short width, short height, WND_TREE *p_child_tree = 0, Z_ORDER_LEVEL max_zorder = Z_ORDER_LEVEL_0)
+    int add_slide(c_wnd *slide, unsigned short resource_id, short x, short y, short width, short height,
+                  WND_TREE *p_child_tree = 0, Z_ORDER_LEVEL max_zorder = Z_ORDER_LEVEL_0)
     {
-        if (0 == slide)
-        {
+        if (0 == slide) {
             return -1;
         }
         c_surface *old_surface = get_surface();
@@ -2646,37 +2370,31 @@ public:
         slide->connect(this, resource_id, 0, x, y, width, height, p_child_tree);
         set_surface(old_surface);
         int i = 0;
-        while (i < MAX_PAGES)
-        {
-            if (m_slides[i] == slide)
-            { //slide has lived
+        while (i < MAX_PAGES) {
+            if (m_slides[i] == slide) { // slide has lived
                 ASSERT(false);
                 return -2;
             }
             i++;
         }
-        //new slide
+        // new slide
         i = 0;
-        while (i < MAX_PAGES)
-        {
-            if (m_slides[i] == 0)
-            {
+        while (i < MAX_PAGES) {
+            if (m_slides[i] == 0) {
                 m_slides[i] = slide;
                 slide->show_window();
                 return 0;
             }
             i++;
         }
-        //no more slide can be add
+        // no more slide can be add
         ASSERT(false);
         return -3;
     }
     void disabel_all_slide()
     {
-        for (int i = 0; i < MAX_PAGES; i++)
-        {
-            if (m_slides[i])
-            {
+        for (int i = 0; i < MAX_PAGES; i++) {
+            if (m_slides[i]) {
                 m_slides[i]->get_surface()->set_active(false);
             }
         }
@@ -2684,8 +2402,7 @@ public:
     inline virtual void on_touch(int x, int y, TOUCH_ACTION action);
     virtual void on_navigate(NAVIGATION_KEY key)
     {
-        if (m_slides[m_active_slide_index])
-        {
+        if (m_slides[m_active_slide_index]) {
             m_slides[m_active_slide_index]->on_navigate(key);
         }
     }
@@ -2695,14 +2412,10 @@ protected:
     int m_active_slide_index;
     c_gesture *m_gesture;
 };
-//#define SWIPE_STEP      300//for arm
-#define SWIPE_STEP 10 //for PC & ANDROID
+// #define SWIPE_STEP      300//for arm
+#define SWIPE_STEP 10 // for PC & ANDROID
 #define MOVE_THRESHOLD 10
-typedef enum
-{
-    TOUCH_MOVE,
-    TOUCH_IDLE
-} TOUCH_STATE;
+typedef enum { TOUCH_MOVE, TOUCH_IDLE } TOUCH_STATE;
 class c_slide_group;
 class c_gesture
 {
@@ -2715,30 +2428,24 @@ public:
     }
     bool handle_swipe(int x, int y, TOUCH_ACTION action)
     {
-        if (action == TOUCH_DOWN) //MOUSE_LBUTTONDOWN
+        if (action == TOUCH_DOWN) // MOUSE_LBUTTONDOWN
         {
-            if (m_state == TOUCH_IDLE)
-            {
+            if (m_state == TOUCH_IDLE) {
                 m_state = TOUCH_MOVE;
                 m_move_x = m_down_x = x;
                 return true;
-            }
-            else //TOUCH_MOVE
+            } else // TOUCH_MOVE
             {
                 return on_move(x);
             }
-        }
-        else if (action == TOUCH_UP) //MOUSE_LBUTTONUP
+        } else if (action == TOUCH_UP) // MOUSE_LBUTTONUP
         {
-            if (m_state == TOUCH_MOVE)
-            {
+            if (m_state == TOUCH_MOVE) {
                 m_state = TOUCH_IDLE;
                 return on_swipe(x);
-            }
-            else
-            {
+            } else {
                 return false;
-                //ASSERT(false);
+                // ASSERT(false);
             }
         }
         return true;
@@ -2747,119 +2454,93 @@ public:
 private:
     bool on_move(int x)
     {
-        if (m_slide_group == 0)
-        {
+        if (m_slide_group == 0) {
             return true;
         }
-        if (abs(x - m_move_x) < MOVE_THRESHOLD)
-        {
+        if (abs(x - m_move_x) < MOVE_THRESHOLD) {
             return false;
         }
         m_slide_group->disabel_all_slide();
         m_move_x = x;
-        if ((m_move_x - m_down_x) > 0)
-        {
+        if ((m_move_x - m_down_x) > 0) {
             move_right();
-        }
-        else
-        {
+        } else {
             move_left();
         }
         return false;
     }
     bool on_swipe(int x)
     {
-        if (m_slide_group == 0)
-        {
+        if (m_slide_group == 0) {
             return true;
         }
-        if ((m_down_x == m_move_x) && (abs(x - m_down_x) < MOVE_THRESHOLD))
-        {
+        if ((m_down_x == m_move_x) && (abs(x - m_down_x) < MOVE_THRESHOLD)) {
             return true;
         }
         m_slide_group->disabel_all_slide();
         int page = -1;
         m_move_x = x;
-        if ((m_move_x - m_down_x) > 0)
-        {
+        if ((m_move_x - m_down_x) > 0) {
             page = swipe_right();
-        }
-        else
-        {
+        } else {
             page = swipe_left();
         }
-        if (page >= 0)
-        {
+        if (page >= 0) {
             m_slide_group->set_active_slide(page);
-        }
-        else
-        {
+        } else {
             m_slide_group->set_active_slide(m_slide_group->get_active_slide_index(), false);
         }
         return false;
     }
     int swipe_left()
     {
-        if (m_slide_group == 0)
-        {
+        if (m_slide_group == 0) {
             return -1;
         }
         int index = m_slide_group->get_active_slide_index();
-        if ((index + 1) >= MAX_PAGES ||
-            m_slide_group->get_slide(index + 1) == 0 ||
-            m_slide_group->get_slide(index) == 0)
-        {
+        if ((index + 1) >= MAX_PAGES || m_slide_group->get_slide(index + 1) == 0 ||
+            m_slide_group->get_slide(index) == 0) {
             return -2;
         }
         c_surface *s1 = m_slide_group->get_slide(index + 1)->get_surface();
         c_surface *s2 = m_slide_group->get_slide(index)->get_surface();
-        if (s1->get_display() != s2->get_display())
-        {
+        if (s1->get_display() != s2->get_display()) {
             return -3;
         }
         int step = m_down_x - m_move_x;
         c_rect rc;
         m_slide_group->get_screen_rect(rc);
-        while (step < rc.width())
-        {
+        while (step < rc.width()) {
             s1->get_display()->swipe_surface(s2, s1, rc.m_left, rc.m_right, rc.m_top, rc.m_bottom, step);
             step += SWIPE_STEP;
         }
-        if (step != rc.width())
-        {
+        if (step != rc.width()) {
             s1->get_display()->swipe_surface(s2, s1, rc.m_left, rc.m_right, rc.m_top, rc.m_bottom, rc.width());
         }
         return (index + 1);
     }
     int swipe_right()
     {
-        if (m_slide_group == 0)
-        {
+        if (m_slide_group == 0) {
             return -1;
         }
         int index = m_slide_group->get_active_slide_index();
-        if (index <= 0 ||
-            m_slide_group->get_slide(index - 1) == 0 ||
-            m_slide_group->get_slide(index) == 0)
-        {
+        if (index <= 0 || m_slide_group->get_slide(index - 1) == 0 || m_slide_group->get_slide(index) == 0) {
             return -2;
         }
         c_surface *s1 = m_slide_group->get_slide(index - 1)->get_surface();
         c_surface *s2 = m_slide_group->get_slide(index)->get_surface();
-        if (s1->get_display() != s2->get_display())
-        {
+        if (s1->get_display() != s2->get_display()) {
             return -3;
         }
         c_rect rc;
         m_slide_group->get_screen_rect(rc);
         int step = rc.width() - (m_move_x - m_down_x);
-        while (step > 0)
-        {
+        while (step > 0) {
             s1->get_display()->swipe_surface(s1, s2, rc.m_left, rc.m_right, rc.m_top, rc.m_bottom, step);
             step -= SWIPE_STEP;
         }
-        if (step != 0)
-        {
+        if (step != 0) {
             s1->get_display()->swipe_surface(s1, s2, rc.m_left, rc.m_right, rc.m_top, rc.m_bottom, 0);
         }
         return (index - 1);
@@ -2867,37 +2548,32 @@ private:
     void move_left()
     {
         int index = m_slide_group->get_active_slide_index();
-        if ((index + 1) >= MAX_PAGES ||
-            m_slide_group->get_slide(index + 1) == 0 ||
-            m_slide_group->get_slide(index) == 0)
-        {
+        if ((index + 1) >= MAX_PAGES || m_slide_group->get_slide(index + 1) == 0 ||
+            m_slide_group->get_slide(index) == 0) {
             return;
         }
         c_surface *s1 = m_slide_group->get_slide(index + 1)->get_surface();
         c_surface *s2 = m_slide_group->get_slide(index)->get_surface();
         c_rect rc;
         m_slide_group->get_screen_rect(rc);
-        if (s1->get_display() == s2->get_display())
-        {
-            s1->get_display()->swipe_surface(s2, s1, rc.m_left, rc.m_right, rc.m_top, rc.m_bottom, (m_down_x - m_move_x));
+        if (s1->get_display() == s2->get_display()) {
+            s1->get_display()->swipe_surface(s2, s1, rc.m_left, rc.m_right, rc.m_top, rc.m_bottom,
+                                             (m_down_x - m_move_x));
         }
     }
     void move_right()
     {
         int index = m_slide_group->get_active_slide_index();
-        if (index <= 0 ||
-            m_slide_group->get_slide(index - 1) == 0 ||
-            m_slide_group->get_slide(index) == 0)
-        {
+        if (index <= 0 || m_slide_group->get_slide(index - 1) == 0 || m_slide_group->get_slide(index) == 0) {
             return;
         }
         c_surface *s1 = m_slide_group->get_slide(index - 1)->get_surface();
         c_surface *s2 = m_slide_group->get_slide(index)->get_surface();
         c_rect rc;
         m_slide_group->get_screen_rect(rc);
-        if (s1->get_display() == s2->get_display())
-        {
-            s1->get_display()->swipe_surface(s1, s2, rc.m_left, rc.m_right, rc.m_top, rc.m_bottom, (rc.width() - (m_move_x - m_down_x)));
+        if (s1->get_display() == s2->get_display()) {
+            s1->get_display()->swipe_surface(s1, s2, rc.m_left, rc.m_right, rc.m_top, rc.m_bottom,
+                                             (rc.width() - (m_move_x - m_down_x)));
         }
     }
     int m_down_x;
@@ -2910,8 +2586,7 @@ private:
 inline c_slide_group::c_slide_group()
 {
     m_gesture = new c_gesture(this);
-    for (int i = 0; i < MAX_PAGES; i++)
-    {
+    for (int i = 0; i < MAX_PAGES; i++) {
         m_slides[i] = 0;
     }
     m_active_slide_index = 0;
@@ -2920,10 +2595,8 @@ inline void c_slide_group::on_touch(int x, int y, TOUCH_ACTION action)
 {
     x -= m_wnd_rect.m_left;
     y -= m_wnd_rect.m_top;
-    if (m_gesture->handle_swipe(x, y, action))
-    {
-        if (m_slides[m_active_slide_index])
-        {
+    if (m_gesture->handle_swipe(x, y, action)) {
+        if (m_slides[m_active_slide_index]) {
             m_slides[m_active_slide_index]->on_touch(x, y, action);
         }
     }
@@ -2964,7 +2637,8 @@ protected:
         get_screen_rect(rect);
         rect.m_right = rect.m_left + (rect.width() * 2 / 3);
         m_surface->fill_rect(rect, c_theme::get_color(COLOR_WND_NORMAL), m_z_order);
-        c_word::draw_value_in_rect(m_surface, m_parent->get_z_order(), m_cur_value, m_digit, rect, m_font, m_font_color, c_theme::get_color(COLOR_WND_NORMAL), ALIGN_HCENTER | ALIGN_VCENTER);
+        c_word::draw_value_in_rect(m_surface, m_parent->get_z_order(), m_cur_value, m_digit, rect, m_font, m_font_color,
+                                   c_theme::get_color(COLOR_WND_NORMAL), ALIGN_HCENTER | ALIGN_VCENTER);
     }
     virtual void pre_create_wnd()
     {
@@ -2975,35 +2649,33 @@ protected:
         m_min = 1;
         m_digit = 0;
         m_step = 1;
-        //link arrow button position.
+        // link arrow button position.
         c_rect rect;
         get_wnd_rect(rect);
         m_bt_down.m_spin_box = m_bt_up.m_spin_box = this;
-        m_bt_up.connect(m_parent, ID_BT_ARROW_UP, "+", (rect.m_left + rect.width() * 2 / 3), rect.m_top, (rect.width() / 3), (rect.height() / 2));
-        m_bt_down.connect(m_parent, ID_BT_ARROW_DOWN, "-", (rect.m_left + rect.width() * 2 / 3), (rect.m_top + rect.height() / 2), (rect.width() / 3), (rect.height() / 2));
+        m_bt_up.connect(m_parent, ID_BT_ARROW_UP, "+", (rect.m_left + rect.width() * 2 / 3), rect.m_top,
+                        (rect.width() / 3), (rect.height() / 2));
+        m_bt_down.connect(m_parent, ID_BT_ARROW_DOWN, "-", (rect.m_left + rect.width() * 2 / 3),
+                          (rect.m_top + rect.height() / 2), (rect.width() / 3), (rect.height() / 2));
     }
     void on_arrow_up_bt_click()
     {
-        if (m_cur_value + m_step > m_max)
-        {
+        if (m_cur_value + m_step > m_max) {
             return;
         }
         m_cur_value += m_step;
-        if (on_change)
-        {
+        if (on_change) {
             (m_parent->*(on_change))(m_id, m_cur_value);
         }
         on_paint();
     }
     void on_arrow_down_bt_click()
     {
-        if (m_cur_value - m_step < m_min)
-        {
+        if (m_cur_value - m_step < m_min) {
             return;
         }
         m_cur_value -= m_step;
-        if (on_change)
-        {
+        if (on_change) {
             (m_parent->*(on_change))(m_id, m_cur_value);
         }
         on_paint();
@@ -3020,8 +2692,7 @@ protected:
 };
 inline void c_spin_button::on_touch(int x, int y, TOUCH_ACTION action)
 {
-    if (action == TOUCH_UP)
-    {
+    if (action == TOUCH_UP) {
         (m_id == ID_BT_ARROW_UP) ? m_spin_box->on_arrow_up_bt_click() : m_spin_box->on_arrow_down_bt_click();
     }
     c_button::on_touch(x, y, action);
@@ -3036,22 +2707,19 @@ public:
     void set_col_num(unsigned int col_num) { m_col_num = col_num; }
     void set_row_height(unsigned int height)
     {
-        for (unsigned int i = 0; i < m_row_num; i++)
-        {
+        for (unsigned int i = 0; i < m_row_num; i++) {
             m_row_height[i] = height;
         }
     }
     void set_col_width(unsigned int width)
     {
-        for (unsigned int i = 0; i < m_col_num; i++)
-        {
+        for (unsigned int i = 0; i < m_col_num; i++) {
             m_col_width[i] = width;
         }
     }
     int set_row_height(unsigned int index, unsigned int height)
     {
-        if (m_row_num > index)
-        {
+        if (m_row_num > index) {
             m_row_height[index] = height;
             return index;
         }
@@ -3059,48 +2727,39 @@ public:
     }
     int set_col_width(unsigned int index, unsigned int width)
     {
-        if (m_col_num > index)
-        {
+        if (m_col_num > index) {
             m_col_width[index] = width;
             return index;
         }
         return -1;
     }
-    void set_item(int row, int col, char *str, unsigned int color)
-    {
-        draw_item(row, col, str, color);
-    }
+    void set_item(int row, int col, char *str, unsigned int color) { draw_item(row, col, str, color); }
     unsigned int get_row_num() { return m_row_num; }
     unsigned int get_col_num() { return m_col_num; }
     c_rect get_item_rect(int row, int col)
     {
         static c_rect rect;
-        if (row >= MAX_ROW_NUM || col >= MAX_COL_NUM)
-        {
+        if (row >= MAX_ROW_NUM || col >= MAX_COL_NUM) {
             return rect;
         }
         unsigned int width = 0;
         unsigned int height = 0;
-        for (int i = 0; i < col; i++)
-        {
+        for (int i = 0; i < col; i++) {
             width += m_col_width[i];
         }
-        for (int j = 0; j < row; j++)
-        {
+        for (int j = 0; j < row; j++) {
             height += m_row_height[j];
         }
         c_rect wRect;
         get_screen_rect(wRect);
         rect.m_left = wRect.m_left + width;
         rect.m_right = rect.m_left + m_col_width[col];
-        if (rect.m_right > wRect.m_right)
-        {
+        if (rect.m_right > wRect.m_right) {
             rect.m_right = wRect.m_right;
         }
         rect.m_top = wRect.m_top + height;
         rect.m_bottom = rect.m_top + m_row_height[row];
-        if (rect.m_bottom > wRect.m_bottom)
-        {
+        if (rect.m_bottom > wRect.m_bottom) {
             rect.m_bottom = wRect.m_bottom;
         }
         return rect;
@@ -3117,7 +2776,8 @@ protected:
     {
         c_rect rect = get_item_rect(row, col);
         m_surface->fill_rect(rect.m_left + 1, rect.m_top + 1, rect.m_right - 1, rect.m_bottom - 1, color, m_z_order);
-        c_word::draw_string_in_rect(m_surface, m_z_order, str, rect, m_font, m_font_color, GL_ARGB(0, 0, 0, 0), m_align_type);
+        c_word::draw_string_in_rect(m_surface, m_z_order, str, rect, m_font, m_font_color, GL_ARGB(0, 0, 0, 0),
+                                    m_align_type);
     }
     unsigned int m_align_type;
     unsigned int m_row_num;
@@ -3125,8 +2785,8 @@ protected:
     unsigned int m_row_height[MAX_ROW_NUM];
     unsigned int m_col_width[MAX_COL_NUM];
 };
-#include <string.h>
 #include <stdio.h>
+#include <string.h>
 #define WAVE_BUFFER_LEN 1024
 #define WAVE_READ_CACHE_LEN 8
 #define BUFFER_EMPTY -1111
@@ -3136,8 +2796,8 @@ class c_wave_buffer
 public:
     c_wave_buffer()
     {
-        m_head = m_tail = m_min_old = m_max_old =
-            m_min_older = m_max_older = m_last_data = m_read_cache_sum = m_refresh_sequence = 0;
+        m_head = m_tail = m_min_old = m_max_old = m_min_older = m_max_older = m_last_data = m_read_cache_sum =
+            m_refresh_sequence = 0;
         memset(m_wave_buf, 0, sizeof(m_wave_buf));
         memset(m_read_cache_min, 0, sizeof(m_read_cache_min));
         memset(m_read_cache_mid, 0, sizeof(m_read_cache_mid));
@@ -3145,9 +2805,8 @@ public:
     }
     int write_wave_data(short data)
     {
-        if ((m_tail + 1) % WAVE_BUFFER_LEN == m_head)
-        { //full
-            //log_out("wave buf full\n");
+        if ((m_tail + 1) % WAVE_BUFFER_LEN == m_head) { // full
+            // log_out("wave buf full\n");
             return BUFFER_FULL;
         }
         m_wave_buf[m_tail] = data;
@@ -3156,12 +2815,10 @@ public:
     }
     int read_wave_data_by_frame(short &max, short &min, short frame_len, unsigned int sequence, short offset)
     {
-        if (m_refresh_sequence != sequence)
-        {
+        if (m_refresh_sequence != sequence) {
             m_refresh_sequence = sequence;
             m_read_cache_sum = 0;
-        }
-        else if (offset < m_read_cache_sum) //(m_refresh_sequence == sequence && offset < m_fb_sum)
+        } else if (offset < m_read_cache_sum) //(m_refresh_sequence == sequence && offset < m_fb_sum)
         {
             max = m_read_cache_max[offset];
             min = m_read_cache_min[offset];
@@ -3174,20 +2831,16 @@ public:
         int tmp_max = m_last_data;
         int mid = (m_min_old + m_max_old) >> 1;
         i = 0;
-        while (i++ < frame_len)
-        {
+        while (i++ < frame_len) {
             data = read_data();
-            if (BUFFER_EMPTY == data)
-            {
+            if (BUFFER_EMPTY == data) {
                 break;
             }
             m_last_data = data;
-            if (data < tmp_min)
-            {
+            if (data < tmp_min) {
                 tmp_min = data;
             }
-            if (data > tmp_max)
-            {
+            if (data > tmp_max) {
                 tmp_max = data;
             }
         }
@@ -3199,26 +2852,19 @@ public:
         m_max_old = tmp_max;
         return (m_read_cache_mid[offset] = mid);
     }
-    void reset()
-    {
-        m_head = m_tail;
-    }
+    void reset() { m_head = m_tail; }
     void clear_data()
     {
         m_head = m_tail = 0;
         memset(m_wave_buf, 0, sizeof(m_wave_buf));
     }
-    short get_cnt()
-    {
-        return (m_tail >= m_head) ? (m_tail - m_head) : (m_tail - m_head + WAVE_BUFFER_LEN);
-    }
+    short get_cnt() { return (m_tail >= m_head) ? (m_tail - m_head) : (m_tail - m_head + WAVE_BUFFER_LEN); }
 
 private:
     int read_data()
     {
-        if (m_head == m_tail)
-        { //empty
-            //log_out("wave buf empty\n");
+        if (m_head == m_tail) { // empty
+            // log_out("wave buf empty\n");
             return BUFFER_EMPTY;
         }
         int ret = m_wave_buf[m_head];
@@ -3241,20 +2887,16 @@ private:
 };
 #include <stdlib.h>
 #include <string.h>
-#define CORRECT(x, high_limit, low_limit)      \
-    {                                          \
-        x = (x > high_limit) ? high_limit : x; \
-        x = (x < low_limit) ? low_limit : x;   \
-    }                                          \
+#define CORRECT(x, high_limit, low_limit)                                                                              \
+    {                                                                                                                  \
+        x = (x > high_limit) ? high_limit : x;                                                                         \
+        x = (x < low_limit) ? low_limit : x;                                                                           \
+    }                                                                                                                  \
     while (0)
 #define WAVE_CURSOR_WIDTH 8
 #define WAVE_LINE_WIDTH 1
 #define WAVE_MARGIN 5
-typedef enum
-{
-    FILL_MODE,
-    SCAN_MODE
-} E_WAVE_DRAW_MODE;
+typedef enum { FILL_MODE, SCAN_MODE } E_WAVE_DRAW_MODE;
 class c_wave_buffer;
 class c_wave_ctrl : public c_wnd
 {
@@ -3274,7 +2916,7 @@ public:
         m_wave_name_color = m_wave_unit_color = m_wave_color = GL_RGB(255, 0, 0);
         m_back_color = GL_RGB(0, 0, 0);
     }
-    virtual void on_init_children() //should be pre_create
+    virtual void on_init_children() // should be pre_create
     {
         c_rect rect;
         get_screen_rect(rect);
@@ -3290,10 +2932,12 @@ public:
         c_rect rect;
         get_screen_rect(rect);
         m_surface->fill_rect(rect, m_back_color, m_z_order);
-        //show name
-        c_word::draw_string(m_surface, m_z_order, m_wave_name, m_wave_left + 10, rect.m_top, m_wave_name_font, m_wave_name_color, GL_ARGB(0, 0, 0, 0));
-        //show unit
-        c_word::draw_string(m_surface, m_z_order, m_wave_unit, m_wave_left + 60, rect.m_top, m_wave_unit_font, m_wave_unit_color, GL_ARGB(0, 0, 0, 0));
+        // show name
+        c_word::draw_string(m_surface, m_z_order, m_wave_name, m_wave_left + 10, rect.m_top, m_wave_name_font,
+                            m_wave_name_color, GL_ARGB(0, 0, 0, 0));
+        // show unit
+        c_word::draw_string(m_surface, m_z_order, m_wave_unit, m_wave_left + 60, rect.m_top, m_wave_unit_font,
+                            m_wave_unit_color, GL_ARGB(0, 0, 0, 0));
         save_background();
     }
     void set_wave_name(char *wave_name) { m_wave_name = wave_name; }
@@ -3309,9 +2953,9 @@ public:
         m_wave_refresh_rate = refresh_rate;
         int read_times_per_second = m_wave_speed * 1000 / m_wave_refresh_rate;
         memset(m_frame_len_map, 0, sizeof(m_frame_len_map));
-        for (unsigned int i = 1; i < sizeof(m_frame_len_map) + 1; i++)
-        {
-            m_frame_len_map[i - 1] = data_rate * i / read_times_per_second - data_rate * (i - 1) / read_times_per_second;
+        for (unsigned int i = 1; i < sizeof(m_frame_len_map) + 1; i++) {
+            m_frame_len_map[i - 1] =
+                data_rate * i / read_times_per_second - data_rate * (i - 1) / read_times_per_second;
         }
         m_frame_len_map_index = 0;
     }
@@ -3329,8 +2973,7 @@ public:
     c_wave_buffer *get_wave() { return m_wave; }
     void clear_data()
     {
-        if (m_wave == 0)
-        {
+        if (m_wave == 0) {
             ASSERT(false);
             return;
         }
@@ -3338,8 +2981,7 @@ public:
     }
     bool is_data_enough()
     {
-        if (m_wave == 0)
-        {
+        if (m_wave == 0) {
             ASSERT(false);
             return false;
         }
@@ -3347,33 +2989,29 @@ public:
     }
     void refresh_wave(unsigned char frame)
     {
-        if (m_wave == 0)
-        {
+        if (m_wave == 0) {
             ASSERT(false);
             return;
         }
         short max, min, mid;
-        for (short offset = 0; offset < m_wave_speed; offset++)
-        {
-            //get wave value
-            mid = m_wave->read_wave_data_by_frame(max, min,
-                                                  m_frame_len_map[m_frame_len_map_index++],
-                                                  frame, offset);
+        for (short offset = 0; offset < m_wave_speed; offset++) {
+            // get wave value
+            mid = m_wave->read_wave_data_by_frame(max, min, m_frame_len_map[m_frame_len_map_index++], frame, offset);
             m_frame_len_map_index %= sizeof(m_frame_len_map);
-            //map to wave ctrl
+            // map to wave ctrl
             int y_min, y_max;
-            if (m_max_data == m_min_data)
-            {
+            if (m_max_data == m_min_data) {
                 ASSERT(false);
             }
-            y_max = m_wave_bottom + WAVE_LINE_WIDTH - (m_wave_bottom - m_wave_top) * (min - m_min_data) / (m_max_data - m_min_data);
-            y_min = m_wave_bottom - WAVE_LINE_WIDTH - (m_wave_bottom - m_wave_top) * (max - m_min_data) / (m_max_data - m_min_data);
+            y_max = m_wave_bottom + WAVE_LINE_WIDTH -
+                    (m_wave_bottom - m_wave_top) * (min - m_min_data) / (m_max_data - m_min_data);
+            y_min = m_wave_bottom - WAVE_LINE_WIDTH -
+                    (m_wave_bottom - m_wave_top) * (max - m_min_data) / (m_max_data - m_min_data);
             mid = m_wave_bottom - (m_wave_bottom - m_wave_top) * (mid - m_min_data) / (m_max_data - m_min_data);
             CORRECT(y_min, m_wave_bottom, m_wave_top);
             CORRECT(y_max, m_wave_bottom, m_wave_top);
             CORRECT(mid, m_wave_bottom, m_wave_top);
-            if (m_wave_cursor > m_wave_right)
-            {
+            if (m_wave_cursor > m_wave_right) {
                 m_wave_cursor = m_wave_left;
             }
             draw_smooth_vline(y_min, y_max, mid, m_wave_color);
@@ -3397,16 +3035,13 @@ protected:
         int index = (dy >> 1) + 2;
         int y;
         m_surface->draw_pixel(m_wave_cursor, mid, rgb, m_z_order);
-        if (dy < 1)
-        {
+        if (dy < 1) {
             return;
         }
         unsigned char cur_r, cur_g, cur_b;
         unsigned int cur_rgb;
-        for (int i = 1; i <= (dy >> 1) + 1; ++i)
-        {
-            if ((mid + i) <= y_max)
-            {
+        for (int i = 1; i <= (dy >> 1) + 1; ++i) {
+            if ((mid + i) <= y_max) {
                 y = mid + i;
                 cur_r = r * (index - i) / index;
                 cur_g = g * (index - i) / index;
@@ -3414,8 +3049,7 @@ protected:
                 cur_rgb = GL_RGB(cur_r, cur_g, cur_b);
                 m_surface->draw_pixel(m_wave_cursor, y, cur_rgb, m_z_order);
             }
-            if ((mid - i) >= y_min)
-            {
+            if ((mid - i) >= y_min) {
                 y = mid - i;
                 cur_r = r * (index - i) / index;
                 cur_g = g * (index - i) / index;
@@ -3428,8 +3062,7 @@ protected:
     void restore_background()
     {
         int x = m_wave_cursor + WAVE_CURSOR_WIDTH;
-        if (x > m_wave_right)
-        {
+        if (x > m_wave_right) {
             x -= (m_wave_right - m_wave_left + 1);
         }
         c_rect rect;
@@ -3437,24 +3070,21 @@ protected:
         register int width = rect.width();
         register int top = rect.m_top;
         register int left = rect.m_left;
-        for (int y_pos = (m_wave_top - 1); y_pos <= (m_wave_bottom + 1); y_pos++)
-        {
-            (m_bg_fb) ? m_surface->draw_pixel(x, y_pos, m_bg_fb[(y_pos - top) * width + (x - left)], m_z_order) : m_surface->draw_pixel(x, y_pos, 0, m_z_order);
+        for (int y_pos = (m_wave_top - 1); y_pos <= (m_wave_bottom + 1); y_pos++) {
+            (m_bg_fb) ? m_surface->draw_pixel(x, y_pos, m_bg_fb[(y_pos - top) * width + (x - left)], m_z_order)
+                      : m_surface->draw_pixel(x, y_pos, 0, m_z_order);
         }
     }
     void save_background()
     {
-        if (!m_bg_fb)
-        {
+        if (!m_bg_fb) {
             return;
         }
         c_rect rect;
         get_screen_rect(rect);
         register unsigned int *p_des = m_bg_fb;
-        for (int y = rect.m_top; y <= rect.m_bottom; y++)
-        {
-            for (int x = rect.m_left; x <= rect.m_right; x++)
-            {
+        for (int y = rect.m_top; y <= rect.m_bottom; y++) {
+            for (int x = rect.m_left; x <= rect.m_right; x++) {
                 *p_des++ = m_surface->get_pixel(x, y, m_z_order);
             }
         }
@@ -3476,11 +3106,11 @@ protected:
 
 private:
     c_wave_buffer *m_wave;
-    unsigned int *m_bg_fb; //background frame buffer, could be used to draw scale line.
+    unsigned int *m_bg_fb; // background frame buffer, could be used to draw scale line.
     int m_wave_cursor;
-    int m_wave_speed;                 //pixels per refresh
-    unsigned int m_wave_data_rate;    //data sample rate
-    unsigned int m_wave_refresh_rate; //refresh cycle in millisecond
+    int m_wave_speed;                 // pixels per refresh
+    unsigned int m_wave_data_rate;    // data sample rate
+    unsigned int m_wave_refresh_rate; // refresh cycle in millisecond
     unsigned char m_frame_len_map[64];
     unsigned char m_frame_len_map_index;
 };
@@ -3505,23 +3135,22 @@ c_font_operator *c_word::fontOperator = &the_lattice_font_op;
 #endif
 #ifdef GUILITE_ON
 #if (defined __linux__) || (defined __APPLE__)
-#include <unistd.h>
-#include <pthread.h>
-#include <string.h>
-#include <time.h>
-#include <sys/time.h>
-#include <signal.h>
-#include <sys/times.h>
-#include <fcntl.h>
-#include <termios.h>
-#include <sys/stat.h>
-#include <semaphore.h>
 #include <errno.h>
-#include <string.h>
+#include <fcntl.h>
+#include <pthread.h>
+#include <semaphore.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <sys/times.h>
+#include <termios.h>
+#include <time.h>
+#include <unistd.h>
 #define MAX_TIMER_CNT 10
-#define TIMER_UNIT 50 //ms
+#define TIMER_UNIT 50 // ms
 static void (*do_assert)(const char *file, int line);
 static void (*do_log_out)(const char *log);
 void register_debug_function(void (*my_assert)(const char *file, int line), void (*my_log_out)(const char *log))
@@ -3531,31 +3160,23 @@ void register_debug_function(void (*my_assert)(const char *file, int line), void
 }
 void _assert(const char *file, int line)
 {
-    if (do_assert)
-    {
+    if (do_assert) {
         do_assert(file, line);
-    }
-    else
-    {
+    } else {
         printf("assert@ file:%s, line:%d, error no: %d\n", file, line, errno);
     }
 }
 void log_out(const char *log)
 {
-    if (do_log_out)
-    {
+    if (do_log_out) {
         do_log_out(log);
-    }
-    else
-    {
+    } else {
         printf("%s", log);
         fflush(stdout);
     }
 }
-typedef struct _timer_manage
-{
-    struct _timer_info
-    {
+typedef struct _timer_manage {
+    struct _timer_info {
         int state; /* on or off */
         int interval;
         int elapse; /* 0~interval */
@@ -3569,17 +3190,13 @@ static struct _timer_manage timer_manage;
 static void *timer_routine(void *)
 {
     int i;
-    while (true)
-    {
-        for (i = 0; i < MAX_TIMER_CNT; i++)
-        {
-            if (timer_manage.timer_info[i].state == 0)
-            {
+    while (true) {
+        for (i = 0; i < MAX_TIMER_CNT; i++) {
+            if (timer_manage.timer_info[i].state == 0) {
                 continue;
             }
             timer_manage.timer_info[i].elapse++;
-            if (timer_manage.timer_info[i].elapse == timer_manage.timer_info[i].interval)
-            {
+            if (timer_manage.timer_info[i].elapse == timer_manage.timer_info[i].interval) {
                 timer_manage.timer_info[i].elapse = 0;
                 timer_manage.timer_info[i].timer_proc(timer_manage.timer_info[i].param);
             }
@@ -3591,8 +3208,7 @@ static void *timer_routine(void *)
 static int init_mul_timer()
 {
     static bool s_is_init = false;
-    if (s_is_init == true)
-    {
+    if (s_is_init == true) {
         return 0;
     }
     memset(&timer_manage, 0, sizeof(struct _timer_manage));
@@ -3605,14 +3221,11 @@ static int set_a_timer(int interval, void (*timer_proc)(void *param), void *para
 {
     init_mul_timer();
     int i;
-    if (timer_proc == NULL || interval <= 0)
-    {
+    if (timer_proc == NULL || interval <= 0) {
         return (-1);
     }
-    for (i = 0; i < MAX_TIMER_CNT; i++)
-    {
-        if (timer_manage.timer_info[i].state == 1)
-        {
+    for (i = 0; i < MAX_TIMER_CNT; i++) {
+        if (timer_manage.timer_info[i].state == 1) {
             continue;
         }
         memset(&timer_manage.timer_info[i], 0, sizeof(timer_manage.timer_info[i]));
@@ -3623,8 +3236,7 @@ static int set_a_timer(int interval, void (*timer_proc)(void *param), void *para
         timer_manage.timer_info[i].state = 1;
         break;
     }
-    if (i >= MAX_TIMER_CNT)
-    {
+    if (i >= MAX_TIMER_CNT) {
         ASSERT(false);
         return (-1);
     }
@@ -3636,15 +3248,11 @@ static c_fifo s_real_timer_fifo;
 static void *real_timer_routine(void *)
 {
     char dummy;
-    while (1)
-    {
-        if (s_real_timer_fifo.read(&dummy, 1) > 0)
-        {
+    while (1) {
+        if (s_real_timer_fifo.read(&dummy, 1) > 0) {
             if (s_expire_function)
                 s_expire_function(0);
-        }
-        else
-        {
+        } else {
             ASSERT(false);
         }
     }
@@ -3653,15 +3261,13 @@ static void *real_timer_routine(void *)
 static void expire_real_timer(int sigo)
 {
     char dummy = 0x33;
-    if (s_real_timer_fifo.write(&dummy, 1) <= 0)
-    {
+    if (s_real_timer_fifo.write(&dummy, 1) <= 0) {
         ASSERT(false);
     }
 }
 void start_real_timer(void (*func)(void *arg))
 {
-    if (NULL == func)
-    {
+    if (NULL == func) {
         return;
     }
     s_expire_function = func;
@@ -3673,23 +3279,16 @@ void start_real_timer(void (*func)(void *arg))
     value.it_interval.tv_usec = REAL_TIME_TASK_CYCLE_MS * 1000;
     setitimer(ITIMER_REAL, &value, &ovalue);
     static pthread_t s_pid;
-    if (s_pid == 0)
-    {
+    if (s_pid == 0) {
         pthread_create(&s_pid, NULL, real_timer_routine, NULL);
     }
 }
-unsigned int get_cur_thread_id()
-{
-    return (unsigned long)pthread_self();
-}
+unsigned int get_cur_thread_id() { return (unsigned long)pthread_self(); }
 void register_timer(int milli_second, void func(void *param), void *param)
 {
     set_a_timer(milli_second / TIMER_UNIT, func, param);
 }
-long get_time_in_second()
-{
-    return time(NULL); /* + 8*60*60*/
-}
+long get_time_in_second() { return time(NULL); /* + 8*60*60*/ }
 T_TIME get_time()
 {
     T_TIME ret = {0};
@@ -3722,20 +3321,15 @@ void create_thread(unsigned long *thread_id, void *attr, void *(*start_routine)(
 {
     pthread_create((pthread_t *)thread_id, (pthread_attr_t const *)attr, start_routine, arg);
 }
-void thread_sleep(unsigned int milli_seconds)
-{
-    usleep(milli_seconds * 1000);
-}
-typedef struct
-{
+void thread_sleep(unsigned int milli_seconds) { usleep(milli_seconds * 1000); }
+typedef struct {
     unsigned short bfType;
     unsigned int bfSize;
     unsigned short bfReserved1;
     unsigned short bfReserved2;
     unsigned int bfOffBits;
 } __attribute__((packed)) FileHead;
-typedef struct
-{
+typedef struct {
     unsigned int biSize;
     int biWidth;
     int biHeight;
@@ -3756,12 +3350,12 @@ int build_bmp(const char *filename, unsigned int width, unsigned int height, uns
     FileHead bmp_head;
     Infohead bmp_info;
     int size = width * height * 2;
-    //initialize bmp head.
+    // initialize bmp head.
     bmp_head.bfType = 0x4d42;
     bmp_head.bfSize = size + sizeof(FileHead) + sizeof(Infohead);
     bmp_head.bfReserved1 = bmp_head.bfReserved2 = 0;
     bmp_head.bfOffBits = bmp_head.bfSize - size;
-    //initialize bmp info.
+    // initialize bmp info.
     bmp_info.biSize = 40;
     bmp_info.biWidth = width;
     bmp_info.biHeight = height;
@@ -3773,21 +3367,19 @@ int build_bmp(const char *filename, unsigned int width, unsigned int height, uns
     bmp_info.biYPelsPerMeter = 0;
     bmp_info.biClrUsed = 0;
     bmp_info.biClrImportant = 0;
-    //RGB565
+    // RGB565
     bmp_info.biRedMask = 0xF800;
     bmp_info.biGreenMask = 0x07E0;
     bmp_info.biBlueMask = 0x001F;
-    //copy the data
+    // copy the data
     FILE *fp;
-    if (!(fp = fopen(filename, "wb")))
-    {
+    if (!(fp = fopen(filename, "wb"))) {
         return -1;
     }
     fwrite(&bmp_head, 1, sizeof(FileHead), fp);
     fwrite(&bmp_info, 1, sizeof(Infohead), fp);
-    //fwrite(data, 1, size, fp);//top <-> bottom
-    for (int i = (height - 1); i >= 0; --i)
-    {
+    // fwrite(data, 1, size, fp);//top <-> bottom
+    for (int i = (height - 1); i >= 0; --i) {
         fwrite(&data[i * width * 2], 1, width * 2, fp);
     }
 
@@ -3807,10 +3399,8 @@ int c_fifo::read(void *buf, int len)
 {
     unsigned char *pbuf = (unsigned char *)buf;
     int i = 0;
-    while (i < len)
-    {
-        if (m_tail == m_head)
-        { //empty
+    while (i < len) {
+        if (m_tail == m_head) { // empty
             sem_wait((sem_t *)m_read_sem);
             continue;
         }
@@ -3818,8 +3408,7 @@ int c_fifo::read(void *buf, int len)
         m_head = (m_head + 1) % FIFO_BUFFER_LEN;
         i++;
     }
-    if (i != len)
-    {
+    if (i != len) {
         ASSERT(false);
     }
     return i;
@@ -3830,10 +3419,8 @@ int c_fifo::write(void *buf, int len)
     int i = 0;
     int tail = m_tail;
     pthread_mutex_lock((pthread_mutex_t *)m_write_mutex);
-    while (i < len)
-    {
-        if ((m_tail + 1) % FIFO_BUFFER_LEN == m_head)
-        { //full, clear data has been written;
+    while (i < len) {
+        if ((m_tail + 1) % FIFO_BUFFER_LEN == m_head) { // full, clear data has been written;
             m_tail = tail;
             log_out("Warning: fifo full\n");
             pthread_mutex_unlock((pthread_mutex_t *)m_write_mutex);
@@ -3844,12 +3431,9 @@ int c_fifo::write(void *buf, int len)
         i++;
     }
     pthread_mutex_unlock((pthread_mutex_t *)m_write_mutex);
-    if (i != len)
-    {
+    if (i != len) {
         ASSERT(false);
-    }
-    else
-    {
+    } else {
         sem_post((sem_t *)m_read_sem);
     }
     return i;
@@ -3857,7 +3441,8 @@ int c_fifo::write(void *buf, int len)
 #endif
 #endif
 #ifdef GUILITE_ON
-#if (!defined _WIN32) && (!defined WIN32) && (!defined _WIN64) && (!defined WIN64) && (!defined __linux__) && (!defined __APPLE__)
+#if (!defined _WIN32) && (!defined WIN32) && (!defined _WIN64) && (!defined WIN64) && (!defined __linux__) &&          \
+    (!defined __APPLE__)
 
 #include <stdio.h>
 
@@ -3871,8 +3456,7 @@ void register_debug_function(void (*my_assert)(const char *file, int line), void
 
 void _assert(const char *file, int line)
 {
-    if (do_assert)
-    {
+    if (do_assert) {
         do_assert(file, line);
     }
     while (1)
@@ -3881,16 +3465,12 @@ void _assert(const char *file, int line)
 
 void log_out(const char *log)
 {
-    if (do_log_out)
-    {
+    if (do_log_out) {
         do_log_out(log);
     }
 }
 
-long get_time_in_second()
-{
-    return 0;
-}
+long get_time_in_second() { return 0; }
 
 T_TIME second_to_day(long second)
 {
@@ -3904,15 +3484,9 @@ T_TIME get_time()
     return ret;
 }
 
-void start_real_timer(void (*func)(void *arg))
-{
-    log_out("Not support now");
-}
+void start_real_timer(void (*func)(void *arg)) { log_out("Not support now"); }
 
-void register_timer(int milli_second, void func(void *ptmr, void *parg))
-{
-    log_out("Not support now");
-}
+void register_timer(int milli_second, void func(void *ptmr, void *parg)) { log_out("Not support now"); }
 
 unsigned int get_cur_thread_id()
 {
@@ -3927,7 +3501,7 @@ void create_thread(unsigned long *thread_id, void *attr, void *(*start_routine)(
 
 extern "C" void delay_ms(unsigned short nms);
 void thread_sleep(unsigned int milli_seconds)
-{ //MCU alway implemnet driver code in APP.
+{ // MCU alway implemnet driver code in APP.
     delay_ms(milli_seconds);
 }
 
@@ -3947,18 +3521,15 @@ int c_fifo::read(void *buf, int len)
 {
     unsigned char *pbuf = (unsigned char *)buf;
     int i = 0;
-    while (i < len)
-    {
-        if (m_tail == m_head)
-        { //empty
+    while (i < len) {
+        if (m_tail == m_head) { // empty
             continue;
         }
         *pbuf++ = m_buf[m_head];
         m_head = (m_head + 1) % FIFO_BUFFER_LEN;
         i++;
     }
-    if (i != len)
-    {
+    if (i != len) {
         ASSERT(false);
     }
     return i;
@@ -3970,10 +3541,8 @@ int c_fifo::write(void *buf, int len)
     int i = 0;
     int tail = m_tail;
 
-    while (i < len)
-    {
-        if ((m_tail + 1) % FIFO_BUFFER_LEN == m_head)
-        { //full, clear data has been written;
+    while (i < len) {
+        if ((m_tail + 1) % FIFO_BUFFER_LEN == m_head) { // full, clear data has been written;
             m_tail = tail;
             log_out("Warning: fifo full\n");
             return 0;
@@ -3983,8 +3552,7 @@ int c_fifo::write(void *buf, int len)
         i++;
     }
 
-    if (i != len)
-    {
+    if (i != len) {
         ASSERT(false);
     }
     return i;
@@ -3994,14 +3562,14 @@ int c_fifo::write(void *buf, int len)
 #endif
 #ifdef GUILITE_ON
 #if (defined _WIN32) || (defined WIN32) || (defined _WIN64) || (defined WIN64)
-#include <string.h>
-#include <stdio.h>
-#include <time.h>
-#include <conio.h>
-#include <windows.h>
 #include <assert.h>
+#include <conio.h>
+#include <stdio.h>
+#include <string.h>
+#include <time.h>
+#include <windows.h>
 #define MAX_TIMER_CNT 10
-#define TIMER_UNIT 50 //ms
+#define TIMER_UNIT 50 // ms
 static void (*do_assert)(const char *file, int line);
 static void (*do_log_out)(const char *log);
 void register_debug_function(void (*my_assert)(const char *file, int line), void (*my_log_out)(const char *log))
@@ -4012,14 +3580,13 @@ void register_debug_function(void (*my_assert)(const char *file, int line), void
 void _assert(const char *file, int line)
 {
     static char s_buf[192];
-    if (do_assert)
-    {
+    if (do_assert) {
         do_assert(file, line);
-    }
-    else
-    {
+    } else {
         memset(s_buf, 0, sizeof(s_buf));
-        sprintf_s(s_buf, sizeof(s_buf), "vvvvvvvvvvvvvvvvvvvvvvvvvvvv\n\nAssert@ file = %s, line = %d\n\n^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n", file, line);
+        sprintf_s(s_buf, sizeof(s_buf),
+                  "vvvvvvvvvvvvvvvvvvvvvvvvvvvv\n\nAssert@ file = %s, line = %d\n\n^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n",
+                  file, line);
         OutputDebugStringA(s_buf);
         printf("%s", s_buf);
         fflush(stdout);
@@ -4028,21 +3595,16 @@ void _assert(const char *file, int line)
 }
 void log_out(const char *log)
 {
-    if (do_log_out)
-    {
+    if (do_log_out) {
         do_log_out(log);
-    }
-    else
-    {
+    } else {
         printf("%s", log);
         fflush(stdout);
         OutputDebugStringA(log);
     }
 }
-typedef struct _timer_manage
-{
-    struct _timer_info
-    {
+typedef struct _timer_manage {
+    struct _timer_info {
         int state; /* on or off */
         int interval;
         int elapse; /* 0~interval */
@@ -4056,17 +3618,13 @@ static struct _timer_manage timer_manage;
 DWORD WINAPI timer_routine(LPVOID lpParam)
 {
     int i;
-    while (true)
-    {
-        for (i = 0; i < MAX_TIMER_CNT; i++)
-        {
-            if (timer_manage.timer_info[i].state == 0)
-            {
+    while (true) {
+        for (i = 0; i < MAX_TIMER_CNT; i++) {
+            if (timer_manage.timer_info[i].state == 0) {
                 continue;
             }
             timer_manage.timer_info[i].elapse++;
-            if (timer_manage.timer_info[i].elapse == timer_manage.timer_info[i].interval)
-            {
+            if (timer_manage.timer_info[i].elapse == timer_manage.timer_info[i].interval) {
                 timer_manage.timer_info[i].elapse = 0;
                 timer_manage.timer_info[i].timer_proc(timer_manage.timer_info[i].param);
             }
@@ -4078,8 +3636,7 @@ DWORD WINAPI timer_routine(LPVOID lpParam)
 static int init_mul_timer()
 {
     static bool s_is_init = false;
-    if (s_is_init == true)
-    {
+    if (s_is_init == true) {
         return 0;
     }
     memset(&timer_manage, 0, sizeof(struct _timer_manage));
@@ -4092,14 +3649,11 @@ static int set_a_timer(int interval, void (*timer_proc)(void *param), void *para
 {
     init_mul_timer();
     int i;
-    if (timer_proc == 0 || interval <= 0)
-    {
+    if (timer_proc == 0 || interval <= 0) {
         return (-1);
     }
-    for (i = 0; i < MAX_TIMER_CNT; i++)
-    {
-        if (timer_manage.timer_info[i].state == 1)
-        {
+    for (i = 0; i < MAX_TIMER_CNT; i++) {
+        if (timer_manage.timer_info[i].state == 1) {
             continue;
         }
         memset(&timer_manage.timer_info[i], 0, sizeof(timer_manage.timer_info[i]));
@@ -4110,8 +3664,7 @@ static int set_a_timer(int interval, void (*timer_proc)(void *param), void *para
         timer_manage.timer_info[i].state = 1;
         break;
     }
-    if (i >= MAX_TIMER_CNT)
-    {
+    if (i >= MAX_TIMER_CNT) {
         ASSERT(false);
         return (-1);
     }
@@ -4123,15 +3676,11 @@ static c_fifo s_real_timer_fifo;
 static DWORD WINAPI fire_real_timer(LPVOID lpParam)
 {
     char dummy;
-    while (1)
-    {
-        if (s_real_timer_fifo.read(&dummy, 1) > 0)
-        {
+    while (1) {
+        if (s_real_timer_fifo.read(&dummy, 1) > 0) {
             if (s_expire_function)
                 s_expire_function(0);
-        }
-        else
-        {
+        } else {
             ASSERT(false);
         }
     }
@@ -4147,8 +3696,7 @@ static void CALLBACK trigger_real_timer(UINT, UINT, DWORD_PTR, DWORD_PTR, DWORD_
 static DWORD WINAPI trigger_real_timer(LPVOID lpParam)
 {
     char dummy = 0x33;
-    while (1)
-    {
+    while (1) {
         s_real_timer_fifo.write(&dummy, 1);
         Sleep(REAL_TIME_TASK_CYCLE_MS);
     }
@@ -4156,31 +3704,23 @@ static DWORD WINAPI trigger_real_timer(LPVOID lpParam)
 }
 void start_real_timer(void (*func)(void *arg))
 {
-    if (0 == func)
-    {
+    if (0 == func) {
         return;
     }
     s_expire_function = func;
-    //timeSetEvent(REAL_TIME_TASK_CYCLE_MS, 0, trigger_real_timer, 0, TIME_PERIODIC);//Win32 desktop only
+    // timeSetEvent(REAL_TIME_TASK_CYCLE_MS, 0, trigger_real_timer, 0, TIME_PERIODIC);//Win32 desktop only
     static DWORD s_pid;
-    if (s_pid == 0)
-    {
+    if (s_pid == 0) {
         CreateThread(0, 0, trigger_real_timer, 0, 0, &s_pid);
         CreateThread(0, 0, fire_real_timer, 0, 0, &s_pid);
     }
 }
-unsigned int get_cur_thread_id()
-{
-    return GetCurrentThreadId();
-}
+unsigned int get_cur_thread_id() { return GetCurrentThreadId(); }
 void register_timer(int milli_second, void func(void *param), void *param)
 {
     set_a_timer(milli_second / TIMER_UNIT, func, param);
 }
-long get_time_in_second()
-{
-    return (long)time(0);
-}
+long get_time_in_second() { return (long)time(0); }
 T_TIME get_time()
 {
     T_TIME ret = {0};
@@ -4205,7 +3745,7 @@ T_TIME second_to_day(long second)
     second /= 60;
     ret.minute = second % 60;
     second /= 60;
-    ret.hour = (second + 8) % 24; //China time zone.
+    ret.hour = (second + 8) % 24; // China time zone.
     return ret;
 }
 void create_thread(unsigned long *thread_id, void *attr, void *(*start_routine)(void *), void *arg)
@@ -4214,21 +3754,16 @@ void create_thread(unsigned long *thread_id, void *attr, void *(*start_routine)(
     CreateThread(0, 0, LPTHREAD_START_ROUTINE(start_routine), arg, 0, &pid);
     *thread_id = pid;
 }
-void thread_sleep(unsigned int milli_seconds)
-{
-    Sleep(milli_seconds);
-}
+void thread_sleep(unsigned int milli_seconds) { Sleep(milli_seconds); }
 #pragma pack(push, 1)
-typedef struct
-{
+typedef struct {
     unsigned short bfType;
     unsigned int bfSize;
     unsigned short bfReserved1;
     unsigned short bfReserved2;
     unsigned int bfOffBits;
 } FileHead;
-typedef struct
-{
+typedef struct {
     unsigned int biSize;
     int biWidth;
     int biHeight;
@@ -4250,12 +3785,12 @@ int build_bmp(const char *filename, unsigned int width, unsigned int height, uns
     FileHead bmp_head;
     Infohead bmp_info;
     int size = width * height * 2;
-    //initialize bmp head.
+    // initialize bmp head.
     bmp_head.bfType = 0x4d42;
     bmp_head.bfSize = size + sizeof(FileHead) + sizeof(Infohead);
     bmp_head.bfReserved1 = bmp_head.bfReserved2 = 0;
     bmp_head.bfOffBits = bmp_head.bfSize - size;
-    //initialize bmp info.
+    // initialize bmp info.
     bmp_info.biSize = 40;
     bmp_info.biWidth = width;
     bmp_info.biHeight = height;
@@ -4267,21 +3802,19 @@ int build_bmp(const char *filename, unsigned int width, unsigned int height, uns
     bmp_info.biYPelsPerMeter = 0;
     bmp_info.biClrUsed = 0;
     bmp_info.biClrImportant = 0;
-    //RGB565
+    // RGB565
     bmp_info.biRedMask = 0xF800;
     bmp_info.biGreenMask = 0x07E0;
     bmp_info.biBlueMask = 0x001F;
-    //copy the data
+    // copy the data
     FILE *fp;
-    if (!(fp = fopen(filename, "wb")))
-    {
+    if (!(fp = fopen(filename, "wb"))) {
         return -1;
     }
     fwrite(&bmp_head, 1, sizeof(FileHead), fp);
     fwrite(&bmp_info, 1, sizeof(Infohead), fp);
-    //fwrite(data, 1, size, fp);//top <-> bottom
-    for (int i = (height - 1); i >= 0; --i)
-    {
+    // fwrite(data, 1, size, fp);//top <-> bottom
+    for (int i = (height - 1); i >= 0; --i) {
         fwrite(&data[i * width * 2], 1, width * 2, fp);
     }
     fclose(fp);
@@ -4300,10 +3833,8 @@ int c_fifo::read(void *buf, int len)
 {
     unsigned char *pbuf = (unsigned char *)buf;
     int i = 0;
-    while (i < len)
-    {
-        if (m_tail == m_head)
-        { //empty
+    while (i < len) {
+        if (m_tail == m_head) { // empty
             WaitForSingleObject(m_read_sem, INFINITE);
             continue;
         }
@@ -4311,8 +3842,7 @@ int c_fifo::read(void *buf, int len)
         m_head = (m_head + 1) % FIFO_BUFFER_LEN;
         i++;
     }
-    if (i != len)
-    {
+    if (i != len) {
         ASSERT(false);
     }
     return i;
@@ -4323,10 +3853,8 @@ int c_fifo::write(void *buf, int len)
     int i = 0;
     int tail = m_tail;
     WaitForSingleObject(m_write_mutex, INFINITE);
-    while (i < len)
-    {
-        if ((m_tail + 1) % FIFO_BUFFER_LEN == m_head)
-        { //full, clear data has been written;
+    while (i < len) {
+        if ((m_tail + 1) % FIFO_BUFFER_LEN == m_head) { // full, clear data has been written;
             m_tail = tail;
             log_out("Warning: fifo full\n");
             ReleaseMutex(m_write_mutex);
@@ -4337,12 +3865,9 @@ int c_fifo::write(void *buf, int len)
         i++;
     }
     ReleaseMutex(m_write_mutex);
-    if (i != len)
-    {
+    if (i != len) {
         ASSERT(false);
-    }
-    else
-    {
+    } else {
         ReleaseSemaphore(m_read_sem, 1, 0);
     }
     return i;
@@ -4361,62 +3886,59 @@ static c_keyboard_button s_key_A, s_key_B, s_key_C, s_key_D, s_key_E, s_key_F, s
 static c_keyboard_button s_key_K, s_key_L, s_key_M, s_key_N, s_key_O, s_key_P, s_key_Q, s_key_R, s_key_S, s_key_T;
 static c_keyboard_button s_key_U, s_key_V, s_key_W, s_key_X, s_key_Y, s_key_Z;
 static c_keyboard_button s_key_dot, s_key_caps, s_key_space, s_key_enter, s_key_del, s_key_esc, s_key_num_switch;
-WND_TREE g_key_board_children[] =
-    {
-        //Row 1
-        {&s_key_Q, 'Q', 0, POS_X(0), POS_Y(0), KEY_WIDTH, KEY_HEIGHT},
-        {&s_key_W, 'W', 0, POS_X(1), POS_Y(0), KEY_WIDTH, KEY_HEIGHT},
-        {&s_key_E, 'E', 0, POS_X(2), POS_Y(0), KEY_WIDTH, KEY_HEIGHT},
-        {&s_key_R, 'R', 0, POS_X(3), POS_Y(0), KEY_WIDTH, KEY_HEIGHT},
-        {&s_key_T, 'T', 0, POS_X(4), POS_Y(0), KEY_WIDTH, KEY_HEIGHT},
-        {&s_key_Y, 'Y', 0, POS_X(5), POS_Y(0), KEY_WIDTH, KEY_HEIGHT},
-        {&s_key_U, 'U', 0, POS_X(6), POS_Y(0), KEY_WIDTH, KEY_HEIGHT},
-        {&s_key_I, 'I', 0, POS_X(7), POS_Y(0), KEY_WIDTH, KEY_HEIGHT},
-        {&s_key_O, 'O', 0, POS_X(8), POS_Y(0), KEY_WIDTH, KEY_HEIGHT},
-        {&s_key_P, 'P', 0, POS_X(9), POS_Y(0), KEY_WIDTH, KEY_HEIGHT},
-        //Row 2
-        {&s_key_A, 'A', 0, ((KEY_WIDTH / 2) + POS_X(0)), POS_Y(1), KEY_WIDTH, KEY_HEIGHT},
-        {&s_key_S, 'S', 0, ((KEY_WIDTH / 2) + POS_X(1)), POS_Y(1), KEY_WIDTH, KEY_HEIGHT},
-        {&s_key_D, 'D', 0, ((KEY_WIDTH / 2) + POS_X(2)), POS_Y(1), KEY_WIDTH, KEY_HEIGHT},
-        {&s_key_F, 'F', 0, ((KEY_WIDTH / 2) + POS_X(3)), POS_Y(1), KEY_WIDTH, KEY_HEIGHT},
-        {&s_key_G, 'G', 0, ((KEY_WIDTH / 2) + POS_X(4)), POS_Y(1), KEY_WIDTH, KEY_HEIGHT},
-        {&s_key_H, 'H', 0, ((KEY_WIDTH / 2) + POS_X(5)), POS_Y(1), KEY_WIDTH, KEY_HEIGHT},
-        {&s_key_J, 'J', 0, ((KEY_WIDTH / 2) + POS_X(6)), POS_Y(1), KEY_WIDTH, KEY_HEIGHT},
-        {&s_key_K, 'K', 0, ((KEY_WIDTH / 2) + POS_X(7)), POS_Y(1), KEY_WIDTH, KEY_HEIGHT},
-        {&s_key_L, 'L', 0, ((KEY_WIDTH / 2) + POS_X(8)), POS_Y(1), KEY_WIDTH, KEY_HEIGHT},
-        //Row 3
-        {&s_key_caps, 0x14, 0, POS_X(0), POS_Y(2), CAPS_WIDTH, KEY_HEIGHT},
-        {&s_key_Z, 'Z', 0, ((KEY_WIDTH / 2) + POS_X(1)), POS_Y(2), KEY_WIDTH, KEY_HEIGHT},
-        {&s_key_X, 'X', 0, ((KEY_WIDTH / 2) + POS_X(2)), POS_Y(2), KEY_WIDTH, KEY_HEIGHT},
-        {&s_key_C, 'C', 0, ((KEY_WIDTH / 2) + POS_X(3)), POS_Y(2), KEY_WIDTH, KEY_HEIGHT},
-        {&s_key_V, 'V', 0, ((KEY_WIDTH / 2) + POS_X(4)), POS_Y(2), KEY_WIDTH, KEY_HEIGHT},
-        {&s_key_B, 'B', 0, ((KEY_WIDTH / 2) + POS_X(5)), POS_Y(2), KEY_WIDTH, KEY_HEIGHT},
-        {&s_key_N, 'N', 0, ((KEY_WIDTH / 2) + POS_X(6)), POS_Y(2), KEY_WIDTH, KEY_HEIGHT},
-        {&s_key_M, 'M', 0, ((KEY_WIDTH / 2) + POS_X(7)), POS_Y(2), KEY_WIDTH, KEY_HEIGHT},
-        {&s_key_del, 0x7F, 0, ((KEY_WIDTH / 2) + POS_X(8)), POS_Y(2), DEL_WIDTH, KEY_HEIGHT},
-        //Row 4
-        {&s_key_esc, 0x1B, 0, POS_X(0), POS_Y(3), ESC_WIDTH, KEY_HEIGHT},
-        {&s_key_num_switch, 0x90, 0, POS_X(2), POS_Y(3), SWITCH_WIDTH, KEY_HEIGHT},
-        {&s_key_space, ' ', 0, ((KEY_WIDTH / 2) + POS_X(3)), POS_Y(3), SPACE_WIDTH, KEY_HEIGHT},
-        {&s_key_dot, '.', 0, ((KEY_WIDTH / 2) + POS_X(6)), POS_Y(3), DOT_WIDTH, KEY_HEIGHT},
-        {&s_key_enter, '\n', 0, POS_X(8), POS_Y(3), ENTER_WIDTH, KEY_HEIGHT},
-        {0, 0, 0, 0, 0, 0, 0}};
-WND_TREE g_number_board_children[] =
-    {
-        {&s_key_1, '1', 0, POS_X(0), POS_Y(0), KEY_WIDTH, KEY_HEIGHT},
-        {&s_key_2, '2', 0, POS_X(1), POS_Y(0), KEY_WIDTH, KEY_HEIGHT},
-        {&s_key_3, '3', 0, POS_X(2), POS_Y(0), KEY_WIDTH, KEY_HEIGHT},
-        {&s_key_4, '4', 0, POS_X(0), POS_Y(1), KEY_WIDTH, KEY_HEIGHT},
-        {&s_key_5, '5', 0, POS_X(1), POS_Y(1), KEY_WIDTH, KEY_HEIGHT},
-        {&s_key_6, '6', 0, POS_X(2), POS_Y(1), KEY_WIDTH, KEY_HEIGHT},
-        {&s_key_7, '7', 0, POS_X(0), POS_Y(2), KEY_WIDTH, KEY_HEIGHT},
-        {&s_key_8, '8', 0, POS_X(1), POS_Y(2), KEY_WIDTH, KEY_HEIGHT},
-        {&s_key_9, '9', 0, POS_X(2), POS_Y(2), KEY_WIDTH, KEY_HEIGHT},
+WND_TREE g_key_board_children[] = {
+    // Row 1
+    {&s_key_Q, 'Q', 0, POS_X(0), POS_Y(0), KEY_WIDTH, KEY_HEIGHT},
+    {&s_key_W, 'W', 0, POS_X(1), POS_Y(0), KEY_WIDTH, KEY_HEIGHT},
+    {&s_key_E, 'E', 0, POS_X(2), POS_Y(0), KEY_WIDTH, KEY_HEIGHT},
+    {&s_key_R, 'R', 0, POS_X(3), POS_Y(0), KEY_WIDTH, KEY_HEIGHT},
+    {&s_key_T, 'T', 0, POS_X(4), POS_Y(0), KEY_WIDTH, KEY_HEIGHT},
+    {&s_key_Y, 'Y', 0, POS_X(5), POS_Y(0), KEY_WIDTH, KEY_HEIGHT},
+    {&s_key_U, 'U', 0, POS_X(6), POS_Y(0), KEY_WIDTH, KEY_HEIGHT},
+    {&s_key_I, 'I', 0, POS_X(7), POS_Y(0), KEY_WIDTH, KEY_HEIGHT},
+    {&s_key_O, 'O', 0, POS_X(8), POS_Y(0), KEY_WIDTH, KEY_HEIGHT},
+    {&s_key_P, 'P', 0, POS_X(9), POS_Y(0), KEY_WIDTH, KEY_HEIGHT},
+    // Row 2
+    {&s_key_A, 'A', 0, ((KEY_WIDTH / 2) + POS_X(0)), POS_Y(1), KEY_WIDTH, KEY_HEIGHT},
+    {&s_key_S, 'S', 0, ((KEY_WIDTH / 2) + POS_X(1)), POS_Y(1), KEY_WIDTH, KEY_HEIGHT},
+    {&s_key_D, 'D', 0, ((KEY_WIDTH / 2) + POS_X(2)), POS_Y(1), KEY_WIDTH, KEY_HEIGHT},
+    {&s_key_F, 'F', 0, ((KEY_WIDTH / 2) + POS_X(3)), POS_Y(1), KEY_WIDTH, KEY_HEIGHT},
+    {&s_key_G, 'G', 0, ((KEY_WIDTH / 2) + POS_X(4)), POS_Y(1), KEY_WIDTH, KEY_HEIGHT},
+    {&s_key_H, 'H', 0, ((KEY_WIDTH / 2) + POS_X(5)), POS_Y(1), KEY_WIDTH, KEY_HEIGHT},
+    {&s_key_J, 'J', 0, ((KEY_WIDTH / 2) + POS_X(6)), POS_Y(1), KEY_WIDTH, KEY_HEIGHT},
+    {&s_key_K, 'K', 0, ((KEY_WIDTH / 2) + POS_X(7)), POS_Y(1), KEY_WIDTH, KEY_HEIGHT},
+    {&s_key_L, 'L', 0, ((KEY_WIDTH / 2) + POS_X(8)), POS_Y(1), KEY_WIDTH, KEY_HEIGHT},
+    // Row 3
+    {&s_key_caps, 0x14, 0, POS_X(0), POS_Y(2), CAPS_WIDTH, KEY_HEIGHT},
+    {&s_key_Z, 'Z', 0, ((KEY_WIDTH / 2) + POS_X(1)), POS_Y(2), KEY_WIDTH, KEY_HEIGHT},
+    {&s_key_X, 'X', 0, ((KEY_WIDTH / 2) + POS_X(2)), POS_Y(2), KEY_WIDTH, KEY_HEIGHT},
+    {&s_key_C, 'C', 0, ((KEY_WIDTH / 2) + POS_X(3)), POS_Y(2), KEY_WIDTH, KEY_HEIGHT},
+    {&s_key_V, 'V', 0, ((KEY_WIDTH / 2) + POS_X(4)), POS_Y(2), KEY_WIDTH, KEY_HEIGHT},
+    {&s_key_B, 'B', 0, ((KEY_WIDTH / 2) + POS_X(5)), POS_Y(2), KEY_WIDTH, KEY_HEIGHT},
+    {&s_key_N, 'N', 0, ((KEY_WIDTH / 2) + POS_X(6)), POS_Y(2), KEY_WIDTH, KEY_HEIGHT},
+    {&s_key_M, 'M', 0, ((KEY_WIDTH / 2) + POS_X(7)), POS_Y(2), KEY_WIDTH, KEY_HEIGHT},
+    {&s_key_del, 0x7F, 0, ((KEY_WIDTH / 2) + POS_X(8)), POS_Y(2), DEL_WIDTH, KEY_HEIGHT},
+    // Row 4
+    {&s_key_esc, 0x1B, 0, POS_X(0), POS_Y(3), ESC_WIDTH, KEY_HEIGHT},
+    {&s_key_num_switch, 0x90, 0, POS_X(2), POS_Y(3), SWITCH_WIDTH, KEY_HEIGHT},
+    {&s_key_space, ' ', 0, ((KEY_WIDTH / 2) + POS_X(3)), POS_Y(3), SPACE_WIDTH, KEY_HEIGHT},
+    {&s_key_dot, '.', 0, ((KEY_WIDTH / 2) + POS_X(6)), POS_Y(3), DOT_WIDTH, KEY_HEIGHT},
+    {&s_key_enter, '\n', 0, POS_X(8), POS_Y(3), ENTER_WIDTH, KEY_HEIGHT},
+    {0, 0, 0, 0, 0, 0, 0}};
+WND_TREE g_number_board_children[] = {{&s_key_1, '1', 0, POS_X(0), POS_Y(0), KEY_WIDTH, KEY_HEIGHT},
+                                      {&s_key_2, '2', 0, POS_X(1), POS_Y(0), KEY_WIDTH, KEY_HEIGHT},
+                                      {&s_key_3, '3', 0, POS_X(2), POS_Y(0), KEY_WIDTH, KEY_HEIGHT},
+                                      {&s_key_4, '4', 0, POS_X(0), POS_Y(1), KEY_WIDTH, KEY_HEIGHT},
+                                      {&s_key_5, '5', 0, POS_X(1), POS_Y(1), KEY_WIDTH, KEY_HEIGHT},
+                                      {&s_key_6, '6', 0, POS_X(2), POS_Y(1), KEY_WIDTH, KEY_HEIGHT},
+                                      {&s_key_7, '7', 0, POS_X(0), POS_Y(2), KEY_WIDTH, KEY_HEIGHT},
+                                      {&s_key_8, '8', 0, POS_X(1), POS_Y(2), KEY_WIDTH, KEY_HEIGHT},
+                                      {&s_key_9, '9', 0, POS_X(2), POS_Y(2), KEY_WIDTH, KEY_HEIGHT},
 
-        {&s_key_esc, 0x1B, 0, POS_X(0), POS_Y(3), KEY_WIDTH, KEY_HEIGHT},
-        {&s_key_0, '0', 0, POS_X(1), POS_Y(3), KEY_WIDTH, KEY_HEIGHT},
-        {&s_key_dot, '.', 0, POS_X(2), POS_Y(3), KEY_WIDTH, KEY_HEIGHT},
-        {&s_key_del, 0x7F, 0, POS_X(3), POS_Y(0), KEY_WIDTH, KEY_HEIGHT * 2 + 2},
-        {&s_key_enter, '\n', 0, POS_X(3), POS_Y(2), KEY_WIDTH, KEY_HEIGHT * 2 + 2},
-        {0, 0, 0, 0, 0, 0, 0}};
+                                      {&s_key_esc, 0x1B, 0, POS_X(0), POS_Y(3), KEY_WIDTH, KEY_HEIGHT},
+                                      {&s_key_0, '0', 0, POS_X(1), POS_Y(3), KEY_WIDTH, KEY_HEIGHT},
+                                      {&s_key_dot, '.', 0, POS_X(2), POS_Y(3), KEY_WIDTH, KEY_HEIGHT},
+                                      {&s_key_del, 0x7F, 0, POS_X(3), POS_Y(0), KEY_WIDTH, KEY_HEIGHT * 2 + 2},
+                                      {&s_key_enter, '\n', 0, POS_X(3), POS_Y(2), KEY_WIDTH, KEY_HEIGHT * 2 + 2},
+                                      {0, 0, 0, 0, 0, 0, 0}};
 #endif

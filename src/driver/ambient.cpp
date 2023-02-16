@@ -4,17 +4,16 @@
 void Ambient::init(int mode)
 {
     mMode = mode;
-    switch (mode)
-    {
-    case ONE_TIME_H_RESOLUTION_MODE:
-        sample_time = 125;
-        break;
-    case ONE_TIME_H_RESOLUTION_MODE2:
-        sample_time = 125;
-        break;
-    case ONE_TIME_L_RESOLUTION_MODE:
-        sample_time = 20;
-        break;
+    switch (mode) {
+        case ONE_TIME_H_RESOLUTION_MODE:
+            sample_time = 125;
+            break;
+        case ONE_TIME_H_RESOLUTION_MODE2:
+            sample_time = 125;
+            break;
+        case ONE_TIME_L_RESOLUTION_MODE:
+            sample_time = 20;
+            break;
     }
 
     Wire.begin(AMB_I2C_SDA, AMB_I2C_SCL);
@@ -28,8 +27,7 @@ void Ambient::init(int mode)
 
 unsigned int Ambient::getLux()
 {
-    if (GET_SYS_MILLIS() - last_time > sample_time)
-    {
+    if (GET_SYS_MILLIS() - last_time > sample_time) {
         last_time = GET_SYS_MILLIS();
         Wire.requestFrom(ADDRESS_BH1750FVI, 2); // ask Arduino to read back 2 bytes from the sensor
         highByte = Wire.read();                 // get the high byte

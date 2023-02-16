@@ -2,9 +2,9 @@
 #define APP_CONTROLLER_H
 
 #include "Arduino.h"
-#include "interface.h"
-#include "driver/imu.h"
 #include "common.h"
+#include "driver/imu.h"
+#include "interface.h"
 #include <list>
 
 #define CTRL_NAME "AppCtrl"
@@ -23,8 +23,7 @@
 //     void *message;         // 附带数据，可以为任何数据类型
 // };
 
-struct EVENT_OBJ
-{
+struct EVENT_OBJ {
     const APP_OBJ *from;       // 发送请求服务的APP
     APP_MESSAGE_TYPE type;     // app的事件类型
     void *info;                // 请求携带的信息
@@ -42,8 +41,7 @@ public:
     void Display(void); // 显示接口
     int app_auto_start();
     // 将APP注册到app_controller中
-    int app_install(APP_OBJ *app,
-                    APP_TYPE app_type = APP_TYPE_REAL_TIME);
+    int app_install(APP_OBJ *app, APP_TYPE app_type = APP_TYPE_REAL_TIME);
     // 将APP从app_controller中卸载（删除）
     int app_uninstall(const APP_OBJ *app);
     // 将APP的后台任务从任务队列中移除(自能通过APP退出的时候，移除自身的后台任务)
@@ -51,11 +49,8 @@ public:
     int main_process(ImuAction *act_info);
     void app_exit(void); // 提供给app退出的系统调用
     // 消息发送
-    int send_to(const char *from, const char *to,
-                APP_MESSAGE_TYPE type, void *message,
-                void *ext_info);
-    void deal_config(APP_MESSAGE_TYPE type,
-                     const char *key, char *value);
+    int send_to(const char *from, const char *to, APP_MESSAGE_TYPE type, void *message, void *ext_info);
+    void deal_config(APP_MESSAGE_TYPE type, const char *key, char *value);
     // 事件处理
     int req_event_deal(void);
     bool wifi_event(APP_MESSAGE_TYPE type); // wifi事件的处理

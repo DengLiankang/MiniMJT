@@ -33,7 +33,7 @@
 #ifndef FTP_SERVERESP_H
 #define FTP_SERVERESP_H
 
-//#include "Streaming.h"
+// #include "Streaming.h"
 #include "SD.h"
 #include <FS.h>
 #include <WiFiClient.h>
@@ -69,8 +69,8 @@ private:
     void abortTransfer();
     boolean makePath(char *fullname);
     boolean makePath(char *fullName, char *param);
-    uint8_t getDateTime(uint16_t *pyear, uint8_t *pmonth, uint8_t *pday,
-                        uint8_t *phour, uint8_t *pminute, uint8_t *second);
+    uint8_t getDateTime(uint16_t *pyear, uint8_t *pmonth, uint8_t *pday, uint8_t *phour, uint8_t *pminute,
+                        uint8_t *second);
     char *makeDateTimeStr(char *tstr, uint16_t date, uint16_t time);
     int8_t readChar();
 

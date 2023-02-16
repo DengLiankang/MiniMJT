@@ -3,7 +3,7 @@
 
 #include <Wire.h>
 
-#define ADDRESS_BH1750FVI 0x23           //ADDR="L" for this module
+#define ADDRESS_BH1750FVI 0x23           // ADDR="L" for this module
 #define ONE_TIME_H_RESOLUTION_MODE 0x20  // 1lux for 120ms
 #define ONE_TIME_H_RESOLUTION_MODE2 0x21 // 0.5lux for 120ms
 #define ONE_TIME_L_RESOLUTION_MODE 0x23  // 4lux for 16ms

@@ -1,10 +1,11 @@
-#include <Arduino.h>
 #include "FS.h"
+#include <Arduino.h>
 
 class FlashFS
 {
 private:
     fs::FS *m_fs;
+
 public:
     FlashFS();
 

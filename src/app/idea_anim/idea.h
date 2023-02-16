@@ -3,15 +3,12 @@
 
 #include "sys/interface.h"
 
-
-
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
 #include "lvgl.h"
-    extern const lv_img_dsc_t app_idea;
+extern const lv_img_dsc_t app_idea;
 
 #ifdef __cplusplus
 } /* extern "C" */

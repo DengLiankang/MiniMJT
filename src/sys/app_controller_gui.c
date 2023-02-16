@@ -17,8 +17,7 @@ LV_FONT_DECLARE(lv_font_montserrat_24);
 
 void app_control_gui_init(void)
 {
-    if (NULL != app_scr)
-    {
+    if (NULL != app_scr) {
         lv_obj_clean(app_scr);
         app_scr = NULL;
     }
@@ -38,8 +37,7 @@ void app_control_gui_init(void)
     app_scr = lv_obj_create(NULL);
     lv_obj_add_style(app_scr, &default_style, LV_STATE_DEFAULT);
     // 设置不显示滚动条
-    lv_obj_set_style_bg_opa(app_scr, LV_OPA_0,
-                            LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(app_scr, LV_OPA_0, LV_PART_SCROLLBAR | LV_STATE_DEFAULT);
     // lv_obj_set_size(app_scr, 240, 240);
     // lv_obj_align(app_scr, LV_ALIGN_CENTER, 0, 0);
     // lv_scr_load(app_scr);
@@ -54,8 +52,7 @@ void app_control_gui_init(void)
 
 void app_control_gui_release(void)
 {
-    if (NULL != app_scr)
-    {
+    if (NULL != app_scr) {
         lv_obj_clean(app_scr);
         app_scr = NULL;
     }
@@ -64,8 +61,7 @@ void app_control_gui_release(void)
 void display_app_scr_init(const void *src_img_path, const char *app_name)
 {
     lv_obj_t *act_obj = lv_scr_act(); // 获取当前活动页
-    if (act_obj == app_scr)
-    {
+    if (act_obj == app_scr) {
         // 防止一些不适用lvgl的APP退出 造成画面在无其他动作情况下无法绘制更新
         lv_scr_load_anim(app_scr, LV_SCR_LOAD_ANIM_NONE, 300, 300, false);
         return;
@@ -90,14 +86,12 @@ void display_app_scr_init(const void *src_img_path, const char *app_name)
 void app_control_display_scr(const void *src_img, const char *app_name, lv_scr_load_anim_t anim_type, bool force)
 {
     // force为是否强制刷新页面 true为强制刷新
-    if (true == force)
-    {
+    if (true == force) {
         display_app_scr_init(src_img, app_name);
         return;
     }
 
-    if (src_img == pre_img_path)
-    {
+    if (src_img == pre_img_path) {
         return;
     }
 
@@ -107,16 +101,13 @@ void app_control_display_scr(const void *src_img, const char *app_name, lv_scr_l
     int old_start_x;
     int old_end_x;
 
-    if (LV_SCR_LOAD_ANIM_MOVE_LEFT == anim_type)
-    {
+    if (LV_SCR_LOAD_ANIM_MOVE_LEFT == anim_type) {
         // 120为半个屏幕大小 应用图标规定是128，一半刚好是64
         now_start_x = -120 - 64;
         now_end_x = 0;
         old_start_x = 0;
         old_end_x = 120 + 64;
-    }
-    else
-    {
+    } else {
         // 120为半个屏幕大小 应用图标规定是128，一半刚好是64
         now_start_x = 120 + 64;
         now_end_x = 0;

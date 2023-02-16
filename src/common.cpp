@@ -15,8 +15,7 @@ SemaphoreHandle_t lvgl_mutex = xSemaphoreCreateMutex();
 boolean doDelayMillisTime(unsigned long interval, unsigned long *previousMillis, boolean state)
 {
     unsigned long currentMillis = GET_SYS_MILLIS();
-    if (currentMillis - *previousMillis >= interval)
-    {
+    if (currentMillis - *previousMillis >= interval) {
         *previousMillis = currentMillis;
         state = !state;
     }
@@ -28,9 +27,8 @@ boolean doDelayMillisTime(unsigned long interval, unsigned long *previousMillis,
 #include <Arduino_GFX_Library.h>
 
 Arduino_HWSPI *bus = new Arduino_HWSPI(TFT_DC /* DC */, TFT_CS /* CS */, TFT_SCLK, TFT_MOSI, TFT_MISO);
-Arduino_ST7789 *tft = new Arduino_ST7789(bus, TFT_RST /* RST */, 3 /* rotation */, true /* IPS */,
-                                         240 /* width */, 240 /* height */,
-                                         0 /* col offset 1 */, 80 /* row offset 1 */);
+Arduino_ST7789 *tft = new Arduino_ST7789(bus, TFT_RST /* RST */, 3 /* rotation */, true /* IPS */, 240 /* width */,
+                                         240 /* height */, 0 /* col offset 1 */, 80 /* row offset 1 */);
 
 #else
 #include <TFT_eSPI.h>

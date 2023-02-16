@@ -20,12 +20,11 @@ void game_2048_gui_init(void)
         return;
     lv_obj_clean(act_obj); // 清空此前页面
 
-    //创建屏幕对象
+    // 创建屏幕对象
     game_2048_gui = lv_obj_create(NULL);
     lv_obj_add_style(game_2048_gui, &default_style, LV_STATE_DEFAULT);
 
-    for (int i = 0; i < SCALE_SIZE * SCALE_SIZE; i++)
-    {
+    for (int i = 0; i < SCALE_SIZE * SCALE_SIZE; i++) {
         img[i] = lv_img_create(game_2048_gui);
         lv_img_set_src(img[i], &N0);
         lv_obj_align(img[i], LV_ALIGN_TOP_LEFT, 8 + i % 4 * 58, 8 + i / 4 * 58);
@@ -36,14 +35,11 @@ void game_2048_gui_init(void)
 /*
  * 其他函数请根据需要添加
  */
-void display_game_2048(const char *file_name, lv_scr_load_anim_t anim_type)
-{
-}
+void display_game_2048(const char *file_name, lv_scr_load_anim_t anim_type) {}
 
 void game_2048_gui_del(void)
 {
-    if (NULL != game_2048_gui)
-    {
+    if (NULL != game_2048_gui) {
         lv_obj_clean(game_2048_gui);
         game_2048_gui = NULL;
     }
@@ -52,17 +48,11 @@ void game_2048_gui_del(void)
     // lv_style_reset(&default_style);
 }
 
-//用于宽高同时增加的lv_anim_exec_xcb_t动画参数
-static void anim_size_cb(void *var, int32_t v)
-{
-    lv_obj_set_size(var, v, v);
-}
+// 用于宽高同时增加的lv_anim_exec_xcb_t动画参数
+static void anim_size_cb(void *var, int32_t v) { lv_obj_set_size(var, v, v); }
 
-//用于斜向移动的lv_anim_exec_xcb_t动画参数
-static void anim_pos_cb(void *var, int32_t v)
-{
-    lv_obj_set_pos(var, v, v);
-}
+// 用于斜向移动的lv_anim_exec_xcb_t动画参数
+static void anim_pos_cb(void *var, int32_t v) { lv_obj_set_pos(var, v, v); }
 
 /*
  * 出生动画
@@ -111,11 +101,11 @@ void zoom(int i)
     lv_anim_set_var(&a, img[i]);
     lv_anim_set_delay(&a, 400);
     lv_anim_set_time(&a, 100);
-    //播完后回放
+    // 播完后回放
     lv_anim_set_playback_delay(&a, 0);
     lv_anim_set_playback_time(&a, 100);
 
-    //线性动画
+    // 线性动画
     lv_anim_set_path_cb(&a, lv_anim_path_linear);
 
     lv_anim_set_values(&a, 50, 56);
@@ -152,12 +142,9 @@ void move(int i, lv_anim_exec_xcb_t direction, int dist)
     lv_anim_set_exec_cb(&a, (lv_anim_exec_xcb_t)direction);
     lv_anim_set_var(&a, img[i]);
     lv_anim_set_time(&a, 500);
-    if (direction == (lv_anim_exec_xcb_t)lv_obj_set_x)
-    {
+    if (direction == (lv_anim_exec_xcb_t)lv_obj_set_x) {
         lv_anim_set_values(&a, lv_obj_get_x(img[i]), lv_obj_get_x(img[i]) + dist * 58);
-    }
-    else
-    {
+    } else {
         lv_anim_set_values(&a, lv_obj_get_y(img[i]), lv_obj_get_y(img[i]) + dist * 58);
     }
 
@@ -167,45 +154,43 @@ void move(int i, lv_anim_exec_xcb_t direction, int dist)
     lv_anim_start(&a);
 }
 
-//获取图片内容对象
+// 获取图片内容对象
 const lv_img_dsc_t *getN(int i)
 {
-    switch (i)
-    {
-    case 0:
-        return &N0;
-    case 2:
-        return &N2;
-    case 4:
-        return &N4;
-    case 8:
-        return &N8;
-    case 16:
-        return &N16;
-    case 32:
-        return &N32;
-    case 64:
-        return &N64;
-    case 128:
-        return &N128;
-    case 256:
-        return &N256;
-    case 512:
-        return &N512;
-    case 1024:
-        return &N1024;
-    case 2048:
-        return &N2048;
-    default:
-        return &N0;
+    switch (i) {
+        case 0:
+            return &N0;
+        case 2:
+            return &N2;
+        case 4:
+            return &N4;
+        case 8:
+            return &N8;
+        case 16:
+            return &N16;
+        case 32:
+            return &N32;
+        case 64:
+            return &N64;
+        case 128:
+            return &N128;
+        case 256:
+            return &N256;
+        case 512:
+            return &N512;
+        case 1024:
+            return &N1024;
+        case 2048:
+            return &N2048;
+        default:
+            return &N0;
     }
 }
 
-//刷新棋盘
+// 刷新棋盘
 void showBoard(int *map)
 {
-    for (int i = 0; i < SCALE_SIZE * SCALE_SIZE; i++)
-    {
+    for (int i = 0; i < SCALE_SIZE * SCALE_SIZE; i++) {
         lv_img_set_src(img[i], getN(map[i]));
         lv_obj_align(img[i], LV_ALIGN_TOP_LEFT, 8 + i % 4 * 58, 8 + i / 4 * 58);
     }
@@ -219,28 +204,23 @@ void showBoard(int *map)
 void showAnim(int *animMap, int direction)
 {
     lv_anim_exec_xcb_t Normal;
-    switch (direction)
-    {
-    case 1:
-    case 2:
-        Normal = (lv_anim_exec_xcb_t)lv_obj_set_y;
-        break;
-    case 3:
-    case 4:
-        Normal = (lv_anim_exec_xcb_t)lv_obj_set_x;
-        break;
+    switch (direction) {
+        case 1:
+        case 2:
+            Normal = (lv_anim_exec_xcb_t)lv_obj_set_y;
+            break;
+        case 3:
+        case 4:
+            Normal = (lv_anim_exec_xcb_t)lv_obj_set_x;
+            break;
     }
 
-    //移动和合并
-    for (int i = 0; i < 16; i++)
-    {
-        if (animMap[i] > 4)
-        {
+    // 移动和合并
+    for (int i = 0; i < 16; i++) {
+        if (animMap[i] > 4) {
             zoom(i);
             move(i, Normal, animMap[i] - 8);
-        }
-        else if (animMap[i] != 0)
-        {
+        } else if (animMap[i] != 0) {
             move(i, Normal, animMap[i]);
         }
     }
@@ -252,9 +232,9 @@ void showAnim(int *animMap, int direction)
  */
 void showNewBorn(int newborn, int *map)
 {
-    //展示新棋盘
+    // 展示新棋盘
     showBoard(map);
 
-    //出现
+    // 出现
     born(newborn);
 }

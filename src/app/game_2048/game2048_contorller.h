@@ -21,8 +21,7 @@ private:
 public:
     void init()
     {
-        for (int i = 0; i < SCALE_SIZE * SCALE_SIZE; i++)
-        {
+        for (int i = 0; i < SCALE_SIZE * SCALE_SIZE; i++) {
             this->board[i / 4][i % 4] = 0;
             this->previous[i / 4][i % 4] = 0;
             this->moveRecord[i / 4][i % 4] = 0;
@@ -41,40 +40,28 @@ public:
 
     void recordBoard()
     {
-        for (int i = 0; i < SCALE_SIZE * SCALE_SIZE; i++)
-        {
+        for (int i = 0; i < SCALE_SIZE * SCALE_SIZE; i++) {
             this->previous[i / 4][i % 4] = this->board[i / 4][i % 4];
         }
     };
 
     int comparePre()
     {
-        //判断移动后是否相同
+        // 判断移动后是否相同
         int x = 0;
-        for (int i = 0; i < SCALE_SIZE * SCALE_SIZE; i++)
-        {
+        for (int i = 0; i < SCALE_SIZE * SCALE_SIZE; i++) {
             if (this->board[i / 4][i % 4] == this->previous[i / 4][i % 4])
                 x++;
         }
 
-        if (x >= 16)
-        {
+        if (x >= 16) {
             return 1;
         }
         return 0;
     };
-    int *getBoard()
-    {
-        return &this->board[0][0];
-    };
-    string *getLocation()
-    {
-        return &this->Location[0][0];
-    };
-    int *getMoveRecord()
-    {
-        return &this->moveRecord[0][0];
-    };
+    int *getBoard() { return &this->board[0][0]; };
+    string *getLocation() { return &this->Location[0][0]; };
+    int *getMoveRecord() { return &this->moveRecord[0][0]; };
 };
 
 #endif

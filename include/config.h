@@ -1,12 +1,11 @@
 #ifndef CONFIG_H
 #define CONFIG_H
-#include <WString.h>
 #include <Preferences.h>
+#include <WString.h>
 
-extern Preferences prefs;       // 声明Preferences对象
+extern Preferences prefs; // 声明Preferences对象
 
-struct MPU_Config
-{
+struct MPU_Config {
     int16_t x_gyro_offset;
     int16_t y_gyro_offset;
     int16_t z_gyro_offset;
@@ -16,8 +15,7 @@ struct MPU_Config
     int16_t z_accel_offset;
 };
 
-struct Config
-{
+struct Config {
     String ssid;
     String password;
     String cityname;              // 显示的城市

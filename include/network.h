@@ -16,16 +16,16 @@
 #define SERVER_NAME "fileserver"
 
 #ifdef ESP8266
+#include <ESP8266WebServer.h> // Built-in
 #include <ESP8266WiFi.h>      // Built-in
 #include <ESP8266WiFiMulti.h> // Built-in
-#include <ESP8266WebServer.h> // Built-in
 #include <ESP8266mDNS.h>
 #else
-#include <WiFi.h>      // Built-in
-#include <WiFiMulti.h> // 当我们需要使用ESP8266开发板存储多个WiFi网络连接信息时，可以使用ESP8266WiFiMulti库来实现。
-#include <WebServer.h> // https://github.com/Pedroalbuquerque/ESP32WebServer download and place in your Libraries folder
 #include <ESPmDNS.h>
 #include <HTTPClient.h>
+#include <WebServer.h> // https://github.com/Pedroalbuquerque/ESP32WebServer download and place in your Libraries folder
+#include <WiFi.h>      // Built-in
+#include <WiFiMulti.h> // 当我们需要使用ESP8266开发板存储多个WiFi网络连接信息时，可以使用ESP8266WiFiMulti库来实现。
 #endif
 
 // #ifdef __cplusplus
@@ -44,7 +44,7 @@ extern IPAddress gateway;  // Set your network Gateway usually your Router base 
 extern IPAddress subnet;   // Set your network sub-network mask here
 extern IPAddress dns;      // Set your network DNS usually your Router base address
 
-extern const char *AP_SSID; //热点名称
+extern const char *AP_SSID; // 热点名称
 
 void restCallback(TimerHandle_t xTimer);
 

@@ -1,9 +1,9 @@
 #ifndef IMU_H
 #define IMU_H
 
+#include "lv_port_indev.h"
 #include <I2Cdev.h>
 #include <MPU6050.h>
-#include "lv_port_indev.h"
 #include <list>
 #define ACTION_HISTORY_BUF_LEN 5
 
@@ -12,8 +12,7 @@ extern lv_indev_state_t encoder_state;
 
 extern const char *active_type_info[];
 
-enum ACTIVE_TYPE
-{
+enum ACTIVE_TYPE {
     TURN_RIGHT = 0,
     RETURN,
     TURN_LEFT,
@@ -21,21 +20,19 @@ enum ACTIVE_TYPE
     DOWN,
     GO_FORWORD,
     SHAKE,
-    UNKNOWN
+    UNKNOWN,
 };
 
 // 方向类型
-enum MPU_DIR_TYPE
-{
+enum MPU_DIR_TYPE {
     NORMAL_DIR_TYPE = 0,
     X_DIR_TYPE = 0x01,
     Y_DIR_TYPE = 0x02,
     Z_DIR_TYPE = 0x04,
-    XY_DIR_TYPE = 0x08
+    XY_DIR_TYPE = 0x08,
 };
 
-struct SysMpuConfig
-{
+struct SysMpuConfig {
     int16_t x_gyro_offset;
     int16_t y_gyro_offset;
     int16_t z_gyro_offset;
@@ -45,8 +42,7 @@ struct SysMpuConfig
     int16_t z_accel_offset;
 };
 
-struct ImuAction
-{
+struct ImuAction {
     volatile ACTIVE_TYPE active;
     boolean isValid;
     boolean long_time;
@@ -75,8 +71,7 @@ public:
 
 public:
     IMU();
-    void init(uint8_t order, uint8_t auto_calibration,
-              SysMpuConfig *mpu_cfg);
+    void init(uint8_t order, uint8_t auto_calibration, SysMpuConfig *mpu_cfg);
     void setOrder(uint8_t order); // 设置方向
     bool Encoder_GetIsPush(void); // 适配Peak的编码器中键 开关机使用
     ImuAction *update(int interval);

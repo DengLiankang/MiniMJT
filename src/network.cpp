@@ -1,6 +1,6 @@
 #include "network.h"
-#include "common.h"
 #include "HardwareSerial.h"
+#include "common.h"
 
 IPAddress local_ip(192, 168, 4, 2); // Set your server's fixed IP address here
 IPAddress gateway(192, 168, 4, 2);  // Set your network Gateway usually your Router base address
@@ -26,16 +26,12 @@ void Network::search_wifi(void)
     Serial.println("scan start");
     int wifi_num = WiFi.scanNetworks();
     Serial.println("scan done");
-    if (0 == wifi_num)
-    {
+    if (0 == wifi_num) {
         Serial.println("no networks found");
-    }
-    else
-    {
+    } else {
         Serial.print(wifi_num);
         Serial.println(" networks found");
-        for (int cnt = 0; cnt < wifi_num; ++cnt)
-        {
+        for (int cnt = 0; cnt < wifi_num; ++cnt) {
             Serial.print(cnt + 1);
             Serial.print(": ");
             Serial.print(WiFi.SSID(cnt));
@@ -49,8 +45,7 @@ void Network::search_wifi(void)
 
 boolean Network::start_conn_wifi(const char *ssid, const char *password)
 {
-    if (WiFi.status() == WL_CONNECTED)
-    {
+    if (WiFi.status() == WL_CONNECTED) {
         Serial.println(F("\nWiFi is OK.\n"));
         return false;
     }
@@ -80,11 +75,11 @@ boolean Network::start_conn_wifi(const char *ssid, const char *password)
     // 	delay(250);
     // 	Serial.print('.');
     // }
-    // Serial.println("\nConnected to " + WiFi.SSID() + " Use IP address: " + WiFi.localIP().toString()); // Report which SSID and IP is in use
-    // // The logical name http://fileserver.local will also access the device if you have 'Bonjour' running or your system supports multicast dns
-    // if (!MDNS.begin(SERVER_NAME))
-    // { // Set your preferred server name, if you use "myserver" the address would be http://myserver.local/
-    // 	Serial.println(F("Error setting up MDNS responder!"));
+    // Serial.println("\nConnected to " + WiFi.SSID() + " Use IP address: " + WiFi.localIP().toString()); // Report
+    // which SSID and IP is in use
+    // // The logical name http://fileserver.local will also access the device if you have 'Bonjour' running or your
+    // system supports multicast dns if (!MDNS.begin(SERVER_NAME)) { // Set your preferred server name, if you use
+    // "myserver" the address would be http://myserver.local/ 	Serial.println(F("Error setting up MDNS responder!"));
     // 	ESP.restart();
     // }
 
@@ -93,18 +88,15 @@ boolean Network::start_conn_wifi(const char *ssid, const char *password)
 
 boolean Network::end_conn_wifi(void)
 {
-    if (WL_CONNECTED != WiFi.status())
-    {
-        if (doDelayMillisTime(10000, &m_preDisWifiConnInfoMillis, false))
-        {
+    if (WL_CONNECTED != WiFi.status()) {
+        if (doDelayMillisTime(10000, &m_preDisWifiConnInfoMillis, false)) {
             // 这个if为了减少频繁的打印
             Serial.println(F("\nWiFi connect error.\n"));
         }
         return CONN_ERROR;
     }
 
-    if (doDelayMillisTime(10000, &m_preDisWifiConnInfoMillis, false))
-    {
+    if (doDelayMillisTime(10000, &m_preDisWifiConnInfoMillis, false)) {
         // 这个if为了减少频繁的打印
         Serial.println(F("\nWiFi connected"));
         Serial.print(F("IP address: "));
@@ -115,12 +107,15 @@ boolean Network::end_conn_wifi(void)
 
 boolean Network::close_wifi(void)
 {
-    if (!WiFi.disconnect())
-    {
+    if (WiFi.getMode() & WIFI_MODE_AP) {
+        WiFi.enableAP(false);
+        Serial.println(F("AP shutdowm"));
+    }
+
+    if (!WiFi.disconnect()) {
         return false;
     }
     WiFi.enableSTA(false);
-    WiFi.enableAP(false);
     WiFi.mode(WIFI_MODE_NULL);
     // esp_wifi_set_inactive_time(ESP_IF_ETH, 10); //设置暂时休眠时间
     // esp_wifi_get_ant(wifi_ant_config_t * config);                   //获取暂时休眠时间
@@ -137,8 +132,7 @@ boolean Network::open_ap(const char *ap_ssid, const char *ap_password)
     WiFi.setHostname(HOST_NAME);
     // WiFi.begin();
     boolean result = WiFi.softAP(ap_ssid, ap_password); // 开启WIFI热点
-    if (result)
-    {
+    if (result) {
         WiFi.softAPConfig(local_ip, gateway, subnet);
         IPAddress myIP = WiFi.softAPIP();
 
@@ -150,9 +144,7 @@ boolean Network::open_ap(const char *ap_ssid, const char *ap_password)
         ap_timeout = 300; // 开始计时
         // xTimer_ap = xTimerCreate("ap time out", 1000 / portTICK_PERIOD_MS, pdTRUE, (void *)0, restCallback);
         // xTimerStart(xTimer_ap, 0); //开启定时器
-    }
-    else
-    {
+    } else {
         // 开启热点失败
         Serial.println(F("WiFiAP Failed"));
         return false;
@@ -160,8 +152,7 @@ boolean Network::open_ap(const char *ap_ssid, const char *ap_password)
         ESP.restart(); // 复位esp32
     }
     // 设置域名
-    if (MDNS.begin(HOST_NAME))
-    {
+    if (MDNS.begin(HOST_NAME)) {
         Serial.println(F("MDNS responder started"));
     }
     return true;
@@ -173,8 +164,7 @@ void restCallback(TimerHandle_t xTimer)
     --ap_timeout;
     Serial.print(F("AP timeout: "));
     Serial.println(ap_timeout);
-    if (ap_timeout < 1)
-    {
+    if (ap_timeout < 1) {
         // todo
         WiFi.softAPdisconnect(true);
         // ESP.restart();

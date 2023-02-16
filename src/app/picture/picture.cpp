@@ -1,7 +1,7 @@
 #include "picture.h"
+#include "common.h"
 #include "picture_gui.h"
 #include "sys/app_controller.h"
-#include "common.h"
 
 // Include the jpeg decoder library
 #include <TJpg_Decoder.h>
@@ -10,8 +10,7 @@
 
 // 相册的持久化配置
 #define PICTURE_CONFIG_PATH "/picture.cfg"
-struct PIC_Config
-{
+struct PIC_Config {
     unsigned long switchInterval; // 自动播放下一张的时间间隔 ms
 };
 
@@ -33,14 +32,11 @@ static void read_config(PIC_Config *cfg)
     char info[128] = {0};
     uint16_t size = g_flashCfg.readFile(PICTURE_CONFIG_PATH, (uint8_t *)info);
     info[size] = 0;
-    if (size == 0)
-    {
+    if (size == 0) {
         // 默认值
         cfg->switchInterval = 10000; // 是否自动播放下一个（0不切换 默认10000毫秒）
         write_config(cfg);
-    }
-    else
-    {
+    } else {
         // 解析数据
         char *param[1] = {0};
         analyseParam(info, 1, param);
@@ -48,14 +44,13 @@ static void read_config(PIC_Config *cfg)
     }
 }
 
-struct PictureAppRunData
-{
-    unsigned long pic_perMillis;      // 图片上一回更新的时间
-    unsigned long picRefreshInterval; // 图片播放的时间间隔(10s)
+struct PictureAppRunData {
+    unsigned long pic_perMillis; // 图片上一回更新的时间
 
     File_Info *image_file;      // movie文件夹下的文件指针头
     File_Info *pfile;           // 指向当前播放的文件节点
     int image_pos_increate = 1; // 文件的遍历方向
+    bool refreshFlag = false;   // 是否更新
     bool tftSwapStatus;
 };
 
@@ -84,16 +79,13 @@ bool tft_output(int16_t x, int16_t y, uint16_t w, uint16_t h, uint16_t *bitmap)
 static File_Info *get_next_file(File_Info *p_cur_file, int direction)
 {
     // 得到 p_cur_file 的下一个 类型为FILE_TYPE_FILE 的文件（即下一个非文件夹文件）
-    if (NULL == p_cur_file)
-    {
+    if (NULL == p_cur_file) {
         return NULL;
     }
 
     File_Info *pfile = direction == 1 ? p_cur_file->next_node : p_cur_file->front_node;
-    while (pfile != p_cur_file)
-    {
-        if (FILE_TYPE_FILE == pfile->file_type)
-        {
+    while (pfile != p_cur_file) {
+        if (FILE_TYPE_FILE == pfile->file_type) {
             break;
         }
         pfile = direction == 1 ? pfile->next_node : pfile->front_node;
@@ -117,8 +109,7 @@ static int picture_init(AppController *sys)
     tft->setSwapBytes(true); // We need to swap the colour bytes (endianess)
 
     run_data->image_file = tf.listDir(IMAGE_PATH);
-    if (NULL != run_data->image_file)
-    {
+    if (NULL != run_data->image_file) {
         run_data->pfile = get_next_file(run_data->image_file->next_node, 1);
     }
 
@@ -129,66 +120,60 @@ static int picture_init(AppController *sys)
     return 0;
 }
 
-static void picture_process(AppController *sys,
-                            const ImuAction *act_info)
+static void picture_process(AppController *sys, const ImuAction *act_info)
 {
     lv_scr_load_anim_t anim_type = LV_SCR_LOAD_ANIM_FADE_ON;
 
-    if (RETURN == act_info->active)
-    {
+    if (RETURN == act_info->active) {
         sys->app_exit();
         return;
     }
 
-    if (TURN_RIGHT == act_info->active)
-    {
+    if (TURN_RIGHT == act_info->active) {
         anim_type = LV_SCR_LOAD_ANIM_OVER_RIGHT;
         run_data->image_pos_increate = 1;
-        run_data->pic_perMillis = GET_SYS_MILLIS() - cfg_data.switchInterval; // 间接强制更新
-    }
-    else if (TURN_LEFT == act_info->active)
-    {
+        run_data->refreshFlag = true;
+    } else if (TURN_LEFT == act_info->active) {
         anim_type = LV_SCR_LOAD_ANIM_OVER_LEFT;
         run_data->image_pos_increate = -1;
-        run_data->pic_perMillis = GET_SYS_MILLIS() - cfg_data.switchInterval; // 间接强制更新
+        run_data->refreshFlag = true;
     }
 
-    if (NULL == run_data->image_file)
-    {
+    if (NULL == run_data->image_file) {
         sys->app_exit();
         return;
     }
 
-    if (doDelayMillisTime(cfg_data.switchInterval, &run_data->pic_perMillis, false) == true)
-    {
-        if (NULL != run_data->image_file)
-        {
-            run_data->pfile = get_next_file(run_data->pfile,
-                                            run_data->image_pos_increate);
+    // 自动切换的时间检测
+    if (0 != run_data->image_pos_increate && 0 != cfg_data.switchInterval &&
+        GET_SYS_MILLIS() - run_data->pic_perMillis >= cfg_data.switchInterval) {
+        run_data->refreshFlag = true;
+    }
+
+    if (true == run_data->refreshFlag) {
+        if (NULL != run_data->image_file) {
+            run_data->pfile = get_next_file(run_data->pfile, run_data->image_pos_increate);
         }
         char file_name[PIC_FILENAME_MAX_LEN] = {0};
-        snprintf(file_name, PIC_FILENAME_MAX_LEN, "%s/%s",
-                 run_data->image_file->file_name,
-                 run_data->pfile->file_name);
+        snprintf(file_name, PIC_FILENAME_MAX_LEN, "%s/%s", run_data->image_file->file_name, run_data->pfile->file_name);
         // Draw the image, top left at 0,0
         Serial.print(F("Decode image: "));
         Serial.println(file_name);
-        if (NULL != strstr(file_name, ".jpg") || NULL != strstr(file_name, ".JPG"))
-        {
+        if (NULL != strstr(file_name, ".jpg") || NULL != strstr(file_name, ".JPG")) {
             // 直接解码jpg格式的图片
             TJpgDec.drawSdJpg(0, 0, file_name);
-        }
-        else if (NULL != strstr(file_name, ".bin") || NULL != strstr(file_name, ".BIN"))
-        {
+        } else if (NULL != strstr(file_name, ".bin") || NULL != strstr(file_name, ".BIN")) {
             // 使用LVGL的bin格式的图片
             display_photo(file_name, anim_type);
         }
+        run_data->refreshFlag = false;
+        // 重置更新的时间标记
+        run_data->pic_perMillis = GET_SYS_MILLIS();
     }
     delay(300);
 }
 
-static void picture_background_task(AppController *sys,
-                                    const ImuAction *act_info)
+static void picture_background_task(AppController *sys, const ImuAction *act_info)
 {
     // 本函数为后台任务，主控制器会间隔一分钟调用此函数
     // 本函数尽量只调用"常驻数据",其他变量可能会因为生命周期的缘故已经释放
@@ -203,58 +188,43 @@ static int picture_exit_callback(void *param)
     tft->setSwapBytes(run_data->tftSwapStatus);
 
     // 释放运行数据
-    if (NULL != run_data)
-    {
+    if (NULL != run_data) {
         free(run_data);
         run_data = NULL;
     }
     return 0;
 }
 
-static void picture_message_handle(const char *from, const char *to,
-                                   APP_MESSAGE_TYPE type, void *message,
+static void picture_message_handle(const char *from, const char *to, APP_MESSAGE_TYPE type, void *message,
                                    void *ext_info)
 {
-    switch (type)
-    {
-    case APP_MESSAGE_GET_PARAM:
-    {
-        char *param_key = (char *)message;
-        if (!strcmp(param_key, "switchInterval"))
-        {
-            snprintf((char *)ext_info, 32, "%lu", cfg_data.switchInterval);
-        }
-        else
-        {
-            snprintf((char *)ext_info, 32, "%s", "NULL");
-        }
-    }
-    break;
-    case APP_MESSAGE_SET_PARAM:
-    {
-        char *param_key = (char *)message;
-        char *param_val = (char *)ext_info;
-        if (!strcmp(param_key, "switchInterval"))
-        {
-            cfg_data.switchInterval = atol(param_val);
-        }
-    }
-    break;
-    case APP_MESSAGE_READ_CFG:
-    {
-        read_config(&cfg_data);
-    }
-    break;
-    case APP_MESSAGE_WRITE_CFG:
-    {
-        write_config(&cfg_data);
-    }
-    break;
-    default:
-        break;
+    switch (type) {
+        case APP_MESSAGE_GET_PARAM: {
+            char *param_key = (char *)message;
+            if (!strcmp(param_key, "switchInterval")) {
+                snprintf((char *)ext_info, 32, "%lu", cfg_data.switchInterval);
+            } else {
+                snprintf((char *)ext_info, 32, "%s", "NULL");
+            }
+        } break;
+        case APP_MESSAGE_SET_PARAM: {
+            char *param_key = (char *)message;
+            char *param_val = (char *)ext_info;
+            if (!strcmp(param_key, "switchInterval")) {
+                cfg_data.switchInterval = atol(param_val);
+            }
+        } break;
+        case APP_MESSAGE_READ_CFG: {
+            read_config(&cfg_data);
+        } break;
+        case APP_MESSAGE_WRITE_CFG: {
+            write_config(&cfg_data);
+        } break;
+        default:
+            break;
     }
 }
 
-APP_OBJ picture_app = {PICTURE_APP_NAME, &app_picture, "",
-                       picture_init, picture_process, picture_background_task,
+APP_OBJ picture_app = {PICTURE_APP_NAME,      &app_picture,          "",
+                       picture_init,          picture_process,       picture_background_task,
                        picture_exit_callback, picture_message_handle};

@@ -2,15 +2,6 @@
 
 #define LV_LVGL_H_INCLUDE_SIMPLE
 
-#include "images/archerS_0000.h"
-#include "images/archerS_0001.h"
-#include "images/archerS_0002.h"
-#include "images/archerS_0003.h"
-#include "images/archerS_0004.h"
-#include "images/archerS_0005.h"
-#include "images/archerS_0006.h"
-#include "images/archerS_0007.h"
-#include "images/archerS_0008.h"
 #include "images/archerR_0000.h"
 #include "images/archerR_0001.h"
 #include "images/archerR_0002.h"
@@ -21,6 +12,15 @@
 #include "images/archerR_0007.h"
 #include "images/archerR_0008.h"
 #include "images/archerR_0009.h"
+#include "images/archerS_0000.h"
+#include "images/archerS_0001.h"
+#include "images/archerS_0002.h"
+#include "images/archerS_0003.h"
+#include "images/archerS_0004.h"
+#include "images/archerS_0005.h"
+#include "images/archerS_0006.h"
+#include "images/archerS_0007.h"
+#include "images/archerS_0008.h"
 #include "images/heart_0000.h"
 #include "images/heart_0001.h"
 #include "images/heart_0002.h"
@@ -59,26 +59,9 @@ const void *archerR_map[] = {&archerR_0000, &archerR_0001, &archerR_0002, &arche
 const void *archerS_map[] = {&archerS_0000, &archerS_0001, &archerS_0002, &archerS_0003, &archerS_0004,
                              &archerS_0005, &archerS_0006, &archerS_0007, &archerS_0008};
 const void *heart_map[] = {
-    &heart_0000,
-    &heart_0001,
-    &heart_0002,
-    &heart_0003,
-    &heart_0004,
-    &heart_0005,
-    &heart_0006,
-    &heart_0007,
-    &heart_0008,
-    &heart_0009,
-    &heart_0010,
-    &heart_0011,
-    &heart_0012,
-    &heart_0013,
-    &heart_0014,
-    &heart_0015,
-    &heart_0016,
-    &heart_0017,
-    &heart_0018,
-    &heart_0019,
+    &heart_0000, &heart_0001, &heart_0002, &heart_0003, &heart_0004, &heart_0005, &heart_0006,
+    &heart_0007, &heart_0008, &heart_0009, &heart_0010, &heart_0011, &heart_0012, &heart_0013,
+    &heart_0014, &heart_0015, &heart_0016, &heart_0017, &heart_0018, &heart_0019,
 };
 
 static lv_style_t default_style;
@@ -123,7 +106,7 @@ void display_heartbeat(const char *file_name, lv_scr_load_anim_t anim_type)
     heartbeat_gui = lv_obj_create(NULL);
     lv_obj_add_style(heartbeat_gui, &default_style, LV_STATE_DEFAULT);
 
-    heartbeatImg = lv_img_create(heartbeat_gui); //创建heart图标
+    heartbeatImg = lv_img_create(heartbeat_gui); // 创建heart图标
 
     txtlabel = lv_label_create(heartbeat_gui);
     lv_obj_add_style(txtlabel, &chFont_style, LV_STATE_DEFAULT);
@@ -149,20 +132,14 @@ void display_heartbeat(const char *file_name, lv_scr_load_anim_t anim_type)
 void display_heartbeat_img(void)
 {
     static int _beatIndex = 0;
-    if (NULL != heartbeat_gui && lv_scr_act() == heartbeat_gui)
-    {
-        if (s_r_type == SEND)
-        {
+    if (NULL != heartbeat_gui && lv_scr_act() == heartbeat_gui) {
+        if (s_r_type == SEND) {
             _beatIndex = (_beatIndex + 1) % SEND_IMG_NUM;
             lv_img_set_src(heartbeatImg, archerS_map[_beatIndex]);
-        }
-        else if (s_r_type == RECV)
-        {
+        } else if (s_r_type == RECV) {
             _beatIndex = (_beatIndex + 1) % RECV_IMG_NUM;
             lv_img_set_src(heartbeatImg, archerR_map[_beatIndex]);
-        }
-        else
-        {
+        } else {
             _beatIndex = (_beatIndex + 1) % HEART_IMG_NUM;
             lv_img_set_src(heartbeatImg, heart_map[_beatIndex]);
         }
@@ -171,10 +148,7 @@ void display_heartbeat_img(void)
     }
 }
 
-void heartbeat_set_sr_type(enum S_R_TYPE type)
-{
-    s_r_type = type;
-}
+void heartbeat_set_sr_type(enum S_R_TYPE type) { s_r_type = type; }
 
 void heartbeat_set_send_recv_cnt_label(uint8_t send_num, uint8_t recv_num)
 {
@@ -183,8 +157,7 @@ void heartbeat_set_send_recv_cnt_label(uint8_t send_num, uint8_t recv_num)
 
 void heartbeat_gui_del(void)
 {
-    if (NULL != heartbeat_gui)
-    {
+    if (NULL != heartbeat_gui) {
         lv_obj_clean(heartbeat_gui);
         heartbeat_gui = NULL;
         txtlabel = NULL;

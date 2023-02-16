@@ -7,7 +7,6 @@
 #define MQTT_SEND_MSG "HeartBeat"
 #endif
 
-
 extern APP_OBJ heartbeat_app;
 
 #endif

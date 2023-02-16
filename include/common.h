@@ -1,17 +1,23 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-#define MJT_VERSION "1.0.2"
+#define MJT_VERSION "1.1.0"
 #define GET_SYS_MILLIS xTaskGetTickCount // 获取系统毫秒数
 // #define GET_SYS_MILLIS millis            // 获取系统毫秒数
 
 #include "Arduino.h"
-#include "driver/flash_fs.h"
-#include "driver/sd_card.h"
-#include "driver/display.h"
 #include "driver/ambient.h"
+#include "driver/display.h"
+#include "driver/flash_fs.h"
 #include "driver/imu.h"
+#include "driver/sd_card.h"
 #include "network.h"
+
+// SD_Card
+#define SD_SCK 14
+#define SD_MISO 26
+#define SD_MOSI 13
+#define SD_SS 15
 
 // MUP6050
 #define IMU_I2C_SDA 32
@@ -25,9 +31,7 @@ extern FlashFS g_flashCfg; // flash中的文件系统（替代原先的Preferenc
 extern Display screen;     // 屏幕对象
 extern Ambient ambLight;   // 光纤传感器对象
 
-boolean doDelayMillisTime(unsigned long interval,
-                          unsigned long *previousMillis,
-                          boolean state);
+boolean doDelayMillisTime(unsigned long interval, unsigned long *previousMillis, boolean state);
 
 // 光感 (与MPU6050一致)
 #define AMB_I2C_SDA 32
@@ -49,15 +53,13 @@ boolean doDelayMillisTime(unsigned long interval,
 // lvgl 操作的锁
 extern SemaphoreHandle_t lvgl_mutex;
 // LVGL操作的安全宏（避免脏数据）
-#define AIO_LVGL_OPERATE_LOCK(CODE)                          \
-    if (pdTRUE == xSemaphoreTake(lvgl_mutex, portMAX_DELAY)) \
-    {                                                        \
-        CODE;                                                \
-        xSemaphoreGive(lvgl_mutex);                          \
+#define AIO_LVGL_OPERATE_LOCK(CODE)                                                                                    \
+    if (pdTRUE == xSemaphoreTake(lvgl_mutex, portMAX_DELAY)) {                                                         \
+        CODE;                                                                                                          \
+        xSemaphoreGive(lvgl_mutex);                                                                                    \
     }
 
-struct SysUtilConfig
-{
+struct SysUtilConfig {
     String ssid_0;
     String password_0;
     String ssid_1;

@@ -23,7 +23,7 @@ void server_gui_init(void)
 
     lv_style_init(&default_style);
     lv_style_set_bg_color(&default_style, lv_color_hex(0x000000));
-    
+
     lv_style_init(&label_style);
     lv_style_set_text_opa(&label_style, LV_OPA_COVER);
     lv_style_set_text_color(&label_style, lv_color_white());
@@ -36,8 +36,7 @@ void display_setting_init(void)
     if (act_obj == main_scr)
         return;
 
-    if (NULL != main_scr)
-    {
+    if (NULL != main_scr) {
         lv_obj_clean(main_scr);
     }
 
@@ -45,7 +44,7 @@ void display_setting_init(void)
 
     // 本地的ip地址
     main_scr = lv_obj_create(NULL);
-    lv_obj_set_size(main_scr, 240 , 240);
+    lv_obj_set_size(main_scr, 240, 240);
     lv_obj_set_pos(main_scr, 0, 0);
     lv_obj_add_style(main_scr, &default_style, LV_STATE_DEFAULT);
 
@@ -68,8 +67,7 @@ void display_setting_init(void)
     lv_scr_load(main_scr);
 }
 
-void display_setting(const char *title, const char *domain,
-                     const char *info, const char *ap_ip,
+void display_setting(const char *title, const char *domain, const char *info, const char *ap_ip,
                      lv_scr_load_anim_t anim_type)
 {
     display_setting_init();
@@ -85,8 +83,7 @@ void display_setting(const char *title, const char *domain,
 
 void setting_gui_del(void)
 {
-    if (NULL != main_scr)
-    {
+    if (NULL != main_scr) {
         lv_obj_clean(main_scr); // 清空此前页面
         main_scr = NULL;
         local_ip_label = NULL;

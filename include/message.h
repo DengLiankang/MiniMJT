@@ -4,8 +4,7 @@
 #include "stdint.h"
 #include <string.h>
 
-enum MODULE_TYPE : unsigned char
-{
+enum MODULE_TYPE : unsigned char {
     MODULE_TYPE_UNKNOW = 0,
     MODULE_TYPE_CUBIC_FILE_MANAGER,
     MODULE_TYPE_C_FILE_MANAGER,
@@ -13,8 +12,7 @@ enum MODULE_TYPE : unsigned char
     MODULE_TYPE_TOOL_SETTINGS
 };
 
-enum ACTION_TYPE : unsigned char
-{
+enum ACTION_TYPE : unsigned char {
     AT_UNKNOWN = 0,
     AT_FREE_STATUS,
 
@@ -44,16 +42,14 @@ public:
     ACTION_TYPE m_action_type;
 
 public:
-    MsgHead(MODULE_TYPE from_who = MODULE_TYPE_UNKNOW,
-            MODULE_TYPE to_who = MODULE_TYPE_UNKNOW);
+    MsgHead(MODULE_TYPE from_who = MODULE_TYPE_UNKNOW, MODULE_TYPE to_who = MODULE_TYPE_UNKNOW);
     ~MsgHead(){};
     bool isLegal();
     uint32_t decode(const uint8_t *msg);
     uint32_t encode(uint8_t *msg);
 };
 
-enum VALUE_TYPE : unsigned char
-{
+enum VALUE_TYPE : unsigned char {
     VALUE_TYPE_UNKNOWN = 0,
 
     VALUE_TYPE_INT,
@@ -109,7 +105,7 @@ class DirList
 public:
     FileSystem m_file_system;
     char m_dir_path[99];
-    char m_dir_info[400];   // 用来承载子文件的文件名 多个文件名之间使用\t分隔
+    char m_dir_info[400]; // 用来承载子文件的文件名 多个文件名之间使用\t分隔
 
 public:
     DirList(const char *dir_path = NULL, const char *dir_info = NULL);

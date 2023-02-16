@@ -35,7 +35,7 @@ void display_file_manager_init(void)
     lv_obj_t *act_obj = lv_scr_act(); // 获取当前活动页
     if (act_obj == file_manager_scr)
         return;
-    
+
     lv_obj_clean(act_obj); // 清空此前页面
 
     // 本地的ip地址
@@ -61,8 +61,7 @@ void display_file_manager_init(void)
     lv_scr_load(file_manager_scr);
 }
 
-void display_file_manager(const char *title, const char *ap_ip,
-                          const char *port, const char *info,
+void display_file_manager(const char *title, const char *ap_ip, const char *port, const char *info,
                           lv_scr_load_anim_t anim_type)
 {
     display_file_manager_init();
@@ -78,8 +77,7 @@ void display_file_manager(const char *title, const char *ap_ip,
 
 void file_manager_gui_del(void)
 {
-    if (NULL != file_manager_scr)
-    {
+    if (NULL != file_manager_scr) {
         lv_obj_clean(file_manager_scr); // 清空此前页面
         file_manager_scr = NULL;
         port_label = NULL;

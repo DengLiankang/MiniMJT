@@ -1,5 +1,5 @@
-#include "docoder.h"
 #include "common.h"
+#include "docoder.h"
 #include <TJpg_Decoder.h>
 // #include "MjpegClass.h"
 // static MjpegClass mjpeg;
@@ -28,10 +28,9 @@ bool MjpegPlayDocoder::tft_output(int16_t x, int16_t y, uint16_t w, uint16_t h, 
     // Total time to decode and also draw to TFT:
     // SPI 54MHz=71ms, with DMA 50ms, 71-43 = 28ms spent drawing, so DMA is complete before next MCU block is ready
     // Apparent performance benefit of DMA = 71/50 = 42%, 50 - 43 = 7ms lost elsewhere
-    // SPI 27MHz=95ms, with DMA 52ms. 95-43 = 52ms spent drawing, so DMA is *just* complete before next MCU block is ready!
-    // Apparent performance benefit of DMA = 95/52 = 83%, 52 - 43 = 9ms lost elsewhere
-    if (m_isUseDMA)
-    {
+    // SPI 27MHz=95ms, with DMA 52ms. 95-43 = 52ms spent drawing, so DMA is *just* complete before next MCU block is
+    // ready! Apparent performance benefit of DMA = 95/52 = 83%, 52 - 43 = 9ms lost elsewhere
+    if (m_isUseDMA) {
         // Double buffering is used, the bitmap is copied to the buffer by pushImageDMA() the
         // bitmap can then be updated by the jpeg decoder while DMA is in progress
         uint16_t *dmaBufferPtr;
@@ -41,11 +40,10 @@ bool MjpegPlayDocoder::tft_output(int16_t x, int16_t y, uint16_t w, uint16_t h, 
             dmaBufferPtr = (uint16_t *)MjpegPlayDocoder::m_displayBufWithDma[1];
         MjpegPlayDocoder::m_dmaBufferSel = !MjpegPlayDocoder::m_dmaBufferSel; // Toggle buffer selection
         //  pushImageDMA() will clip the image block at screen boundaries before initiating DMA
-        tft->pushImageDMA(x, y, w, h, bitmap, dmaBufferPtr); // Initiate DMA - blocking only if last DMA is not complete
-                                                             // The DMA transfer of image block to the TFT is now in progress...
-    }
-    else
-    {
+        tft->pushImageDMA(x, y, w, h, bitmap,
+                          dmaBufferPtr); // Initiate DMA - blocking only if last DMA is not complete
+                                         // The DMA transfer of image block to the TFT is now in progress...
+    } else {
         // Non-DMA blocking alternative
         tft->pushImage(x, y, w, h, bitmap); // Blocking, so only returns when image block is drawn
     }
@@ -58,24 +56,19 @@ uint32_t MjpegPlayDocoder::readJpegFromFile(File *file)
     int32_t read_size = 0;
     int32_t pos = 0;
     bool isFound = false;
-    while (true)
-    {
+    while (true) {
         // 查找帧
-        for (; pos < m_bufSaveTail - 1; ++pos)
-        {
-            if (m_displayBuf[pos] == 0xFF && m_displayBuf[pos + 1] == 0xD9)
-            {
+        for (; pos < m_bufSaveTail - 1; ++pos) {
+            if (m_displayBuf[pos] == 0xFF && m_displayBuf[pos + 1] == 0xD9) {
                 isFound = true;
                 break;
             }
         }
-        if (isFound)
-        {
+        if (isFound) {
             // 找到一帧数据
             break;
         }
-        if (m_bufSaveTail + EACH_READ_SIZE > MOVIE_BUFFER_SIZE)
-        {
+        if (m_bufSaveTail + EACH_READ_SIZE > MOVIE_BUFFER_SIZE) {
             // 防止本帧太大溢出，间接丢弃该帧
             m_bufSaveTail = 0;
             pos = 0;
@@ -84,8 +77,7 @@ uint32_t MjpegPlayDocoder::readJpegFromFile(File *file)
         m_bufSaveTail += read_size;
     }
 
-    if (pos + 2 < JPEG_BUFFER_SIZE)
-    {
+    if (pos + 2 < JPEG_BUFFER_SIZE) {
         // 只有帧大小小于 JPEG_BUFFER_SIZE 的时候才可以拷贝
         memcpy(m_jpegBuf, m_displayBuf, pos + 2);
     }
@@ -130,8 +122,7 @@ MjpegPlayDocoder::~MjpegPlayDocoder(void)
 
 bool MjpegPlayDocoder::video_start()
 {
-    if (m_isUseDMA)
-    {
+    if (m_isUseDMA) {
         m_displayBuf = (uint8_t *)malloc(MOVIE_BUFFER_SIZE);
         m_jpegBuf = (uint8_t *)malloc(JPEG_BUFFER_SIZE);
         m_displayBufWithDma[0] = (uint8_t *)heap_caps_malloc(DMA_BUFFER_SIZE, MALLOC_CAP_DMA);
@@ -139,13 +130,10 @@ bool MjpegPlayDocoder::video_start()
         tft->initDMA();
         // 使用DMA
         // DMADrawer::setup(MOVIE_BUFFER_SIZE, SPI_FREQUENCY, TFT_MOSI, TFT_MISO, TFT_SCLK, TFT_CS, TFT_DC);
-    }
-    else
-    {
+    } else {
         m_displayBuf = (uint8_t *)malloc(MOVIE_BUFFER_SIZE);
-        tft->setAddrWindow((tft->width() - VIDEO_WIDTH) / 2,
-                           (tft->height() - VIDEO_HEIGHT) / 2,
-                           VIDEO_WIDTH, VIDEO_HEIGHT);
+        tft->setAddrWindow((tft->width() - VIDEO_WIDTH) / 2, (tft->height() - VIDEO_HEIGHT) / 2, VIDEO_WIDTH,
+                           VIDEO_HEIGHT);
     }
     return true;
 
@@ -176,8 +164,7 @@ bool MjpegPlayDocoder::video_play_screen(void)
     // Read video
     uint32_t l = 0;
 
-    if (m_isUseDMA)
-    {
+    if (m_isUseDMA) {
         // 一帧数据大概3000B 240M主频时花费50ms  80M时需要150ms
         // unsigned long Millis_1 = GET_SYS_MILLIS(); // 更新的时间
         uint32_t jpg_size = readJpegFromFile(m_pFile);
@@ -188,9 +175,7 @@ bool MjpegPlayDocoder::video_play_screen(void)
         // Draw the image, top left at 0,0 - DMA request is handled in the call-back tft_output() in this sketch
         TJpgDec.drawJpg(0, 0, m_jpegBuf, jpg_size);
         // Serial.println(GET_SYS_MILLIS() - Millis_1);
-    }
-    else
-    {
+    } else {
     }
     return true;
 }
@@ -199,15 +184,13 @@ bool MjpegPlayDocoder::video_end(void)
 {
     m_pFile = NULL;
     // 结束播放 释放资源
-    if (NULL != m_displayBufWithDma[0])
-    {
+    if (NULL != m_displayBufWithDma[0]) {
         free(m_displayBufWithDma[0]);
         free(m_displayBufWithDma[1]);
         m_displayBufWithDma[0] = NULL;
         m_displayBufWithDma[1] = NULL;
     }
-    if (NULL != m_jpegBuf)
-    {
+    if (NULL != m_jpegBuf) {
         free(m_jpegBuf);
         m_jpegBuf = NULL;
     }
@@ -222,8 +205,7 @@ bool MjpegPlayDocoder::video_end(void)
     //                  TFT_SCLK, TFT_CS,
     //                  TFT_DC);
     // DMADrawer::close();
-    if (NULL != m_displayBuf)
-    {
+    if (NULL != m_displayBuf) {
         free(m_displayBuf);
         m_displayBuf = NULL;
     }

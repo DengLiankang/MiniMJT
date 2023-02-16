@@ -41,14 +41,12 @@ void display_photo(const char *file_name, lv_scr_load_anim_t anim_type)
 
 void photo_gui_del(void)
 {
-    if (NULL != photo_image)
-    {
+    if (NULL != photo_image) {
         lv_obj_clean(photo_image); // 清空此前页面
         photo_image = NULL;
     }
 
-    if (NULL != image_scr)
-    {
+    if (NULL != image_scr) {
         lv_obj_clean(image_scr); // 清空此前页面
         image_scr = NULL;
     }

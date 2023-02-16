@@ -1,21 +1,21 @@
-#define GUILITE_ON   //Do not define this macro once more!!!
+#define GUILITE_ON // Do not define this macro once more!!!
+#include "ui_animation.h"
 #include "GuiLite.h" //GUI库
+#include <Wire.h>
+#include <math.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
-#include <Wire.h>
-#include "ui_animation.h"
 
 /*********时钟相关的参数**********/
-#define CLOCK_POS_X 120 //时钟中心点x/y坐标//像素点为单位
+#define CLOCK_POS_X 120 // 时钟中心点x/y坐标//像素点为单位
 #define CLOCK_POS_Y 120
-#define CLOCK_RADIUS 100                    //时钟半径//像素点为单位
-#define CLOCK_ANIMATION_MAX_RADIUS 120      //放动画时时钟最大半径
-#define CLOCK_SACLE_RGB GL_RGB(0, 175, 235) //时钟外框颜色
-#define HOUR_HAND_LEN 40                    //时针长度
-#define HOUR_HAND_RGB GL_RGB(255, 255, 255) //时针颜色
-#define HOUR_HAND_ANIMATION_ANGLE 2         //放动画时时针起始及终值角度。弧度为单位
-#define MINUTE_HAND_LEN 70                  //与时针参数描述相同
+#define CLOCK_RADIUS 100                    // 时钟半径//像素点为单位
+#define CLOCK_ANIMATION_MAX_RADIUS 120      // 放动画时时钟最大半径
+#define CLOCK_SACLE_RGB GL_RGB(0, 175, 235) // 时钟外框颜色
+#define HOUR_HAND_LEN 40                    // 时针长度
+#define HOUR_HAND_RGB GL_RGB(255, 255, 255) // 时针颜色
+#define HOUR_HAND_ANIMATION_ANGLE 2         // 放动画时时针起始及终值角度。弧度为单位
+#define MINUTE_HAND_LEN 70                  // 与时针参数描述相同
 #define MINUTE_HAND_RGB GL_RGB(255, 255, 255)
 #define MINUTE_HAND_ANIMATION_ANGLE 4
 #define SECOND_HAND_LEN 90
@@ -24,33 +24,33 @@
 /*************************/
 
 /*思维点和连线相关的参数*/
-#define MOLECULE_RADIUS 8         //思维点半径
-#define MOLECULE_TOTAL 10         //运动思维点的总数
-#define BOND_TOTAL 45             //BOND_TOTAL = 1 + 2 + ... + (MOLECULE_TOTAL - 1)//思维点连线的总数，最多是等差数列求和
-const int VELOCITY = 2;           //思维点运动速度
-const int BOND_MAX_DISTANCE = 80; //思维点之间连线的阈值
+#define MOLECULE_RADIUS 8 // 思维点半径
+#define MOLECULE_TOTAL 10 // 运动思维点的总数
+#define BOND_TOTAL 45 // BOND_TOTAL = 1 + 2 + ... + (MOLECULE_TOTAL - 1)//思维点连线的总数，最多是等差数列求和
+const int VELOCITY = 2;           // 思维点运动速度
+const int BOND_MAX_DISTANCE = 80; // 思维点之间连线的阈值
 /***************/
 
 /******3D方块相关的参数****/
-#define SHAPE_SIZE 50 //陀螺仪暂时用不了，现在就没用
+#define SHAPE_SIZE 50 // 陀螺仪暂时用不了，现在就没用
 /****************/
 
 /***星空穿越特效相关参数*/
-#define FACTOR_SIZE 2  //星空粒子大小//方形时为方形的边长//圆形时为圆形半径
-#define FACTOR_SHAPE 1 //星空粒子形状//0 方形//1 圆形
+#define FACTOR_SIZE 2  // 星空粒子大小//方形时为方形的边长//圆形时为圆形半径
+#define FACTOR_SHAPE 1 // 星空粒子形状//0 方形//1 圆形
 /*****************/
 
 const int UI_WIDTH = 240;
 const int UI_HEIGHT = 240;
-const int FRAME_COUNT = 32; //播放时钟动画的帧数
+const int FRAME_COUNT = 32; // 播放时钟动画的帧数
 
 /************这两个不能动*****/
 static c_surface *s_surface;
 static c_display *s_display;
 /*****************/
 
-unsigned short int randomColor();                                           //产生随机颜色函数声明
-void screen_fill_circle(int32_t x0, int32_t y0, int32_t r, uint16_t color); //绘制填充圆形函数声明
+unsigned short int randomColor();                                           // 产生随机颜色函数声明
+void screen_fill_circle(int32_t x0, int32_t y0, int32_t r, uint16_t color); // 绘制填充圆形函数声明
 
 /*******这部分矩阵旋转变换，与3D方块有关**********/
 void multiply(int m, int n, int p, double *a, double *b, double *c); // a[m][n] * b[n][p] = c[m][p]
@@ -64,10 +64,7 @@ void projectOnXY(double *point, double *output, double zFactor);
 class c_star
 {
 public:
-    c_star()
-    {
-        initialize();
-    }
+    c_star() { initialize(); }
     void initialize()
     {
         m_x = m_start_x = rand() % UI_WIDTH;
@@ -80,47 +77,35 @@ public:
 
     void move()
     {
-        s_surface->fill_rect(m_x, m_y, m_x + m_size - 1, m_y + m_size - 1, 0, Z_ORDER_LEVEL_0); //clear star footprint
+        s_surface->fill_rect(m_x, m_y, m_x + m_size - 1, m_y + m_size - 1, 0, Z_ORDER_LEVEL_0); // clear star footprint
 
         m_x_factor -= 6;
         m_y_factor -= 6;
         m_size += m_size / 20;
-        if (m_x_factor < 1 || m_y_factor < 1)
-        {
+        if (m_x_factor < 1 || m_y_factor < 1) {
             return initialize();
         }
-        if (m_start_x > (UI_WIDTH / 2) && m_start_y > (UI_HEIGHT / 2))
-        {
+        if (m_start_x > (UI_WIDTH / 2) && m_start_y > (UI_HEIGHT / 2)) {
             m_x = (UI_WIDTH / 2) + (UI_WIDTH * (m_start_x - (UI_WIDTH / 2)) / m_x_factor);
             m_y = (UI_HEIGHT / 2) + (UI_HEIGHT * (m_start_y - (UI_HEIGHT / 2)) / m_y_factor);
-        }
-        else if (m_start_x <= (UI_WIDTH / 2) && m_start_y > (UI_HEIGHT / 2))
-        {
+        } else if (m_start_x <= (UI_WIDTH / 2) && m_start_y > (UI_HEIGHT / 2)) {
             m_x = (UI_WIDTH / 2) - (UI_WIDTH * ((UI_WIDTH / 2) - m_start_x) / m_x_factor);
             m_y = (UI_HEIGHT / 2) + (UI_HEIGHT * (m_start_y - (UI_HEIGHT / 2)) / m_y_factor);
-        }
-        else if (m_start_x > (UI_WIDTH / 2) && m_start_y <= (UI_HEIGHT / 2))
-        {
+        } else if (m_start_x > (UI_WIDTH / 2) && m_start_y <= (UI_HEIGHT / 2)) {
             m_x = (UI_WIDTH / 2) + (UI_WIDTH * (m_start_x - (UI_WIDTH / 2)) / m_x_factor);
             m_y = (UI_HEIGHT / 2) - (UI_HEIGHT * ((UI_HEIGHT / 2) - m_start_y) / m_y_factor);
-        }
-        else if (m_start_x <= (UI_WIDTH / 2) && m_start_y <= (UI_HEIGHT / 2))
-        {
+        } else if (m_start_x <= (UI_WIDTH / 2) && m_start_y <= (UI_HEIGHT / 2)) {
             m_x = (UI_WIDTH / 2) - (UI_WIDTH * ((UI_WIDTH / 2) - m_start_x) / m_x_factor);
             m_y = (UI_HEIGHT / 2) - (UI_HEIGHT * ((UI_HEIGHT / 2) - m_start_y) / m_y_factor);
         }
 
-        if (m_x < 0 || (m_x + m_size - 1) >= UI_WIDTH ||
-            m_y < 0 || (m_y + m_size - 1) >= UI_HEIGHT)
-        {
+        if (m_x < 0 || (m_x + m_size - 1) >= UI_WIDTH || m_y < 0 || (m_y + m_size - 1) >= UI_HEIGHT) {
             return initialize();
         }
-        if (FACTOR_SHAPE == 0)
-        {
-            s_surface->fill_rect(m_x, m_y, m_x + m_size - 1, m_y + m_size - 1, randomColor(), Z_ORDER_LEVEL_0); //draw star
-        }
-        else if (FACTOR_SHAPE == 1)
-        {
+        if (FACTOR_SHAPE == 0) {
+            s_surface->fill_rect(m_x, m_y, m_x + m_size - 1, m_y + m_size - 1, randomColor(),
+                                 Z_ORDER_LEVEL_0); // draw star
+        } else if (FACTOR_SHAPE == 1) {
             screen_fill_circle(m_x, m_y, m_size, randomColor());
         }
     }
@@ -148,11 +133,10 @@ public:
     }
     bool show()
     {
-        if (fabs(m_start_len - m_end_len) < 1.0)
-        {
+        if (fabs(m_start_len - m_end_len) < 1.0) {
             return true;
         }
-        //erase footprint
+        // erase footprint
         int x = (m_start_len)*cos(m_start_angle) + m_pos_x;
         int y = (m_start_len)*sin(m_start_angle) + m_pos_y;
         s_surface->draw_line(m_pos_x, m_pos_y, x, y, 0, Z_ORDER_LEVEL_0);
@@ -186,7 +170,11 @@ class c_clock
 {
 public:
     c_clock() : m_x(CLOCK_POS_X), m_y(CLOCK_POS_Y), pi(3.1415926535 / 180) {}
-    void set_hands(float start_radius, float end_radius, float hour_start_len, float hour_end_len, float hour_start_angle, float hour_end_angle, unsigned int hour_rgb, float minute_start_len, float minute_end_len, float minute_start_angle, float minute_end_angle, unsigned int minute_rgb, float second_start_len, float second_end_len, float second_start_angle, float second_end_angle, unsigned int second_rgb)
+    void set_hands(float start_radius, float end_radius, float hour_start_len, float hour_end_len,
+                   float hour_start_angle, float hour_end_angle, unsigned int hour_rgb, float minute_start_len,
+                   float minute_end_len, float minute_start_angle, float minute_end_angle, unsigned int minute_rgb,
+                   float second_start_len, float second_end_len, float second_start_angle, float second_end_angle,
+                   unsigned int second_rgb)
     {
         m_hour.set(m_x, m_y, hour_start_len, hour_end_len, hour_start_angle, hour_end_angle, hour_rgb);
         m_minute.set(m_x, m_y, minute_start_len, minute_end_len, minute_start_angle, minute_end_angle, minute_rgb);
@@ -195,18 +183,11 @@ public:
         m_end_radius = end_radius;
         m_step = ((m_end_radius - m_start_radius) / FRAME_COUNT);
     }
-    bool isComplete()
-    {
-        return complete;
-    }
-    void setComplete(bool _com)
-    {
-        complete = _com;
-    }
+    bool isComplete() { return complete; }
+    void setComplete(bool _com) { complete = _com; }
     bool drawSacle()
     {
-        if (fabs(m_start_radius - m_end_radius) < 1.0)
-        {
+        if (fabs(m_start_radius - m_end_radius) < 1.0) {
             return true;
         }
 
@@ -227,12 +208,11 @@ public:
         int tmpX, tmpY, lastX, lastY;
         lastX = lastY = 0;
 
-        for (float angle = 0.5; angle < 90; angle += 0.5) //Bigger circle, Smaller angle step
+        for (float angle = 0.5; angle < 90; angle += 0.5) // Bigger circle, Smaller angle step
         {
             tmpX = r * cos(angle * pi);
             tmpY = r * sin(angle * pi);
-            if (tmpX == lastX && tmpY == lastY)
-            {
+            if (tmpX == lastX && tmpY == lastY) {
                 continue;
             }
 
@@ -272,14 +252,14 @@ public:
     }
     void show()
     {
-        //erase footprint
+        // erase footprint
         int x = m_len * cos(m_angle) + m_pos_x;
         int y = m_len * sin(m_angle) + m_pos_y;
         s_surface->draw_line(m_pos_x, m_pos_y, x, y, 0, Z_ORDER_LEVEL_0);
 
-        //calculate new angle
+        // calculate new angle
 
-        //draw new hand
+        // draw new hand
         x = m_len * cos(m_angle) + m_pos_x;
         y = m_len * sin(m_angle) + m_pos_y;
         s_surface->draw_line(m_pos_x, m_pos_y, x, y, m_rgb, Z_ORDER_LEVEL_0);
@@ -293,7 +273,7 @@ private:
     float m_angle;
 };
 /*****************/
-/***********指示时间调用到的时钟类******/ //这个是时钟最终调用到的类，动画部分已经作为成员变量包含进去了，里面共有进入和退出两种动画
+/***********指示时间调用到的时钟类******/ // 这个是时钟最终调用到的类，动画部分已经作为成员变量包含进去了，里面共有进入和退出两种动画
 class Time_clock
 {
 public:
@@ -302,21 +282,27 @@ public:
 
     Time_clock() : m_x(CLOCK_POS_X), m_y(CLOCK_POS_Y), pi(3.1415926535 / 180)
     {
-        clock_enter_animation.set_hands(CLOCK_ANIMATION_MAX_RADIUS, CLOCK_RADIUS, 0.0, HOUR_HAND_LEN, 0.0, 2.0, HOUR_HAND_RGB, 0.0, MINUTE_HAND_LEN, 0.0, 4.0, MINUTE_HAND_RGB, 0.0, SECOND_HAND_LEN, 0.0, 6.0, SECOND_HAND_RGB);
-        clock_leave_animation.set_hands(CLOCK_RADIUS, CLOCK_ANIMATION_MAX_RADIUS, HOUR_HAND_LEN, 0.0, 2.0, 0.0, HOUR_HAND_RGB, MINUTE_HAND_LEN, 0.0, 4.0, 0.0, MINUTE_HAND_RGB, SECOND_HAND_LEN, 0.0, 6.0, 0.0, SECOND_HAND_RGB);
+        clock_enter_animation.set_hands(CLOCK_ANIMATION_MAX_RADIUS, CLOCK_RADIUS, 0.0, HOUR_HAND_LEN, 0.0, 2.0,
+                                        HOUR_HAND_RGB, 0.0, MINUTE_HAND_LEN, 0.0, 4.0, MINUTE_HAND_RGB, 0.0,
+                                        SECOND_HAND_LEN, 0.0, 6.0, SECOND_HAND_RGB);
+        clock_leave_animation.set_hands(CLOCK_RADIUS, CLOCK_ANIMATION_MAX_RADIUS, HOUR_HAND_LEN, 0.0, 2.0, 0.0,
+                                        HOUR_HAND_RGB, MINUTE_HAND_LEN, 0.0, 4.0, 0.0, MINUTE_HAND_RGB, SECOND_HAND_LEN,
+                                        0.0, 6.0, 0.0, SECOND_HAND_RGB);
     }
-    void set_hands(float radius, float hour_len, float hour_angle, unsigned int hour_rgb, float minute_len, float minute_angle, unsigned int minute_rgb, float second_len, float second_angle, unsigned int second_rgb)
+    void set_hands(float radius, float hour_len, float hour_angle, unsigned int hour_rgb, float minute_len,
+                   float minute_angle, unsigned int minute_rgb, float second_len, float second_angle,
+                   unsigned int second_rgb)
     {
         m_hour.set(m_x, m_y, hour_len, hour_angle, hour_rgb);
         m_minute.set(m_x, m_y, minute_len, minute_angle, minute_rgb);
         m_second.set(m_x, m_y, second_len, second_angle, second_rgb);
         m_radius = radius;
     }
-    void drawSacle() //绘制表盘
+    void drawSacle() // 绘制表盘
     {
         drawCircle(m_radius, CLOCK_SACLE_RGB);
     }
-    //zhe li kan zhe gai
+    // zhe li kan zhe gai
     void show()
     {
         drawSacle();
@@ -324,17 +310,16 @@ public:
         m_minute.show();
         m_second.show();
     }
-    void drawCircle(int r, unsigned int rgb) //画圆
+    void drawCircle(int r, unsigned int rgb) // 画圆
     {
         int tmpX, tmpY, lastX, lastY;
         lastX = lastY = 0;
 
-        for (float angle = 0.5; angle < 90; angle += 0.5) //Bigger circle, Smaller angle step
+        for (float angle = 0.5; angle < 90; angle += 0.5) // Bigger circle, Smaller angle step
         {
             tmpX = r * cos(angle * pi);
             tmpY = r * sin(angle * pi);
-            if (tmpX == lastX && tmpY == lastY)
-            {
+            if (tmpX == lastX && tmpY == lastY) {
                 continue;
             }
 
@@ -367,26 +352,24 @@ public:
         y = rand() % UI_HEIGHT;
         vx = VELOCITY * ((0 == rand() % 2) ? -1 : 1);
         vy = VELOCITY * ((0 == rand() % 2) ? -1 : 1);
-        //color = GL_RGB(rand() % 5 * 32 + 127, rand() % 5 * 32 + 127, rand() % 5 * 32 + 127);
+        // color = GL_RGB(rand() % 5 * 32 + 127, rand() % 5 * 32 + 127, rand() % 5 * 32 + 127);
         color = randomColor();
     }
 
     void move()
     {
-        //draw(0);
-        if (x <= 0 || x >= UI_WIDTH)
-        {
+        // draw(0);
+        if (x <= 0 || x >= UI_WIDTH) {
             vx = (0 - vx);
             color = randomColor();
         }
-        if (y < 0 || y >= UI_HEIGHT)
-        {
+        if (y < 0 || y >= UI_HEIGHT) {
             vy = (0 - vy);
             color = randomColor();
         }
         x += vx;
         y += vy;
-        //draw(color);
+        // draw(color);
 
         screen_fill_circle(x, y, MOLECULE_RADIUS, color);
     }
@@ -436,27 +419,23 @@ public:
         static unsigned int _color = randomColor();
 
         int index = -1;
-        for (int i = 0; i < BOND_TOTAL; i++)
-        {
-            if ((bonds[i].m0 == m0 && bonds[i].m1 == m1) || (bonds[i].m0 == m1 && bonds[i].m1 == m0))
-            {
+        for (int i = 0; i < BOND_TOTAL; i++) {
+            if ((bonds[i].m0 == m0 && bonds[i].m1 == m1) || (bonds[i].m0 == m1 && bonds[i].m1 == m0)) {
                 index = i;
                 break;
             }
         }
 
-        if (index >= 0)
-        { //has been registered
-            if (distance > BOND_MAX_DISTANCE)
-            { //unregister
-                s_surface->draw_line(bonds[index].x0, bonds[index].y0, bonds[index].x1, bonds[index].y1, GL_RGB(0, 0, 0), Z_ORDER_LEVEL_0);
+        if (index >= 0) {                       // has been registered
+            if (distance > BOND_MAX_DISTANCE) { // unregister
+                s_surface->draw_line(bonds[index].x0, bonds[index].y0, bonds[index].x1, bonds[index].y1,
+                                     GL_RGB(0, 0, 0), Z_ORDER_LEVEL_0);
                 bonds[index].m0 = bonds[index].m1 = 0;
                 _color = randomColor();
                 return;
-            }
-            else
-            { //update bond & draw
-                s_surface->draw_line(bonds[index].x0, bonds[index].y0, bonds[index].x1, bonds[index].y1, GL_RGB(0, 0, 0), Z_ORDER_LEVEL_0);
+            } else { // update bond & draw
+                s_surface->draw_line(bonds[index].x0, bonds[index].y0, bonds[index].x1, bonds[index].y1,
+                                     GL_RGB(0, 0, 0), Z_ORDER_LEVEL_0);
                 s_surface->draw_line(m0->x, m0->y, m1->x, m1->y, _color, Z_ORDER_LEVEL_0);
                 bonds[index].x0 = m0->x;
                 bonds[index].y0 = m0->y;
@@ -466,27 +445,23 @@ public:
             return;
         }
 
-        if (distance > BOND_MAX_DISTANCE)
-        {
+        if (distance > BOND_MAX_DISTANCE) {
             return;
         }
-        //register new bond
+        // register new bond
         index = -1;
-        for (int i = 0; i < BOND_TOTAL; i++)
-        {
-            if (bonds[i].m0 == 0 && bonds[i].m1 == 0)
-            {
+        for (int i = 0; i < BOND_TOTAL; i++) {
+            if (bonds[i].m0 == 0 && bonds[i].m1 == 0) {
                 index = i;
                 break;
             }
         }
-        if (index < 0)
-        { //bonds full
+        if (index < 0) { // bonds full
             ASSERT(false);
             return;
         }
 
-        //register
+        // register
         bonds[index].m0 = m0;
         bonds[index].m1 = m1;
         bonds[index].x0 = m0->x;
@@ -519,29 +494,29 @@ protected:
 class Cube : public Shape
 {
 public:
-    Cube()
-    {
-        memset(points2d, 0, sizeof(points2d));
-    }
+    Cube() { memset(points2d, 0, sizeof(points2d)); }
     virtual void draw(int x, int y, bool isErase)
     {
-        for (int i = 0; i < 4; i++)
-        {
+        for (int i = 0; i < 4; i++) {
             /*
-      s_surface->draw_line(points2d[i][0] + x, points2d[i][1] + y, points2d[(i + 1) % 4][0] + x, points2d[(i + 1) % 4][1] + y, (isErase) ? 0 : 0xffff0000, Z_ORDER_LEVEL_0);
-      s_surface->draw_line(points2d[i + 4][0] + x, points2d[i + 4][1] + y, points2d[((i + 1) % 4) + 4][0] + x, points2d[((i + 1) % 4) + 4][1] + y, (isErase) ? 0 : 0xff00ff00, Z_ORDER_LEVEL_0);
-      s_surface->draw_line(points2d[i][0] + x, points2d[i][1] + y, points2d[(i + 4)][0] + x, points2d[(i + 4)][1] + y, (isErase) ? 0 : 0xffffff00, Z_ORDER_LEVEL_0);
+      s_surface->draw_line(points2d[i][0] + x, points2d[i][1] + y, points2d[(i + 1) % 4][0] + x, points2d[(i + 1) %
+      4][1] + y, (isErase) ? 0 : 0xffff0000, Z_ORDER_LEVEL_0); s_surface->draw_line(points2d[i + 4][0] + x, points2d[i +
+      4][1] + y, points2d[((i + 1) % 4) + 4][0] + x, points2d[((i + 1) % 4) + 4][1] + y, (isErase) ? 0 : 0xff00ff00,
+      Z_ORDER_LEVEL_0); s_surface->draw_line(points2d[i][0] + x, points2d[i][1] + y, points2d[(i + 4)][0] + x,
+      points2d[(i + 4)][1] + y, (isErase) ? 0 : 0xffffff00, Z_ORDER_LEVEL_0);
       */
-            s_surface->draw_line(points2d[i][0] + x, points2d[i][1] + y, points2d[(i + 1) % 4][0] + x, points2d[(i + 1) % 4][1] + y, (isErase) ? 0 : randomColor(), Z_ORDER_LEVEL_0);
-            s_surface->draw_line(points2d[i + 4][0] + x, points2d[i + 4][1] + y, points2d[((i + 1) % 4) + 4][0] + x, points2d[((i + 1) % 4) + 4][1] + y, (isErase) ? 0 : randomColor(), Z_ORDER_LEVEL_0);
-            s_surface->draw_line(points2d[i][0] + x, points2d[i][1] + y, points2d[(i + 4)][0] + x, points2d[(i + 4)][1] + y, (isErase) ? 0 : randomColor(), Z_ORDER_LEVEL_0);
+            s_surface->draw_line(points2d[i][0] + x, points2d[i][1] + y, points2d[(i + 1) % 4][0] + x,
+                                 points2d[(i + 1) % 4][1] + y, (isErase) ? 0 : randomColor(), Z_ORDER_LEVEL_0);
+            s_surface->draw_line(points2d[i + 4][0] + x, points2d[i + 4][1] + y, points2d[((i + 1) % 4) + 4][0] + x,
+                                 points2d[((i + 1) % 4) + 4][1] + y, (isErase) ? 0 : randomColor(), Z_ORDER_LEVEL_0);
+            s_surface->draw_line(points2d[i][0] + x, points2d[i][1] + y, points2d[(i + 4)][0] + x,
+                                 points2d[(i + 4)][1] + y, (isErase) ? 0 : randomColor(), Z_ORDER_LEVEL_0);
         }
     }
     virtual void rotate()
     {
         double rotateOut1[3][1], rotateOut2[3][1], rotateOut3[3][1];
-        for (int i = 0; i < 8; i++)
-        {
+        for (int i = 0; i < 8; i++) {
             rotateX(angle, points[i], (double *)rotateOut1);
             rotateY(angle, (double *)rotateOut1, (double *)rotateOut2);
             rotateZ(angle, (double *)rotateOut2, (double *)rotateOut3);
@@ -556,107 +531,87 @@ private:
 };
 /*****************/
 
-double Cube::points[8][3] = //方块大小设置
-    {
-        {-SHAPE_SIZE, -SHAPE_SIZE, -SHAPE_SIZE}, // x, y, z
-        {SHAPE_SIZE, -SHAPE_SIZE, -SHAPE_SIZE},
-        {SHAPE_SIZE, SHAPE_SIZE, -SHAPE_SIZE},
-        {-SHAPE_SIZE, SHAPE_SIZE, -SHAPE_SIZE},
-        {-SHAPE_SIZE, -SHAPE_SIZE, SHAPE_SIZE},
-        {SHAPE_SIZE, -SHAPE_SIZE, SHAPE_SIZE},
-        {SHAPE_SIZE, SHAPE_SIZE, SHAPE_SIZE},
-        {-SHAPE_SIZE, SHAPE_SIZE, SHAPE_SIZE}};
+double Cube::points[8][3] =                   // 方块大小设置
+    {{-SHAPE_SIZE, -SHAPE_SIZE, -SHAPE_SIZE}, // x, y, z
+     {SHAPE_SIZE, -SHAPE_SIZE, -SHAPE_SIZE},  {SHAPE_SIZE, SHAPE_SIZE, -SHAPE_SIZE},
+     {-SHAPE_SIZE, SHAPE_SIZE, -SHAPE_SIZE},  {-SHAPE_SIZE, -SHAPE_SIZE, SHAPE_SIZE},
+     {SHAPE_SIZE, -SHAPE_SIZE, SHAPE_SIZE},   {SHAPE_SIZE, SHAPE_SIZE, SHAPE_SIZE},
+     {-SHAPE_SIZE, SHAPE_SIZE, SHAPE_SIZE}};
 
-Time_clock time_clock;              //时钟
-c_star stars[100];                  //星空穿越特效
-Molecule molecules[MOLECULE_TOTAL]; //思维点
-Bond Bond::bonds[BOND_TOTAL];       //思维点的连线
-Cube theCube;                       //方块
+Time_clock time_clock;              // 时钟
+c_star stars[100];                  // 星空穿越特效
+Molecule molecules[MOLECULE_TOTAL]; // 思维点
+Bond Bond::bonds[BOND_TOTAL];       // 思维点的连线
+Cube theCube;                       // 方块
 
-void create_ui(void *phy_fb, int screen_width, int screen_height, int color_bytes, struct EXTERNAL_GFX_OP *gfx_op) //ui的初始化函数
+void create_ui(void *phy_fb, int screen_width, int screen_height, int color_bytes,
+               struct EXTERNAL_GFX_OP *gfx_op) // ui的初始化函数
 {
     /**********这部分使用时几乎不需要修改*******/
-    if (phy_fb)
-    {
+    if (phy_fb) {
         static c_surface surface(UI_WIDTH, UI_HEIGHT, color_bytes, Z_ORDER_LEVEL_0);
         static c_display display(phy_fb, screen_width, screen_height, &surface);
         s_surface = &surface;
         s_display = &display;
-    }
-    else
-    { //for MCU without framebuffer
+    } else { // for MCU without framebuffer
         static c_surface_no_fb surface_no_fb(UI_WIDTH, UI_HEIGHT, color_bytes, gfx_op, Z_ORDER_LEVEL_0);
         static c_display display(phy_fb, screen_width, screen_height, &surface_no_fb);
         s_surface = &surface_no_fb;
         s_display = &display;
     }
 
-    //background
+    // background
     s_surface->fill_rect(0, 0, UI_WIDTH, UI_HEIGHT, 0, Z_ORDER_LEVEL_0);
     /*****************/
 
     /***********这里是自定义需要的初始化******/
-    time_clock.set_hands(CLOCK_RADIUS, HOUR_HAND_LEN, 2, HOUR_HAND_RGB, MINUTE_HAND_LEN, 4, MINUTE_HAND_RGB, SECOND_HAND_LEN, 6, SECOND_HAND_RGB);
+    time_clock.set_hands(CLOCK_RADIUS, HOUR_HAND_LEN, 2, HOUR_HAND_RGB, MINUTE_HAND_LEN, 4, MINUTE_HAND_RGB,
+                         SECOND_HAND_LEN, 6, SECOND_HAND_RGB);
     /*****************/
 }
 
 void ui_update(int choose)
 {
-    switch (choose)
-    {
-    case 0:
-    {
-        /* 时钟显示使用范例
-        */
-        if (!time_clock.clock_enter_animation.isComplete())
-        {
-            time_clock.clock_enter_animation.show();
-        }
-        if (time_clock.clock_enter_animation.isComplete())
-        {
-            time_clock.show();
-        }
-    }
-    break;
-    case 1:
-    {
-        /*星空背景特效使用范例
-        */
-        for (int i = 0; i < sizeof(stars) / sizeof(c_star); i++)
-        {
-            stars[i].move();
-        }
-    }
-    break;
-    case 2:
-    {
-        /*思维点及连线使用范例
-        */
-        for (int i = 0; i < MOLECULE_TOTAL; i++)
-        {
-            molecules[i].move();
-        }
-
-        for (int i = 0; i < MOLECULE_TOTAL; i++)
-        {
-            for (int sub_i = i + 1; sub_i < MOLECULE_TOTAL; sub_i++)
-            {
-                Bond::createBond(&molecules[i], &molecules[sub_i]);
+    switch (choose) {
+        case 0: {
+            /* 时钟显示使用范例
+             */
+            if (!time_clock.clock_enter_animation.isComplete()) {
+                time_clock.clock_enter_animation.show();
             }
-        }
-    }
-    break;
-    case 3:
-    {
-        /*3D方块使用范例
-        */
-        //theCube.draw(120, 100, true);//erase footprint
-        theCube.rotate();
-        theCube.draw(120, 120, false); //refresh cube
-    }
-    break;
-    default:
-        break;
+            if (time_clock.clock_enter_animation.isComplete()) {
+                time_clock.show();
+            }
+        } break;
+        case 1: {
+            /*星空背景特效使用范例
+             */
+            for (int i = 0; i < sizeof(stars) / sizeof(c_star); i++) {
+                stars[i].move();
+            }
+        } break;
+        case 2: {
+            /*思维点及连线使用范例
+             */
+            for (int i = 0; i < MOLECULE_TOTAL; i++) {
+                molecules[i].move();
+            }
+
+            for (int i = 0; i < MOLECULE_TOTAL; i++) {
+                for (int sub_i = i + 1; sub_i < MOLECULE_TOTAL; sub_i++) {
+                    Bond::createBond(&molecules[i], &molecules[sub_i]);
+                }
+            }
+        } break;
+        case 3: {
+            /*3D方块使用范例
+             */
+            // theCube.draw(120, 100, true);//erase footprint
+            theCube.rotate();
+            theCube.draw(120, 120, false); // refresh cube
+        } break;
+        default:
+            break;
     }
 }
 
@@ -676,8 +631,7 @@ void screen_draw_fastVLine(int32_t x, int32_t y, int32_t length, uint16_t color)
 {
     // Bounds check
     int32_t y0 = y;
-    do
-    {
+    do {
         s_surface->draw_pixel(x, y, color, Z_ORDER_LEVEL_0); // 逐点显示，描出垂直线
         y++;
     } while (y0 + length >= y);
@@ -692,10 +646,8 @@ void screen_fillCircle_helper(int32_t x0, int32_t y0, int32_t r, uint8_t corner,
     int32_t x = 0;
     int32_t y = r;
 
-    while (x < y)
-    {
-        if (f >= 0)
-        {
+    while (x < y) {
+        if (f >= 0) {
             y--;
             ddF_y += 2;
             f += ddF_y;
@@ -704,13 +656,11 @@ void screen_fillCircle_helper(int32_t x0, int32_t y0, int32_t r, uint8_t corner,
         ddF_x += 2;
         f += ddF_x;
 
-        if (corner & 0x1)
-        {
+        if (corner & 0x1) {
             screen_draw_fastVLine(x0 + x, y0 - y, 2 * y + delta, color);
             screen_draw_fastVLine(x0 + y, y0 - x, 2 * x + delta, color);
         }
-        if (corner & 0x2)
-        {
+        if (corner & 0x2) {
             screen_draw_fastVLine(x0 - x, y0 - y, 2 * y + delta, color);
             screen_draw_fastVLine(x0 - y, y0 - x, 2 * x + delta, color);
         }
@@ -727,13 +677,10 @@ void screen_fill_circle(int32_t x0, int32_t y0, int32_t r, uint16_t color)
 // 3D engine
 void multiply(int m, int n, int p, double *a, double *b, double *c) // a[m][n] * b[n][p] = c[m][p]
 {
-    for (int i = 0; i < m; i++)
-    {
-        for (int j = 0; j < p; j++)
-        {
+    for (int i = 0; i < m; i++) {
+        for (int j = 0; j < p; j++) {
             c[i * p + j] = 0;
-            for (int k = 0; k < n; k++)
-            {
+            for (int k = 0; k < n; k++) {
                 c[i * p + j] += a[i * n + k] * b[k * p + j];
             }
         }
@@ -775,8 +722,8 @@ void rotateZ(double angle, double *point, double *output) // rotate matrix for Z
 
 void projectOnXY(double *point, double *output, double zFactor)
 {
-    static double projection[2][3]; //project on X/Y face
-    projection[0][0] = zFactor;     //the raio of point.z and camera.z
-    projection[1][1] = zFactor;     //the raio of point.z and camera.z
+    static double projection[2][3]; // project on X/Y face
+    projection[0][0] = zFactor;     // the raio of point.z and camera.z
+    projection[1][1] = zFactor;     // the raio of point.z and camera.z
     multiply(2, 3, 1, (double *)projection, point, output);
 }

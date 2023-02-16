@@ -1,5 +1,5 @@
-#include "docoder.h"
 #include "common.h"
+#include "docoder.h"
 
 #define VIDEO_WIDTH 240L
 #define VIDEO_HEIGHT 240L
@@ -24,20 +24,16 @@ RgbPlayDocoder::~RgbPlayDocoder(void)
 
 bool RgbPlayDocoder::video_start()
 {
-    if (m_isUseDMA)
-    {
+    if (m_isUseDMA) {
         m_displayBufWithDma[0] = (uint8_t *)heap_caps_malloc(MOVIE_BUFFER_SIZE, MALLOC_CAP_DMA);
         m_displayBufWithDma[1] = (uint8_t *)heap_caps_malloc(MOVIE_BUFFER_SIZE, MALLOC_CAP_DMA);
         tft->initDMA();
         // 使用DMA
         // DMADrawer::setup(MOVIE_BUFFER_SIZE, SPI_FREQUENCY, TFT_MOSI, TFT_MISO, TFT_SCLK, TFT_CS, TFT_DC);
-    }
-    else
-    {
+    } else {
         m_displayBuf = (uint8_t *)malloc(MOVIE_BUFFER_SIZE);
-        tft->setAddrWindow((tft->width() - VIDEO_WIDTH) / 2,
-                           (tft->height() - VIDEO_HEIGHT) / 2,
-                           VIDEO_WIDTH, VIDEO_HEIGHT);
+        tft->setAddrWindow((tft->width() - VIDEO_WIDTH) / 2, (tft->height() - VIDEO_HEIGHT) / 2, VIDEO_WIDTH,
+                           VIDEO_HEIGHT);
     }
     return true;
 
@@ -69,8 +65,7 @@ bool RgbPlayDocoder::video_play_screen(void)
     uint32_t l = 0;
     unsigned long Millis_1 = 0; // 更新的时间
 
-    if (m_isUseDMA)
-    {
+    if (m_isUseDMA) {
         // 80M主频大概200ms一帧 240M大概150ms一帧
         uint8_t *dst = NULL;
         dst = m_displayBufWithDma[0];
@@ -106,9 +101,7 @@ bool RgbPlayDocoder::video_play_screen(void)
         // dst = DMADrawer::getNextBuffer();
         // l = m_pFile->read(dst, MOVIE_BUFFER_SIZE);
         // DMADrawer::draw(0, 180, 240, 60);
-    }
-    else
-    {
+    } else {
 
         tft->startWrite();
         Millis_1 = GET_SYS_MILLIS();
@@ -138,10 +131,8 @@ bool RgbPlayDocoder::video_end(void)
 {
     m_pFile = NULL;
     // 结束播放 释放资源
-    if (m_isUseDMA)
-    {
-        if (NULL != m_displayBufWithDma[0])
-        {
+    if (m_isUseDMA) {
+        if (NULL != m_displayBufWithDma[0]) {
             free(m_displayBufWithDma[0]);
             free(m_displayBufWithDma[1]);
             m_displayBufWithDma[0] = NULL;
@@ -158,11 +149,8 @@ bool RgbPlayDocoder::video_end(void)
         //                  TFT_SCLK, TFT_CS,
         //                  TFT_DC);
         // DMADrawer::close();
-    }
-    else
-    {
-        if (NULL != m_displayBuf)
-        {
+    } else {
+        if (NULL != m_displayBuf) {
             free(m_displayBuf);
             m_displayBuf = NULL;
         }

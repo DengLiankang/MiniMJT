@@ -1,7 +1,7 @@
-#include "sys/app_controller.h"
-#include "common.h"
-#include "sys/interface.h"
 #include "Arduino.h"
+#include "common.h"
+#include "sys/app_controller.h"
+#include "sys/interface.h"
 
 #define APP_CTRL_CONFIG_PATH "/sys.cfg"
 #define MPU_CONFIG_PATH "/mpu.cfg"
@@ -13,8 +13,7 @@ void AppController::read_config(SysUtilConfig *cfg)
     char info[128] = {0};
     uint16_t size = g_flashCfg.readFile(APP_CTRL_CONFIG_PATH, (uint8_t *)info);
     info[size] = 0;
-    if (size == 0)
-    {
+    if (size == 0) {
         // 默认值
         cfg->power_mode = 0;           // 功耗模式（0为节能模式 1为性能模式）
         cfg->backLight = 80;           // 屏幕亮度（1-100）
@@ -23,9 +22,7 @@ void AppController::read_config(SysUtilConfig *cfg)
         cfg->mpu_order = 0;            // 操作方向
         cfg->auto_start_app = "None";  // 无指定开机自启APP
         this->write_config(cfg);
-    }
-    else
-    {
+    } else {
         // 解析数据
         char *param[12] = {0};
         analyseParam(info, 12, param);
@@ -92,8 +89,7 @@ void AppController::read_config(SysMpuConfig *cfg)
     char info[128] = {0};
     uint16_t size = g_flashCfg.readFile(MPU_CONFIG_PATH, (uint8_t *)info);
     info[size] = 0;
-    if (size == 0)
-    {
+    if (size == 0) {
         // 默认值
         cfg->x_gyro_offset = 0;
         cfg->y_gyro_offset = 0;
@@ -103,9 +99,7 @@ void AppController::read_config(SysMpuConfig *cfg)
         cfg->z_accel_offset = 0;
 
         this->write_config(cfg);
-    }
-    else
-    {
+    } else {
         // 解析数据
         char *param[6] = {0};
         analyseParam(info, 6, param);
@@ -149,133 +143,77 @@ void AppController::write_config(SysMpuConfig *cfg)
     g_flashCfg.writeFile(MPU_CONFIG_PATH, w_data.c_str());
 }
 
-void AppController::deal_config(APP_MESSAGE_TYPE type,
-                                const char *key, char *value)
+void AppController::deal_config(APP_MESSAGE_TYPE type, const char *key, char *value)
 {
-    switch (type)
-    {
+    switch (type) {
 
-    case APP_MESSAGE_GET_PARAM:
-    {
-        if (!strcmp(key, "ssid_0"))
-        {
-            snprintf(value, 32, "%s", sys_cfg.ssid_0.c_str());
-        }
-        else if (!strcmp(key, "password_0"))
-        {
-            snprintf(value, 32, "%s", sys_cfg.password_0.c_str());
-        }
-        else if (!strcmp(key, "ssid_1"))
-        {
-            snprintf(value, 32, "%s", sys_cfg.ssid_1.c_str());
-        }
-        else if (!strcmp(key, "password_1"))
-        {
-            snprintf(value, 32, "%s", sys_cfg.password_1.c_str());
-        }
-        if (!strcmp(key, "ssid_2"))
-        {
-            snprintf(value, 32, "%s", sys_cfg.ssid_2.c_str());
-        }
-        else if (!strcmp(key, "password_2"))
-        {
-            snprintf(value, 32, "%s", sys_cfg.password_2.c_str());
-        }
-        else if (!strcmp(key, "power_mode"))
-        {
-            snprintf(value, 32, "%u", sys_cfg.power_mode);
-        }
-        else if (!strcmp(key, "backLight"))
-        {
-            snprintf(value, 32, "%u", sys_cfg.backLight);
-        }
-        else if (!strcmp(key, "rotation"))
-        {
-            snprintf(value, 32, "%u", sys_cfg.rotation);
-        }
-        else if (!strcmp(key, "auto_calibration_mpu"))
-        {
-            snprintf(value, 32, "%u", sys_cfg.auto_calibration_mpu);
-        }
-        else if (!strcmp(key, "mpu_order"))
-        {
-            snprintf(value, 32, "%u", sys_cfg.mpu_order);
-        }
-        else if (!strcmp(key, "auto_start_app"))
-        {
-            snprintf(value, 32, "%s", sys_cfg.auto_start_app.c_str());
-        }
-    }
-    break;
-    case APP_MESSAGE_SET_PARAM:
-    {
-        if (!strcmp(key, "ssid_0"))
-        {
-            sys_cfg.ssid_0 = value;
-        }
-        else if (!strcmp(key, "password_0"))
-        {
-            sys_cfg.password_0 = value;
-        }
-        else if (!strcmp(key, "ssid_1"))
-        {
-            sys_cfg.ssid_1 = value;
-        }
-        else if (!strcmp(key, "password_1"))
-        {
-            sys_cfg.password_1 = value;
-        }
-        else if (!strcmp(key, "ssid_2"))
-        {
-            sys_cfg.ssid_2 = value;
-        }
-        else if (!strcmp(key, "password_2"))
-        {
-            sys_cfg.password_2 = value;
-        }
-        else if (!strcmp(key, "power_mode"))
-        {
-            sys_cfg.power_mode = atol(value);
-        }
-        else if (!strcmp(key, "backLight"))
-        {
-            sys_cfg.backLight = atol(value);
-        }
-        else if (!strcmp(key, "rotation"))
-        {
-            sys_cfg.rotation = atol(value);
-        }
-        else if (!strcmp(key, "auto_calibration_mpu"))
-        {
-            sys_cfg.auto_calibration_mpu = atol(value);
-            if (0 == sys_cfg.auto_calibration_mpu)
-            {
-                this->write_config(&this->mpu_cfg);
+        case APP_MESSAGE_GET_PARAM: {
+            if (!strcmp(key, "ssid_0")) {
+                snprintf(value, 32, "%s", sys_cfg.ssid_0.c_str());
+            } else if (!strcmp(key, "password_0")) {
+                snprintf(value, 32, "%s", sys_cfg.password_0.c_str());
+            } else if (!strcmp(key, "ssid_1")) {
+                snprintf(value, 32, "%s", sys_cfg.ssid_1.c_str());
+            } else if (!strcmp(key, "password_1")) {
+                snprintf(value, 32, "%s", sys_cfg.password_1.c_str());
             }
-        }
-        else if (!strcmp(key, "mpu_order"))
-        {
-            sys_cfg.mpu_order = atol(value);
-        }
-        else if (!strcmp(key, "auto_start_app"))
-        {
-            sys_cfg.auto_start_app = value;
-        }
-    }
-    break;
-    case APP_MESSAGE_READ_CFG:
-    {
-        read_config(&sys_cfg);
-        // read_config(&mpu_cfg);
-    }
-    break;
-    case APP_MESSAGE_WRITE_CFG:
-    {
-        write_config(&sys_cfg);
-        // write_config(&mpu_cfg);  // 在取消自动校准的时候已经写过一次了
-    }
-    break;
-    default:
-        break;
+            if (!strcmp(key, "ssid_2")) {
+                snprintf(value, 32, "%s", sys_cfg.ssid_2.c_str());
+            } else if (!strcmp(key, "password_2")) {
+                snprintf(value, 32, "%s", sys_cfg.password_2.c_str());
+            } else if (!strcmp(key, "power_mode")) {
+                snprintf(value, 32, "%u", sys_cfg.power_mode);
+            } else if (!strcmp(key, "backLight")) {
+                snprintf(value, 32, "%u", sys_cfg.backLight);
+            } else if (!strcmp(key, "rotation")) {
+                snprintf(value, 32, "%u", sys_cfg.rotation);
+            } else if (!strcmp(key, "auto_calibration_mpu")) {
+                snprintf(value, 32, "%u", sys_cfg.auto_calibration_mpu);
+            } else if (!strcmp(key, "mpu_order")) {
+                snprintf(value, 32, "%u", sys_cfg.mpu_order);
+            } else if (!strcmp(key, "auto_start_app")) {
+                snprintf(value, 32, "%s", sys_cfg.auto_start_app.c_str());
+            }
+        } break;
+        case APP_MESSAGE_SET_PARAM: {
+            if (!strcmp(key, "ssid_0")) {
+                sys_cfg.ssid_0 = value;
+            } else if (!strcmp(key, "password_0")) {
+                sys_cfg.password_0 = value;
+            } else if (!strcmp(key, "ssid_1")) {
+                sys_cfg.ssid_1 = value;
+            } else if (!strcmp(key, "password_1")) {
+                sys_cfg.password_1 = value;
+            } else if (!strcmp(key, "ssid_2")) {
+                sys_cfg.ssid_2 = value;
+            } else if (!strcmp(key, "password_2")) {
+                sys_cfg.password_2 = value;
+            } else if (!strcmp(key, "power_mode")) {
+                sys_cfg.power_mode = atol(value);
+            } else if (!strcmp(key, "backLight")) {
+                sys_cfg.backLight = atol(value);
+            } else if (!strcmp(key, "rotation")) {
+                sys_cfg.rotation = atol(value);
+            } else if (!strcmp(key, "auto_calibration_mpu")) {
+                sys_cfg.auto_calibration_mpu = atol(value);
+                if (0 == sys_cfg.auto_calibration_mpu) {
+                    this->write_config(&this->mpu_cfg);
+                }
+            } else if (!strcmp(key, "mpu_order")) {
+                sys_cfg.mpu_order = atol(value);
+            } else if (!strcmp(key, "auto_start_app")) {
+                sys_cfg.auto_start_app = value;
+            }
+        } break;
+        case APP_MESSAGE_READ_CFG: {
+            read_config(&sys_cfg);
+            // read_config(&mpu_cfg);
+        } break;
+        case APP_MESSAGE_WRITE_CFG: {
+            write_config(&sys_cfg);
+            // write_config(&mpu_cfg);  // 在取消自动校准的时候已经写过一次了
+        } break;
+        default:
+            break;
     }
 }

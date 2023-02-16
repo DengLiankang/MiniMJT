@@ -1,8 +1,8 @@
 #ifndef WEB_SETTING_H
 #define WEB_SETTING_H
 
-#include <WString.h>
 #include "sys/app_controller.h"
+#include <WString.h>
 
 extern AppController *app_controller; // APP控制器
 void init_page_header(void);
@@ -17,7 +17,6 @@ void handleFileUpload(void);
 
 void sys_setting(void);
 void weather_setting(void);
-void stock_setting(void);
 void picture_setting(void);
 void media_setting(void);
 void screen_setting(void);
@@ -26,7 +25,6 @@ void anniversary_setting(void);
 
 void saveSysConf(void);
 void saveWeatherConf(void);
-void saveStockConf(void);
 void savePictureConf(void);
 void saveMediaConf(void);
 void saveScreenConf(void);

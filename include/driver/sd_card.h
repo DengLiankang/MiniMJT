@@ -12,15 +12,13 @@
 extern int photo_file_num;
 extern char file_name_list[DIR_FILE_NUM][DIR_FILE_NAME_MAX_LEN];
 
-enum FILE_TYPE : unsigned char
-{
+enum FILE_TYPE : unsigned char {
     FILE_TYPE_UNKNOW = 0,
     FILE_TYPE_FILE,
-    FILE_TYPE_FOLDER
+    FILE_TYPE_FOLDER,
 };
 
-struct File_Info
-{
+struct File_Info {
     char *file_name;
     FILE_TYPE file_type;
     File_Info *front_node; // 上一个节点

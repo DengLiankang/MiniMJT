@@ -1,8 +1,8 @@
-#include <WString.h>
-#include "common.h"
 #include "config.h"
+#include "common.h"
+#include <WString.h>
 
-Preferences prefs;        // 声明Preferences对象
+Preferences prefs; // 声明Preferences对象
 
 void config_read(const char *file_path, Config *cfg)
 {
@@ -83,10 +83,8 @@ void config_read(const char *file_path, Config *cfg)
 void config_save(const char *file_path, Config *cfg)
 {
     // String line("\n");
-    // String res = cfg->ssid + line + cfg->password + line + cfg->cityname + line + cfg->language + line + cfg->weather_key;
-    // Serial.println(res);
-    // tf.deleteFile(file_path);
-    // tf.writeFile(file_path, res.c_str());
+    // String res = cfg->ssid + line + cfg->password + line + cfg->cityname + line + cfg->language + line +
+    // cfg->weather_key; Serial.println(res); tf.deleteFile(file_path); tf.writeFile(file_path, res.c_str());
 
     prefs.begin("sys"); // 打开命名空间mynamespace
     prefs.putUChar("backLight", cfg->backLight);

@@ -62,8 +62,7 @@ void display_share_init(void)
     lv_scr_load(share_main_scr);
 }
 
-void display_screen_share(const char *title, const char *ip,
-                          const char *port, const char *info,
+void display_screen_share(const char *title, const char *ip, const char *port, const char *info,
                           lv_scr_load_anim_t anim_type)
 {
     display_share_init();
@@ -79,8 +78,7 @@ void display_screen_share(const char *title, const char *ip,
 
 void screen_share_gui_del(void)
 {
-    if (NULL != share_main_scr)
-    {
+    if (NULL != share_main_scr) {
         lv_obj_clean(share_main_scr); // 清空此前页面
         share_main_scr = NULL;
         title_label = NULL;

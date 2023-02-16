@@ -1,21 +1,19 @@
 #include "example.h"
+#include "common.h"
 #include "example_gui.h"
 #include "sys/app_controller.h"
-#include "common.h"
 
 #define EXAMPLE_APP_NAME "Example"
 
 // 动态数据，APP的生命周期结束也需要释放它
-struct ExampleAppRunData
-{
+struct ExampleAppRunData {
     unsigned int val1;
     unsigned int val2;
     unsigned int val3;
 };
 
 // 常驻数据，可以不随APP的生命周期而释放或删除
-struct ExampleAppForeverData
-{
+struct ExampleAppForeverData {
     unsigned int val1;
     unsigned int val2;
     unsigned int val3;
@@ -47,15 +45,13 @@ static int example_init(AppController *sys)
     // 解析数据
     // 将配置数据保存在文件中（持久化）
     g_flashCfg.writeFile("/example.cfg", "value1=100\nvalue2=200");
-    
+
     return 0;
 }
 
-static void example_process(AppController *sys,
-                            const ImuAction *act_info)
+static void example_process(AppController *sys, const ImuAction *act_info)
 {
-    if (RETURN == act_info->active)
-    {
+    if (RETURN == act_info->active) {
         sys->app_exit(); // 退出APP
         return;
     }
@@ -67,8 +63,7 @@ static void example_process(AppController *sys,
     // delay(300);
 }
 
-static void example_background_task(AppController *sys,
-                                    const ImuAction *act_info)
+static void example_background_task(AppController *sys, const ImuAction *act_info)
 {
     // 本函数为后台任务，主控制器会间隔一分钟调用此函数
     // 本函数尽量只调用"常驻数据",其他变量可能会因为生命周期的缘故已经释放
@@ -87,52 +82,39 @@ static void example_background_task(AppController *sys,
 static int example_exit_callback(void *param)
 {
     // 释放资源
-    if (NULL != run_data)
-    {
+    if (NULL != run_data) {
         free(run_data);
         run_data = NULL;
     }
     return 0;
 }
 
-static void example_message_handle(const char *from, const char *to,
-                                   APP_MESSAGE_TYPE type, void *message,
+static void example_message_handle(const char *from, const char *to, APP_MESSAGE_TYPE type, void *message,
                                    void *ext_info)
 {
     // 目前主要是wifi开关类事件（用于功耗控制）
-    switch (type)
-    {
-    case APP_MESSAGE_WIFI_CONN:
-    {
-        // todo
-    }
-    break;
-    case APP_MESSAGE_WIFI_AP:
-    {
-        // todo
-    }
-    break;
-    case APP_MESSAGE_WIFI_ALIVE:
-    {
-        // wifi心跳维持的响应 可以不做任何处理
-    }
-    break;
-    case APP_MESSAGE_GET_PARAM:
-    {
-        char *param_key = (char *)message;
-    }
-    break;
-    case APP_MESSAGE_SET_PARAM:
-    {
-        char *param_key = (char *)message;
-        char *param_val = (char *)ext_info;
-    }
-    break;
-    default:
-        break;
+    switch (type) {
+        case APP_MESSAGE_WIFI_CONN: {
+            // todo
+        } break;
+        case APP_MESSAGE_WIFI_AP: {
+            // todo
+        } break;
+        case APP_MESSAGE_WIFI_ALIVE: {
+            // wifi心跳维持的响应 可以不做任何处理
+        } break;
+        case APP_MESSAGE_GET_PARAM: {
+            char *param_key = (char *)message;
+        } break;
+        case APP_MESSAGE_SET_PARAM: {
+            char *param_key = (char *)message;
+            char *param_val = (char *)ext_info;
+        } break;
+        default:
+            break;
     }
 }
 
-APP_OBJ example_app = {EXAMPLE_APP_NAME, &app_example, "Author HQ\nVersion 2.0.0\n",
-                       example_init, example_process, example_background_task,
+APP_OBJ example_app = {EXAMPLE_APP_NAME,      &app_example,          "Author HQ\nVersion 2.0.0\n",
+                       example_init,          example_process,       example_background_task,
                        example_exit_callback, example_message_handle};

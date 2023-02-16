@@ -30,7 +30,7 @@ static lv_obj_t *spaceImg = NULL;
 static lv_chart_series_t *ser1, *ser2;
 
 // 天气图标路径的映射关系
-const void *weaImage_map[] = {&weather_0, &weather_9, &weather_14, &weather_5, &weather_25,
+const void *weaImage_map[] = {&weather_0,  &weather_9,  &weather_14, &weather_5, &weather_25,
                               &weather_30, &weather_26, &weather_11, &weather_23};
 // 太空人图标路径的映射关系
 const void *manImage_map[] = {&man_0, &man_1, &man_2, &man_3, &man_4, &man_5, &man_6, &man_7, &man_8, &man_9};
@@ -106,12 +106,9 @@ void display_curve_init(lv_scr_load_anim_t anim_type)
     lv_obj_align(titleLabel, LV_ALIGN_TOP_MID, 0, 10);
     lv_obj_align(chart, LV_ALIGN_CENTER, 0, 10);
 
-    if (LV_SCR_LOAD_ANIM_NONE != anim_type)
-    {
+    if (LV_SCR_LOAD_ANIM_NONE != anim_type) {
         lv_scr_load_anim(scr_2, anim_type, 300, 300, false);
-    }
-    else
-    {
+    } else {
         lv_scr_load(scr_2);
     }
 }
@@ -119,12 +116,10 @@ void display_curve_init(lv_scr_load_anim_t anim_type)
 void display_curve(short maxT[], short minT[], lv_scr_load_anim_t anim_type)
 {
     display_curve_init(anim_type);
-    for (int Ti = 0; Ti < 7; ++Ti)
-    {
+    for (int Ti = 0; Ti < 7; ++Ti) {
         ser1->y_points[Ti] = maxT[Ti] + 50; // 补偿50度
     }
-    for (int Ti = 0; Ti < 7; ++Ti)
-    {
+    for (int Ti = 0; Ti < 7; ++Ti) {
         ser2->y_points[Ti] = minT[Ti] + 50; // 补偿50度
     }
     lv_chart_refresh(chart);
@@ -245,19 +240,16 @@ void display_weather(struct Weather weaInfo, lv_scr_load_anim_t anim_type)
     display_weather_init(anim_type);
 
     lv_label_set_text(cityLabel, weaInfo.cityname);
-    if (strlen(weaInfo.cityname) > 6)
-    {
+    if (strlen(weaInfo.cityname) > 6) {
         lv_obj_align(cityLabel, LV_ALIGN_TOP_LEFT, 5, 15);
-    }
-    else
-    {
+    } else {
         lv_obj_align(cityLabel, LV_ALIGN_TOP_LEFT, 20, 15);
     }
     lv_label_set_text(btnLabel, airQualityCh[weaInfo.airQulity]);
     lv_img_set_src(weatherImg, weaImage_map[weaInfo.weather_code]);
     // 下面这行代码可能会出错
-    lv_label_set_text_fmt(txtLabel, "最低气温%d°C, 最高气温%d°C, %s%d 级.   ",
-                          weaInfo.minTemp, weaInfo.maxTemp, weaInfo.windDir, weaInfo.windLevel);
+    lv_label_set_text_fmt(txtLabel, "最低气温%d°C, 最高气温%d°C, %s%d 级.   ", weaInfo.minTemp, weaInfo.maxTemp,
+                          weaInfo.windDir, weaInfo.windLevel);
 
     lv_bar_set_value(tempBar, weaInfo.temperature, LV_ANIM_ON);
     lv_label_set_text_fmt(tempLabel, "%2d°C", weaInfo.temperature);
@@ -276,12 +268,9 @@ void display_weather(struct Weather weaInfo, lv_scr_load_anim_t anim_type)
     // lv_obj_align(humiLabel, NULL, LV_ALIGN_LEFT_MID, 100, 100);
     // lv_obj_align(spaceImg, NULL, LV_ALIGN_BOTTOM_RIGHT, -10, -10);
 
-    if (LV_SCR_LOAD_ANIM_NONE != anim_type)
-    {
+    if (LV_SCR_LOAD_ANIM_NONE != anim_type) {
         lv_scr_load_anim(scr_1, anim_type, 300, 300, false);
-    }
-    else
-    {
+    } else {
         lv_scr_load(scr_1);
     }
 }
@@ -291,8 +280,7 @@ void display_time(struct TimeStr timeInfo, lv_scr_load_anim_t anim_type)
     display_weather_init(anim_type);
     lv_label_set_text_fmt(clockLabel_1, "%02d#ffa500 %02d#", timeInfo.hour, timeInfo.minute);
     lv_label_set_text_fmt(clockLabel_2, "%02d", timeInfo.second);
-    lv_label_set_text_fmt(dateLabel, "%2d月%2d日   周%s", timeInfo.month, timeInfo.day,
-                          weekDayCh[timeInfo.weekday]);
+    lv_label_set_text_fmt(dateLabel, "%2d月%2d日   周%s", timeInfo.month, timeInfo.day, weekDayCh[timeInfo.weekday]);
 
     // lv_obj_align(clockLabel_1, NULL, LV_ALIGN_LEFT_MID, 0, 10);
     // lv_obj_align(clockLabel_2, NULL, LV_ALIGN_LEFT_MID, 165, 9);
@@ -310,8 +298,7 @@ void display_time(struct TimeStr timeInfo, lv_scr_load_anim_t anim_type)
 
 void weather_gui_release(void)
 {
-    if (scr_1 != NULL)
-    {
+    if (scr_1 != NULL) {
         lv_obj_clean(scr_1);
         scr_1 = NULL;
         weatherImg = NULL;
@@ -331,8 +318,7 @@ void weather_gui_release(void)
         spaceImg = NULL;
     }
 
-    if (scr_2 != NULL)
-    {
+    if (scr_2 != NULL) {
         lv_obj_clean(scr_2);
         scr_2 = NULL;
         chart = NULL;
@@ -358,8 +344,7 @@ void weather_gui_del(void)
 void display_space(void)
 {
     static int _spaceIndex = 0;
-    if (NULL != scr_1 && lv_scr_act() == scr_1)
-    {
+    if (NULL != scr_1 && lv_scr_act() == scr_1) {
         lv_img_set_src(spaceImg, manImage_map[_spaceIndex]);
         _spaceIndex = (_spaceIndex + 1) % 10;
     }
@@ -367,24 +352,15 @@ void display_space(void)
 
 int airQulityLevel(int q)
 {
-    if (q < 50)
-    {
+    if (q < 50) {
         return 0;
-    }
-    else if (q < 100)
-    {
+    } else if (q < 100) {
         return 1;
-    }
-    else if (q < 150)
-    {
+    } else if (q < 150) {
         return 2;
-    }
-    else if (q < 200)
-    {
+    } else if (q < 200) {
         return 3;
-    }
-    else if (q < 300)
-    {
+    } else if (q < 300) {
         return 4;
     }
     return 5;

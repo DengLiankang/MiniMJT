@@ -12,8 +12,7 @@ MsgHead::MsgHead(MODULE_TYPE from_who, MODULE_TYPE to_who)
 
 uint32_t MsgHead::decode(const uint8_t *msg)
 {
-    if (NULL == msg)
-    {
+    if (NULL == msg) {
         return 0;
     }
     m_msg_len = msg[2] << 8 + msg[3];
@@ -26,8 +25,7 @@ uint32_t MsgHead::decode(const uint8_t *msg)
 
 uint32_t MsgHead::encode(uint8_t *msg)
 {
-    if (NULL == msg)
-    {
+    if (NULL == msg) {
         return 0;
     }
     msg[0] = 0x23;
@@ -44,8 +42,7 @@ uint32_t MsgHead::encode(uint8_t *msg)
 
 bool MsgHead::isLegal()
 {
-    if (m_header_mark != 0x2323)
-    {
+    if (m_header_mark != 0x2323) {
         return false;
     }
     return true;
@@ -68,8 +65,7 @@ SettingsMsg::SettingsMsg(ACTION_TYPE action_type)
 
 uint32_t SettingsMsg::decode(const uint8_t *msg)
 {
-    if (NULL == msg)
-    {
+    if (NULL == msg) {
         return 0;
     }
     uint32_t index = m_msg_head.decode(msg);
@@ -90,32 +86,25 @@ uint32_t SettingsMsg::decode(const uint8_t *msg)
     p_ch += 2;
 
     // 解析值 value
-    switch (m_value_type)
-    {
-    case VALUE_TYPE_INT:
-    {
-        m_value[0] = (unsigned char)(*p_ch);
-        p_ch++;
-        m_value[1] = (unsigned char)(*p_ch);
-        p_ch += 2;
-    }
-    break;
-    case VALUE_TYPE_UCHAR:
-    {
-        m_value[0] = (unsigned char)(*p_ch);
-        p_ch += 2;
-    }
-    break;
-    case VALUE_TYPE_STRING:
-    {
-        strncpy((char *)m_value, p_ch, 16);
-        for (; (*p_ch != ' ') && (*p_ch != '\r'); ++p_ch)
-            ;
-        p_ch++;
-    }
-    break;
-    default:
-        break;
+    switch (m_value_type) {
+        case VALUE_TYPE_INT: {
+            m_value[0] = (unsigned char)(*p_ch);
+            p_ch++;
+            m_value[1] = (unsigned char)(*p_ch);
+            p_ch += 2;
+        } break;
+        case VALUE_TYPE_UCHAR: {
+            m_value[0] = (unsigned char)(*p_ch);
+            p_ch += 2;
+        } break;
+        case VALUE_TYPE_STRING: {
+            strncpy((char *)m_value, p_ch, 16);
+            for (; (*p_ch != ' ') && (*p_ch != '\r'); ++p_ch)
+                ;
+            p_ch++;
+        } break;
+        default:
+            break;
     }
 
     return index + (p_ch - ((const char *)msg + index));
@@ -124,8 +113,7 @@ uint32_t SettingsMsg::decode(const uint8_t *msg)
 uint32_t SettingsMsg::encode(uint8_t *msg)
 {
     // msg最大长度为54字节
-    if (NULL == msg)
-    {
+    if (NULL == msg) {
         return false;
     }
     uint32_t index = m_msg_head.encode(msg);
@@ -139,30 +127,23 @@ uint32_t SettingsMsg::encode(uint8_t *msg)
     index += 2;
 
     // 解析值 value
-    switch (m_value_type)
-    {
-    case VALUE_TYPE_INT:
-    {
-        msg[index] = m_value[0];
-        index += 1;
-        msg[index] = m_value[2];
-        index += 2;
-    }
-    break;
-    case VALUE_TYPE_UCHAR:
-    {
-        msg[index] = m_value[0];
-        index += 2;
-    }
-    break;
-    case VALUE_TYPE_STRING:
-    {
-        strncpy((char *)&msg[index], (char *)m_value, 16);
-        index = index + strlen((char *)m_value) + 1;
-    }
-    break;
-    default:
-        break;
+    switch (m_value_type) {
+        case VALUE_TYPE_INT: {
+            msg[index] = m_value[0];
+            index += 1;
+            msg[index] = m_value[2];
+            index += 2;
+        } break;
+        case VALUE_TYPE_UCHAR: {
+            msg[index] = m_value[0];
+            index += 2;
+        } break;
+        case VALUE_TYPE_STRING: {
+            strncpy((char *)&msg[index], (char *)m_value, 16);
+            index = index + strlen((char *)m_value) + 1;
+        } break;
+        default:
+            break;
     }
     m_msg_head.m_msg_len = index;
     m_msg_head.encode(msg);
@@ -170,10 +151,7 @@ uint32_t SettingsMsg::encode(uint8_t *msg)
     return index;
 }
 
-bool SettingsMsg::isLegal()
-{
-    return m_msg_head.isLegal();
-}
+bool SettingsMsg::isLegal() { return m_msg_head.isLegal(); }
 
 /********************************************************/
 /* FileSystem
@@ -188,8 +166,7 @@ FileSystem::FileSystem(ACTION_TYPE action_type)
 
 uint32_t FileSystem::decode(const uint8_t *msg)
 {
-    if (NULL == msg)
-    {
+    if (NULL == msg) {
         return 0;
     }
     uint32_t index = m_msg_head.decode(msg);
@@ -199,8 +176,7 @@ uint32_t FileSystem::decode(const uint8_t *msg)
 
 uint32_t FileSystem::encode(uint8_t *msg)
 {
-    if (NULL == msg)
-    {
+    if (NULL == msg) {
         return false;
     }
     uint32_t index = m_msg_head.encode(msg);
@@ -220,8 +196,7 @@ DirCreate::DirCreate(const char *dir_name)
 
 uint32_t DirCreate::decode(const uint8_t *msg)
 {
-    if (NULL == msg)
-    {
+    if (NULL == msg) {
         return 0;
     }
     uint32_t index = m_file_system.decode(msg);
@@ -231,8 +206,7 @@ uint32_t DirCreate::decode(const uint8_t *msg)
 
 uint32_t DirCreate::encode(uint8_t *msg)
 {
-    if (NULL == msg)
-    {
+    if (NULL == msg) {
         return false;
     }
     uint32_t index = m_file_system.encode(msg);
@@ -248,20 +222,17 @@ DirList::DirList(const char *dir_path, const char *dir_info)
 {
     m_file_system.m_msg_head.m_action_type = AT_DIR_LIST;
 
-    if (NULL != dir_path)
-    {
+    if (NULL != dir_path) {
         memcpy(m_dir_path, dir_path, 99);
     }
-    if (NULL != dir_info)
-    {
+    if (NULL != dir_info) {
         memcpy(m_dir_info, dir_info, 400);
     }
 };
 
 uint32_t DirList::decode(const uint8_t *msg)
 {
-    if (NULL == msg)
-    {
+    if (NULL == msg) {
         return 0;
     }
     uint32_t index = m_file_system.decode(msg);
@@ -274,8 +245,7 @@ uint32_t DirList::decode(const uint8_t *msg)
 
 uint32_t DirList::encode(uint8_t *msg)
 {
-    if (NULL == msg)
-    {
+    if (NULL == msg) {
         return false;
     }
     uint32_t index = m_file_system.encode(msg);
