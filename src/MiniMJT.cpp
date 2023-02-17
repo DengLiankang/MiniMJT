@@ -68,7 +68,7 @@ void setup()
     screen.init(app_controller->sys_cfg.rotation, app_controller->sys_cfg.backLight);
 
     app_controller->init();
-    AIO_LVGL_OPERATE_LOCK(lv_timer_handler();)
+    screen.routine();
 
     /*** Init ambient-light sensor ***/
     ambLight.init(ONE_TIME_H_RESOLUTION_MODE);

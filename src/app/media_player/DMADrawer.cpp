@@ -47,7 +47,7 @@ static spi_device_handle_t spi_start(uint32_t len, int spi_freq, int tft_mosi, i
                                .sclk_io_num = (gpio_num_t)tft_sclk,
                                .quadwp_io_num = -1,
                                .quadhd_io_num = -1,
-                               .max_transfer_sz = len + 8,
+                               .max_transfer_sz = (int)(len + 8),
                                .flags = SPICOMMON_BUSFLAG_MASTER,
                                .intr_flags = 0};
     ret = spi_bus_initialize(VSPI_HOST, &buscfg, 1);

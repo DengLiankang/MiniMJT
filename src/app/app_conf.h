@@ -18,7 +18,7 @@
 #endif
 
 // 纪念日APP
-#define APP_ANNIVERSARY_USE 1
+#define APP_ANNIVERSARY_USE 0
 #if APP_ANNIVERSARY_USE
 #include "app/anniversary/anniversary.h"
 #endif
@@ -30,19 +30,19 @@
 #endif
 
 // 2048游戏APP
-#define APP_GAME_2048_USE 1
+#define APP_GAME_2048_USE 0
 #if APP_GAME_2048_USE
 #include "app/game_2048/game_2048.h"
 #endif
 
 // 心跳APP
-#define APP_HEARTBEAT_USE 1
+#define APP_HEARTBEAT_USE 0
 #if APP_HEARTBEAT_USE
 #include "app/heartbeat/heartbeat.h"
 #endif
 
 // 特效动画APP
-#define APP_IDEA_ANIM_USE 1
+#define APP_IDEA_ANIM_USE 0
 #if APP_IDEA_ANIM_USE
 #include "app/idea_anim/idea.h"
 #endif
@@ -60,7 +60,7 @@
 #endif
 
 // 屏幕分享/投屏APP
-#define APP_SCREEN_SHARE_USE 1
+#define APP_SCREEN_SHARE_USE 0
 #if APP_SCREEN_SHARE_USE
 #include "app/screen_share/screen_share.h"
 #endif

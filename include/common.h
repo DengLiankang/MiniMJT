@@ -1,7 +1,7 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-#define MJT_VERSION "1.1.0"
+#define MJT_VERSION "1.1.1"
 #define GET_SYS_MILLIS xTaskGetTickCount // 获取系统毫秒数
 // #define GET_SYS_MILLIS millis            // 获取系统毫秒数
 

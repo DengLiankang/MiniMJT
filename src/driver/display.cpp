@@ -10,7 +10,7 @@ static lv_disp_draw_buf_t disp_buf;
 static lv_disp_drv_t disp_drv;
 static lv_color_t buf[SCREEN_HOR_RES * LV_HOR_RES_MAX_LEN];
 
-void my_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p)
+void minimjt_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p)
 {
     uint32_t w = (area->x2 - area->x1 + 1);
     uint32_t h = (area->y2 - area->y1 + 1);
@@ -56,7 +56,7 @@ void Display::init(uint8_t rotation, uint8_t backLight)
     lv_disp_drv_init(&disp_drv);
     disp_drv.hor_res = SCREEN_HOR_RES;
     disp_drv.ver_res = SCREEN_VER_RES;
-    disp_drv.flush_cb = my_disp_flush;
+    disp_drv.flush_cb = minimjt_disp_flush;
     disp_drv.draw_buf = &disp_buf;
     disp_drv.user_data = tft;
     // 开启 LV_COLOR_SCREEN_TRANSP 屏幕具有透明和不透明样式
