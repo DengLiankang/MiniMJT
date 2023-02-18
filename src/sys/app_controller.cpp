@@ -66,10 +66,13 @@ void AppController::init(void)
     /*** Init screen ***/
     screen.init(mSysCfg.rotation, mSysCfg.backLight);
 
-    // TODO:loading gui init
+    AppCtrlScreenInit();
+    AppCtrlLoadingGuiInit();
+    AppCtrlLoadingDisplay(40, NULL);
 
     /*** Init ambient-light sensor ***/
     ambLight.init(ONE_TIME_H_RESOLUTION_MODE);
+
 
     /*** Init micro SD-Card ***/
     tf.init();
@@ -79,9 +82,11 @@ void AppController::init(void)
     /*** Init IMU as input device ***/
     // lv_port_indev_init();
 
+    AppCtrlLoadingDisplay(90, "init imu...");
+
     mpu.init(mSysCfg.mpu_order, mSysCfg.auto_calibration_mpu, &mImuCfg); // 初始化比较耗时
 
-    // app_control_gui_init();
+    AppCtrlLoadingDisplay(100, "finished.");
     // appList[0] = new APP_OBJ();
     // appList[0]->app_image = &app_loading;
     // appList[0]->app_name = "Loading...";
@@ -151,19 +156,21 @@ int AppController::app_auto_start()
 
 int AppController::main_process(void)
 {
+    lv_timer_handler();
+
     if (gIsCheckAction) {
         gIsCheckAction = false;
         gImuActionData = mpu.getAction();
     }
 
-    if (ACTIVE_TYPE::UNKNOWN != gImuActionData->active) {
-        Serial.print(F("[Operate]\tact_info->active: "));
-        Serial.println(active_type_info[gImuActionData->active]);
-    }
-
     if (gIsRunEventDeal) {
         gIsRunEventDeal = false;
         this->req_event_deal();
+    }
+
+    if (ACTIVE_TYPE::UNKNOWN != gImuActionData->active) {
+        Serial.print("[Operate] ");
+        Serial.println(active_type_info[gImuActionData->active]);
     }
 
     // // wifi自动关闭(在节能模式下)

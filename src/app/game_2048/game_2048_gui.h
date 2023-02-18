@@ -7,10 +7,6 @@ extern "C" {
 
 #include "lvgl.h"
 
-#define ANIEND_WAIT                                                                                                    \
-    while (lv_anim_count_running())                                                                                    \
-        lv_task_handler(); // 等待动画完成
-
 void game_2048_gui_init(void);
 void display_game_2048(const char *file_name, lv_scr_load_anim_t anim_type);
 void game_2048_gui_del(void);
