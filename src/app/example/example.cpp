@@ -42,6 +42,7 @@ static int example_init(AppController *sys)
     // 配置文件名最好以APP名为开头 以".cfg"结尾，以免多个APP读取混乱
     char info[128] = {0};
     uint16_t size = g_flashCfg.readFile("/example.cfg", (uint8_t *)info);
+    Serial.print(size);
     // 解析数据
     // 将配置数据保存在文件中（持久化）
     g_flashCfg.writeFile("/example.cfg", "value1=100\nvalue2=200");
@@ -104,11 +105,11 @@ static void example_message_handle(const char *from, const char *to, APP_MESSAGE
             // wifi心跳维持的响应 可以不做任何处理
         } break;
         case APP_MESSAGE_GET_PARAM: {
-            char *param_key = (char *)message;
+            // char *param_key = (char *)message;
         } break;
         case APP_MESSAGE_SET_PARAM: {
-            char *param_key = (char *)message;
-            char *param_val = (char *)ext_info;
+            // char *param_key = (char *)message;
+            // char *param_val = (char *)ext_info;
         } break;
         default:
             break;

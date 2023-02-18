@@ -5,7 +5,7 @@
 lv_obj_t *example_gui = NULL;
 
 static lv_style_t default_style;
-static lv_style_t label_style;
+// static lv_style_t label_style;
 
 void example_gui_init(void) { lv_style_init(&default_style); }
 

@@ -168,12 +168,12 @@ static void get_date_diff()
         dateDiff(&(cfg_data.current_date), &(cfg_data.target_date[run_data->cur_anniversary]));
 }
 
-static void date_update()
-{
-    get_date_diff();
-    anniversary_gui_display_date(&(cfg_data.target_date[run_data->cur_anniversary]), run_data->anniversary_day_count,
-                                 cfg_data.event_name[run_data->cur_anniversary].c_str());
-}
+// static void date_update()
+// {
+//     get_date_diff();
+//     anniversary_gui_display_date(&(cfg_data.target_date[run_data->cur_anniversary]), run_data->anniversary_day_count,
+//                                  cfg_data.event_name[run_data->cur_anniversary].c_str());
+// }
 
 static long long get_timestamp(String url)
 {
@@ -296,7 +296,7 @@ static void anniversary_message_handle(const char *from, const char *to, APP_MES
             // todo
             Serial.print(F("ntp update.\n"));
 
-            long long timestamp = get_timestamp(TIME_API); // nowapi时间API
+            // long long timestamp = get_timestamp(TIME_API); // nowapi时间API
         } break;
         case APP_MESSAGE_WIFI_AP: {
             // todo

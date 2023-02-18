@@ -21,7 +21,7 @@ static lv_obj_t *dayLabel = NULL; // 在一起天数
 static lv_obj_t *btn = NULL, *btnLabel = NULL;
 static lv_obj_t *targetDateLabel = NULL; // 目标日期
 
-static const char weekDayCh[7][4] = {"日", "一", "二", "三", "四", "五", "六"};
+// static const char weekDayCh[7][4] = {"日", "一", "二", "三", "四", "五", "六"};
 
 void anniversary_gui_init(void)
 {

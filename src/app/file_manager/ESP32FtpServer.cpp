@@ -468,7 +468,7 @@ boolean FtpServer::processCommand()
             uint16_t nm = 0;
             //      Dir dir= SD.openDir(cwdName);
             File dir = SD.open(cwdName);
-            char dtStr[15];
+            // char dtStr[15];
             //  if(!SD.exists(cwdName))
             if ((!dir) || (!dir.isDirectory()))
                 client.println("550 Can't open directory " + String(cwdName));
@@ -638,7 +638,7 @@ boolean FtpServer::processCommand()
     //
     else if (!strcmp(command, "RNTO")) {
         char path[FTP_CWD_SIZE];
-        char dir[FTP_FIL_SIZE];
+        // char dir[FTP_FIL_SIZE];
         if (strlen(buf) == 0 || !rnfrCmd)
             client.println("503 Need RNFR before RNTO");
         else if (strlen(parameters) == 0)
