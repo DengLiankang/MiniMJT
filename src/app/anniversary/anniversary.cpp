@@ -19,7 +19,7 @@ struct AN_Config {
     struct tm current_date;
 };
 
-static long long get_timestamp(String url);
+// static long long get_timestamp(String url);
 
 static void write_config(AN_Config *cfg)
 {
@@ -39,7 +39,7 @@ static void write_config(AN_Config *cfg)
     memset(tmp, 0, 16);
     snprintf(tmp, 16, "%d.%d.%d\n", cfg->current_date.tm_year, cfg->current_date.tm_mon, cfg->current_date.tm_mday);
     w_data += tmp;
-    g_flashCfg.writeFile(ANNIVERSARY_CONFIG_PATH, w_data.c_str());
+    gFlashCfg.writeFile(ANNIVERSARY_CONFIG_PATH, w_data.c_str());
 }
 
 static void read_config(AN_Config *cfg)
@@ -47,7 +47,7 @@ static void read_config(AN_Config *cfg)
     // 如果有需要持久化配置文件 可以调用此函数将数据存在flash中
     // 配置文件名最好以APP名为开头 以".cfg"结尾，以免多个APP读取混乱
     char info[128] = {0};
-    uint16_t size = g_flashCfg.readFile(ANNIVERSARY_CONFIG_PATH, (uint8_t *)info);
+    uint16_t size = gFlashCfg.readFile(ANNIVERSARY_CONFIG_PATH, (uint8_t *)info);
     Serial.printf("size %d\n", size);
     info[size] = 0;
     if (size == 0) {
@@ -175,37 +175,37 @@ static void get_date_diff()
 //                                  cfg_data.event_name[run_data->cur_anniversary].c_str());
 // }
 
-static long long get_timestamp(String url)
-{
-    if (WL_CONNECTED != WiFi.status())
-        return 0;
+// static long long get_timestamp(String url)
+// {
+//     if (WL_CONNECTED != WiFi.status())
+//         return 0;
 
-    String time = "";
-    HTTPClient http;
-    http.setTimeout(1000);
-    http.begin(url);
+//     String time = "";
+//     HTTPClient http;
+//     http.setTimeout(1000);
+//     http.begin(url);
 
-    int httpCode = http.GET();
-    if (httpCode > 0) {
-        if (httpCode == HTTP_CODE_OK) {
-            String payload = http.getString();
-            Serial.println(payload);
-            int time_index = (payload.indexOf("data")) + 12;
-            time = payload.substring(time_index, payload.length() - 3);
-            // 以网络时间戳为准
-            run_data->preNetTimestamp = atoll(time.c_str()) + run_data->errorNetTimestamp + TIMEZERO_OFFSIZE;
-            run_data->preLocalTimestamp = GET_SYS_MILLIS();
-        }
-    } else {
-        Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
-        // 得不到网络时间戳时
-        run_data->preNetTimestamp = run_data->preNetTimestamp + (GET_SYS_MILLIS() - run_data->preLocalTimestamp);
-        run_data->preLocalTimestamp = GET_SYS_MILLIS();
-    }
-    http.end();
+//     int httpCode = http.GET();
+//     if (httpCode > 0) {
+//         if (httpCode == HTTP_CODE_OK) {
+//             String payload = http.getString();
+//             Serial.println(payload);
+//             int time_index = (payload.indexOf("data")) + 12;
+//             time = payload.substring(time_index, payload.length() - 3);
+//             // 以网络时间戳为准
+//             run_data->preNetTimestamp = atoll(time.c_str()) + run_data->errorNetTimestamp + TIMEZERO_OFFSIZE;
+//             run_data->preLocalTimestamp = GET_SYS_MILLIS();
+//         }
+//     } else {
+//         Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
+//         // 得不到网络时间戳时
+//         run_data->preNetTimestamp = run_data->preNetTimestamp + (GET_SYS_MILLIS() - run_data->preLocalTimestamp);
+//         run_data->preLocalTimestamp = GET_SYS_MILLIS();
+//     }
+//     http.end();
 
-    return run_data->preNetTimestamp;
-}
+//     return run_data->preNetTimestamp;
+// }
 
 static int anniversary_init(AppController *sys)
 {

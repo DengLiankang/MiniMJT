@@ -93,7 +93,7 @@ static void write_config(HeartbeatAppForeverData *cfg)
     snprintf(tmp, 32, "%s\n", cfg->server_password);
     w_data += tmp;
 
-    g_flashCfg.writeFile(HEARTBEAT_CONFIG_PATH, w_data.c_str());
+    gFlashCfg.writeFile(HEARTBEAT_CONFIG_PATH, w_data.c_str());
 }
 
 static void read_config(HeartbeatAppForeverData *cfg)
@@ -101,7 +101,7 @@ static void read_config(HeartbeatAppForeverData *cfg)
     // 如果有需要持久化配置文件 可以调用此函数将数据存在flash中
     // 配置文件名最好以APP名为开头 以".cfg"结尾，以免多个APP读取混乱
     char info[256] = {0};
-    uint16_t size = g_flashCfg.readFile(HEARTBEAT_CONFIG_PATH, (uint8_t *)info);
+    uint16_t size = gFlashCfg.readFile(HEARTBEAT_CONFIG_PATH, (uint8_t *)info);
     Serial.printf("size %d\n", size);
     info[size] = 0;
     if (size == 0) {
@@ -214,7 +214,7 @@ static int heartbeat_init(AppController *sys)
 
     // 初始化MQTT
     char info[128] = {0};
-    uint16_t size = g_flashCfg.readFile(HEARTBEAT_CONFIG_PATH, (uint8_t *)info);
+    uint16_t size = gFlashCfg.readFile(HEARTBEAT_CONFIG_PATH, (uint8_t *)info);
     if (size != 0) // 如果已经设置过heartbeat了，则开启mqtt客户端
     {
         // 获取配置参数

@@ -11,6 +11,8 @@ public:
 
     ~FlashFS();
 
+    void Init(void);
+
     void listDir(const char *dirname, uint8_t levels);
 
     // void createDir(const char *path);

@@ -22,7 +22,7 @@ void taskTwo(void *parameter)
 {
     while (1) {
         // LVGL任务主函数
-        AIO_LVGL_OPERATE_LOCK(lv_task_handler();)
+        MJT_LVGL_OPERATE_LOCK(lv_task_handler());
         vTaskDelay(5 / portTICK_PERIOD_MS);
     }
     Serial.println("Ending lv_task_handler");
@@ -74,10 +74,10 @@ static int game_2048_init(AppController *sys)
     // 刷新棋盘显示
     int new1 = game.addRandom();
     int new2 = game.addRandom();
-    AIO_LVGL_OPERATE_LOCK(showBoard(run_data->pBoard);)
+    MJT_LVGL_OPERATE_LOCK(showBoard(run_data->pBoard));
     // 棋子出生动画
-    AIO_LVGL_OPERATE_LOCK(born(new1);)
-    AIO_LVGL_OPERATE_LOCK(born(new2);)
+    MJT_LVGL_OPERATE_LOCK(born(new1));
+    MJT_LVGL_OPERATE_LOCK(born(new2));
     // 防止进入游戏时，误触发了向上
     vTaskDelay(1000 / portTICK_PERIOD_MS);
     return 0;
@@ -94,30 +94,30 @@ static void game_2048_process(AppController *sys, const ImuAction *act_info)
     if (TURN_RIGHT == act_info->active) {
         game.moveRight();
         if (game.comparePre() == 0) {
-            AIO_LVGL_OPERATE_LOCK(showAnim(run_data->moveRecord, 4);)
+            MJT_LVGL_OPERATE_LOCK(showAnim(run_data->moveRecord, 4));
             delay(700);
-            AIO_LVGL_OPERATE_LOCK(showNewBorn(game.addRandom(), run_data->pBoard);)
+            MJT_LVGL_OPERATE_LOCK(showNewBorn(game.addRandom(), run_data->pBoard));
         }
     } else if (TURN_LEFT == act_info->active) {
         game.moveLeft();
         if (game.comparePre() == 0) {
-            AIO_LVGL_OPERATE_LOCK(showAnim(run_data->moveRecord, 3);)
+            MJT_LVGL_OPERATE_LOCK(showAnim(run_data->moveRecord, 3));
             delay(700);
-            AIO_LVGL_OPERATE_LOCK(showNewBorn(game.addRandom(), run_data->pBoard);)
+            MJT_LVGL_OPERATE_LOCK(showNewBorn(game.addRandom(), run_data->pBoard));
         }
     } else if (UP == act_info->active) {
         game.moveUp();
         if (game.comparePre() == 0) {
-            AIO_LVGL_OPERATE_LOCK(showAnim(run_data->moveRecord, 1);)
+            MJT_LVGL_OPERATE_LOCK(showAnim(run_data->moveRecord, 1));
             delay(700);
-            AIO_LVGL_OPERATE_LOCK(showNewBorn(game.addRandom(), run_data->pBoard);)
+            MJT_LVGL_OPERATE_LOCK(showNewBorn(game.addRandom(), run_data->pBoard));
         }
     } else if (DOWN == act_info->active) {
         game.moveDown();
         if (game.comparePre() == 0) {
-            AIO_LVGL_OPERATE_LOCK(showAnim(run_data->moveRecord, 2);)
+            MJT_LVGL_OPERATE_LOCK(showAnim(run_data->moveRecord, 2));
             delay(700);
-            AIO_LVGL_OPERATE_LOCK(showNewBorn(game.addRandom(), run_data->pBoard);)
+            MJT_LVGL_OPERATE_LOCK(showNewBorn(game.addRandom(), run_data->pBoard));
         }
     }
 
@@ -146,8 +146,6 @@ static int game_2048_exit_callback(void *param)
     if (run_data->xReturned_task_two == pdPASS) {
         vTaskDelete(run_data->xHandle_task_two);
     }
-
-    xSemaphoreGive(lvgl_mutex);
 
     game_2048_gui_del();
 

@@ -11,37 +11,16 @@
 
 #define FORMAT_LITTLEFS_IF_FAILED true
 
-FlashFS::FlashFS()
-{
-    // SPIFFS初始化需要在setup启动后，如果在全局变量里初始化会报错
-    // if (!SPIFFS.begin(FORMAT_LITTLEFS_IF_FAILED))
-    // {
-    //     Serial.println("SPIFFS Mount Failed");
-    //     return;
-    // }
-
-    // listDir("/", 0);
-    // createDir("/mydir");
-    // writeFile("/mydir/hello2.txt", "Hello2");
-    // // writeFile("/mydir/newdir2/newdir3/hello3.txt", "Hello3");
-    // writeFile2("/mydir/newdir2/newdir3/hello3.txt", "Hello3");
-    // listDir("/", 3);
-    // deleteFile("/mydir/hello2.txt");
-    // // deleteFile("/mydir/newdir2/newdir3/hello3.txt");
-    // deleteFile2("/mydir/newdir2/newdir3/hello3.txt");
-    // removeDir("/mydir");
-    // listDir("/", 3);
-    // writeFile("/hello.txt", "Hello ");
-    // appendFile("/hello.txt", "World!\r\n");
-    // readFile("/hello.txt");
-    // renameFile("/hello.txt", "/foo.txt");
-    // readFile("/foo.txt");
-    // deleteFile("/foo.txt");
-    // testFileIO("/test.txt");
-    // deleteFile("/test.txt");
-}
+FlashFS::FlashFS() {}
 
 FlashFS::~FlashFS() {}
+
+void FlashFS::Init(void)
+{
+    if (!SPIFFS.begin(true)) {
+        Serial.println("SPIFFS Mount Failed");
+    }
+}
 
 void FlashFS::listDir(const char *dirname, uint8_t levels)
 {
@@ -117,7 +96,8 @@ void FlashFS::listDir(const char *dirname, uint8_t levels)
 
 uint16_t FlashFS::readFile(const char *path, uint8_t *info)
 {
-    Serial.printf("Reading file: %s\r\n", path);
+    Serial.print("Reading file: ");
+    Serial.println(path);
 
     File file = SPIFFS.open(path);
     uint16_t ret_len = 0;

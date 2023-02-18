@@ -1,7 +1,7 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-#define MJT_VERSION "1.1.2"
+#define MJT_VERSION "2.0.0"
 #define GET_SYS_MILLIS xTaskGetTickCount // 获取系统毫秒数
 // #define GET_SYS_MILLIS millis            // 获取系统毫秒数
 
@@ -27,7 +27,7 @@ extern IMU mpu; // 原则上只提供给主程序调用
 extern SdCard tf;
 // extern Config g_cfg;       // 全局配置文件
 extern Network g_network;  // 网络连接
-extern FlashFS g_flashCfg; // flash中的文件系统（替代原先的Preferences）
+extern FlashFS gFlashCfg; // flash中的文件系统（替代原先的Preferences）
 extern Display screen;     // 屏幕对象
 extern Ambient ambLight;   // 光纤传感器对象
 
@@ -53,10 +53,12 @@ boolean doDelayMillisTime(unsigned long interval, unsigned long *previousMillis,
 // lvgl 操作的锁
 extern SemaphoreHandle_t lvgl_mutex;
 // LVGL操作的安全宏（避免脏数据）
-#define AIO_LVGL_OPERATE_LOCK(CODE)                                                                                    \
-    if (pdTRUE == xSemaphoreTake(lvgl_mutex, portMAX_DELAY)) {                                                         \
-        CODE;                                                                                                          \
-        xSemaphoreGive(lvgl_mutex);                                                                                    \
+#define MJT_LVGL_OPERATE_LOCK(CODE)                                     \
+    {                                                                   \
+        if (pdTRUE == xSemaphoreTake(lvgl_mutex, portMAX_DELAY)) {      \
+            CODE;                                                       \
+            xSemaphoreGive(lvgl_mutex);                                 \
+        }                                                               \
     }
 
 struct SysUtilConfig {

@@ -1,6 +1,7 @@
 #include "sys/app_controller.h"
 #include "Arduino.h"
 #include "common.h"
+#include "driver/lv_port_fs.h"
 #include "sys/app_controller_gui.h"
 #include "sys/interface.h"
 
@@ -9,14 +10,21 @@ const char *app_event_type_info[] = {"APP_MESSAGE_WIFI_CONN",    "APP_MESSAGE_WI
                                      "APP_MESSAGE_GET_PARAM",    "APP_MESSAGE_SET_PARAM",   "APP_MESSAGE_READ_CFG",
                                      "APP_MESSAGE_WRITE_CFG",    "APP_MESSAGE_NONE"};
 
-volatile static bool isRunEventDeal = false;
+// global
+AppController *gAppController = NULL;         // APP控制器
+volatile static bool gIsRunEventDeal = false; // 事件处理标志
+volatile static bool gIsCheckAction = false;  // imu数据更新标志
+ImuAction *gImuActionData = NULL;             // 存放mpu6050数据
 
-// TickType_t mainFormRefreshLastTime;
-// const TickType_t xDelay500ms = pdMS_TO_TICKS(500);
-// mainFormRefreshLastTime = xTaskGetTickCount();
-// vTaskDelayUntil(&mainFormRefreshLastTime, xDelay500ms);
-
-void eventDealHandle(TimerHandle_t xTimer) { isRunEventDeal = true; }
+void TimerAppCtrlHandle(TimerHandle_t xTimer)
+{
+    gIsRunEventDeal = true;
+    gIsCheckAction = true;
+    // 加载阶段使用回调函数刷新屏幕
+    // if (lv_is_initialized() && gAppController->GetSystemState() == MJT_SYS_STATE::STATE_SYS_LOADING) {
+    //     MJT_LVGL_OPERATE_LOCK(lv_timer_handler());
+    // }
+}
 
 AppController::AppController(const char *name)
 {
@@ -28,35 +36,66 @@ AppController::AppController(const char *name)
     // appList = new APP_OBJ[APP_MAX_NUM];
     m_wifi_status = false;
     m_preWifiReqMillis = GET_SYS_MILLIS();
+    mAppCtrlState = MJT_SYS_STATE::STATE_SYS_LOADING;
 
-    // 定义一个事件处理定时器
-    xTimerEventDeal = xTimerCreate("Event Deal", 300 / portTICK_PERIOD_MS, pdTRUE, (void *)0, eventDealHandle);
+    // 定义一个定时器
+    mTimerAppCtrl = xTimerCreate("App Ctrl", 200 / portTICK_PERIOD_MS, pdTRUE, (void *)0, TimerAppCtrlHandle);
     // 启动事件处理定时器
-    xTimerStart(xTimerEventDeal, 0);
+    xTimerStart(mTimerAppCtrl, 500 / portTICK_PERIOD_MS);
 }
 
 void AppController::init(void)
 {
+    // flashfs init first
+    gFlashCfg.Init();
+
+    this->read_config(&mSysCfg);
+    this->read_config(&mImuCfg);
+
     // 设置CPU主频
-    if (1 == this->sys_cfg.power_mode) {
+    if (1 == mSysCfg.power_mode) {
         setCpuFrequencyMhz(240);
     } else {
         setCpuFrequencyMhz(80);
     }
-    // uint32_t freq = getXtalFrequencyMhz(); // In MHz
-    Serial.print(F("CpuFrequencyMhz: "));
+    Serial.print(F("PowerMode: "));
+    Serial.print(mSysCfg.power_mode);
+    Serial.print(F(", CpuFrequencyMhz: "));
     Serial.println(getCpuFrequencyMhz());
 
-    app_control_gui_init();
-    appList[0] = new APP_OBJ();
-    appList[0]->app_image = &app_loading;
-    appList[0]->app_name = "Loading...";
-    appTypeList[0] = APP_TYPE_REAL_TIME;
-    app_control_display_scr(appList[cur_app_index]->app_image, appList[cur_app_index]->app_name, LV_SCR_LOAD_ANIM_NONE,
-                            true);
+    /*** Init screen ***/
+    screen.init(mSysCfg.rotation, mSysCfg.backLight);
+
+    // TODO:loading gui init
+
+    /*** Init ambient-light sensor ***/
+    ambLight.init(ONE_TIME_H_RESOLUTION_MODE);
+
+    /*** Init micro SD-Card ***/
+    tf.init();
+
+    lv_fs_fatfs_init();
+
+    /*** Init IMU as input device ***/
+    // lv_port_indev_init();
+
+    mpu.init(mSysCfg.mpu_order, mSysCfg.auto_calibration_mpu, &mImuCfg); // 初始化比较耗时
+
+    // app_control_gui_init();
+    // appList[0] = new APP_OBJ();
+    // appList[0]->app_image = &app_loading;
+    // appList[0]->app_name = "Loading...";
+    // appTypeList[0] = APP_TYPE_REAL_TIME;
+    // app_control_display_scr(appList[cur_app_index]->app_image, appList[cur_app_index]->app_name,
+    // LV_SCR_LOAD_ANIM_NONE,
+    //                         true);
 }
 
 AppController::~AppController() {}
+
+MJT_SYS_STATE AppController::GetSystemState(void) { return mAppCtrlState; }
+
+void AppController::SetSystemState(MJT_SYS_STATE state) { mAppCtrlState = state; }
 
 int AppController::app_is_legal(const APP_OBJ *app_obj)
 {
@@ -98,7 +137,7 @@ int AppController::app_uninstall(const APP_OBJ *app)
 int AppController::app_auto_start()
 {
     // APP自启动
-    int index = this->getAppIdxByName(sys_cfg.auto_start_app.c_str());
+    int index = this->getAppIdxByName(mSysCfg.auto_start_app.c_str());
     if (index < 0) {
         // 没找到相关的APP
         return 0;
@@ -110,61 +149,65 @@ int AppController::app_auto_start()
     return 0;
 }
 
-int AppController::main_process(ImuAction *act_info)
+int AppController::main_process(void)
 {
-    if (ACTIVE_TYPE::UNKNOWN != act_info->active) {
-        Serial.print(F("[Operate]\tact_info->active: "));
-        Serial.println(active_type_info[act_info->active]);
+    if (gIsCheckAction) {
+        gIsCheckAction = false;
+        gImuActionData = mpu.getAction();
     }
 
-    if (isRunEventDeal) {
-        isRunEventDeal = false;
-        // 扫描事件
+    if (ACTIVE_TYPE::UNKNOWN != gImuActionData->active) {
+        Serial.print(F("[Operate]\tact_info->active: "));
+        Serial.println(active_type_info[gImuActionData->active]);
+    }
+
+    if (gIsRunEventDeal) {
+        gIsRunEventDeal = false;
         this->req_event_deal();
     }
 
-    // wifi自动关闭(在节能模式下)
-    if (0 == sys_cfg.power_mode && true == m_wifi_status &&
-        doDelayMillisTime(WIFI_LIFE_CYCLE, &m_preWifiReqMillis, false)) {
-        send_to(CTRL_NAME, CTRL_NAME, APP_MESSAGE_WIFI_DISCONN, 0, NULL);
-    }
+    // // wifi自动关闭(在节能模式下)
+    // if (0 == mSysCfg.power_mode && true == m_wifi_status &&
+    //     doDelayMillisTime(WIFI_LIFE_CYCLE, &m_preWifiReqMillis, false)) {
+    //     send_to(CTRL_NAME, CTRL_NAME, APP_MESSAGE_WIFI_DISCONN, 0, NULL);
+    // }
 
-    if (0 == app_exit_flag) {
-        // 当前没有进入任何app
-        lv_scr_load_anim_t anim_type = LV_SCR_LOAD_ANIM_NONE;
-        if (ACTIVE_TYPE::TURN_LEFT == act_info->active) {
-            anim_type = LV_SCR_LOAD_ANIM_MOVE_RIGHT;
-            pre_app_index = cur_app_index;
-            cur_app_index = (cur_app_index + 1) % app_num;
-            Serial.println(String("Current App: ") + appList[cur_app_index]->app_name);
-        } else if (ACTIVE_TYPE::TURN_RIGHT == act_info->active) {
-            anim_type = LV_SCR_LOAD_ANIM_MOVE_LEFT;
-            pre_app_index = cur_app_index;
-            // 以下等效与 processId = (processId - 1 + APP_NUM) % 4;
-            // +3为了不让数据溢出成负数，而导致取模逻辑错误
-            cur_app_index = (cur_app_index - 1 + app_num) % app_num; // 此处的3与p_processList的长度一致
-            Serial.println(String("Current App: ") + appList[cur_app_index]->app_name);
-        } else if (ACTIVE_TYPE::GO_FORWORD == act_info->active) {
-            app_exit_flag = 1; // 进入app
-            if (NULL != appList[cur_app_index]->app_init) {
-                (*(appList[cur_app_index]->app_init))(this); // 执行APP初始化
-            }
-        }
+    // if (0 == app_exit_flag) {
+    //     // 当前没有进入任何app
+    //     lv_scr_load_anim_t anim_type = LV_SCR_LOAD_ANIM_NONE;
+    //     if (ACTIVE_TYPE::TURN_LEFT == act_info->active) {
+    //         anim_type = LV_SCR_LOAD_ANIM_MOVE_RIGHT;
+    //         pre_app_index = cur_app_index;
+    //         cur_app_index = (cur_app_index + 1) % app_num;
+    //         Serial.println(String("Current App: ") + appList[cur_app_index]->app_name);
+    //     } else if (ACTIVE_TYPE::TURN_RIGHT == act_info->active) {
+    //         anim_type = LV_SCR_LOAD_ANIM_MOVE_LEFT;
+    //         pre_app_index = cur_app_index;
+    //         // 以下等效与 processId = (processId - 1 + APP_NUM) % 4;
+    //         // +3为了不让数据溢出成负数，而导致取模逻辑错误
+    //         cur_app_index = (cur_app_index - 1 + app_num) % app_num; // 此处的3与p_processList的长度一致
+    //         Serial.println(String("Current App: ") + appList[cur_app_index]->app_name);
+    //     } else if (ACTIVE_TYPE::GO_FORWORD == act_info->active) {
+    //         app_exit_flag = 1; // 进入app
+    //         if (NULL != appList[cur_app_index]->app_init) {
+    //             (*(appList[cur_app_index]->app_init))(this); // 执行APP初始化
+    //         }
+    //     }
 
-        if (ACTIVE_TYPE::GO_FORWORD != act_info->active) // && UNKNOWN != act_info->active
-        {
-            app_control_display_scr(appList[cur_app_index]->app_image, appList[cur_app_index]->app_name, anim_type,
-                                    false);
-            vTaskDelay(200 / portTICK_PERIOD_MS);
-        }
-    } else {
-        app_control_display_scr(appList[cur_app_index]->app_image, appList[cur_app_index]->app_name,
-                                LV_SCR_LOAD_ANIM_NONE, false);
-        // 运行APP进程 等效于把控制权交给当前APP
-        (*(appList[cur_app_index]->main_process))(this, act_info);
-    }
-    act_info->active = ACTIVE_TYPE::UNKNOWN;
-    act_info->isValid = 0;
+    //     if (ACTIVE_TYPE::GO_FORWORD != act_info->active) // && UNKNOWN != act_info->active
+    //     {
+    //         app_control_display_scr(appList[cur_app_index]->app_image, appList[cur_app_index]->app_name, anim_type,
+    //                                 false);
+    //         vTaskDelay(200 / portTICK_PERIOD_MS);
+    //     }
+    // } else {
+    //     app_control_display_scr(appList[cur_app_index]->app_image, appList[cur_app_index]->app_name,
+    //                             LV_SCR_LOAD_ANIM_NONE, false);
+    //     // 运行APP进程 等效于把控制权交给当前APP
+    //     (*(appList[cur_app_index]->main_process))(this, act_info);
+    // }
+    // act_info->active = ACTIVE_TYPE::UNKNOWN;
+    // act_info->isValid = 0;
     return 0;
 }
 
@@ -271,7 +314,7 @@ bool AppController::wifi_event(APP_MESSAGE_TYPE type)
             // 更新请求
             // CONN_ERROR == g_network.end_conn_wifi() ||
             if (false == m_wifi_status) {
-                g_network.start_conn_wifi(sys_cfg.ssid_0.c_str(), sys_cfg.password_0.c_str());
+                g_network.start_conn_wifi(mSysCfg.ssid_0.c_str(), mSysCfg.password_0.c_str());
                 m_wifi_status = true;
             }
             m_preWifiReqMillis = GET_SYS_MILLIS();
@@ -340,7 +383,7 @@ void AppController::app_exit()
                             true);
 
     // 设置CPU主频
-    if (1 == this->sys_cfg.power_mode) {
+    if (1 == this->mSysCfg.power_mode) {
         setCpuFrequencyMhz(240);
     } else {
         setCpuFrequencyMhz(80);

@@ -4,7 +4,6 @@
 #include "sys/app_controller.h"
 #include <WString.h>
 
-extern AppController *app_controller; // APP控制器
 void init_page_header(void);
 void init_page_footer(void);
 void HomePage(void);

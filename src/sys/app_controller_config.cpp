@@ -3,16 +3,18 @@
 #include "sys/app_controller.h"
 #include "sys/interface.h"
 
-#define APP_CTRL_CONFIG_PATH "/sys.cfg"
-#define MPU_CONFIG_PATH "/mpu.cfg"
+#define SYS_CONFIG_PATH         "/sys.cfg"
+#define MPU_CONFIG_PATH         "/mpu.cfg"
+#define MAX_CFG_INFO_LENGTH     64
+
+static char gCfgInfo[MAX_CFG_INFO_LENGTH];
 
 void AppController::read_config(SysUtilConfig *cfg)
 {
     // 如果有需要持久化配置文件 可以调用此函数将数据存在flash中
     // 配置文件名最好以APP名为开头 以".cfg"结尾，以免多个APP读取混乱
-    char info[128] = {0};
-    uint16_t size = g_flashCfg.readFile(APP_CTRL_CONFIG_PATH, (uint8_t *)info);
-    info[size] = 0;
+    uint16_t size = gFlashCfg.readFile(SYS_CONFIG_PATH, (uint8_t *)gCfgInfo);
+    gCfgInfo[size] = 0;
     if (size == 0) {
         // 默认值
         cfg->power_mode = 0;           // 功耗模式（0为节能模式 1为性能模式）
@@ -25,7 +27,7 @@ void AppController::read_config(SysUtilConfig *cfg)
     } else {
         // 解析数据
         char *param[12] = {0};
-        analyseParam(info, 12, param);
+        analyseParam(gCfgInfo, 12, param);
         cfg->ssid_0 = param[0];
         cfg->password_0 = param[1];
         cfg->ssid_1 = param[2];
@@ -74,7 +76,7 @@ void AppController::write_config(SysUtilConfig *cfg)
 
     w_data = w_data + cfg->auto_start_app + "\n";
 
-    g_flashCfg.writeFile(APP_CTRL_CONFIG_PATH, w_data.c_str());
+    gFlashCfg.writeFile(SYS_CONFIG_PATH, w_data.c_str());
 
     // 立即生效相关配置
     screen.setBackLight(cfg->backLight / 100.0);
@@ -86,9 +88,8 @@ void AppController::read_config(SysMpuConfig *cfg)
 {
     // 如果有需要持久化配置文件 可以调用此函数将数据存在flash中
     // 配置文件名最好以APP名为开头 以".cfg"结尾，以免多个APP读取混乱
-    char info[128] = {0};
-    uint16_t size = g_flashCfg.readFile(MPU_CONFIG_PATH, (uint8_t *)info);
-    info[size] = 0;
+    uint16_t size = gFlashCfg.readFile(MPU_CONFIG_PATH, (uint8_t *)gCfgInfo);
+    gCfgInfo[size] = 0;
     if (size == 0) {
         // 默认值
         cfg->x_gyro_offset = 0;
@@ -102,7 +103,7 @@ void AppController::read_config(SysMpuConfig *cfg)
     } else {
         // 解析数据
         char *param[6] = {0};
-        analyseParam(info, 6, param);
+        analyseParam(gCfgInfo, 6, param);
         cfg->x_gyro_offset = atol(param[0]);
         cfg->y_gyro_offset = atol(param[1]);
         cfg->z_gyro_offset = atol(param[2]);
@@ -140,7 +141,7 @@ void AppController::write_config(SysMpuConfig *cfg)
     memset(tmp, 0, 25);
     snprintf(tmp, 25, "%d\n", cfg->z_accel_offset);
     w_data += tmp;
-    g_flashCfg.writeFile(MPU_CONFIG_PATH, w_data.c_str());
+    gFlashCfg.writeFile(MPU_CONFIG_PATH, w_data.c_str());
 }
 
 void AppController::deal_config(APP_MESSAGE_TYPE type, const char *key, char *value)
@@ -149,69 +150,69 @@ void AppController::deal_config(APP_MESSAGE_TYPE type, const char *key, char *va
 
         case APP_MESSAGE_GET_PARAM: {
             if (!strcmp(key, "ssid_0")) {
-                snprintf(value, 32, "%s", sys_cfg.ssid_0.c_str());
+                snprintf(value, 32, "%s", mSysCfg.ssid_0.c_str());
             } else if (!strcmp(key, "password_0")) {
-                snprintf(value, 32, "%s", sys_cfg.password_0.c_str());
+                snprintf(value, 32, "%s", mSysCfg.password_0.c_str());
             } else if (!strcmp(key, "ssid_1")) {
-                snprintf(value, 32, "%s", sys_cfg.ssid_1.c_str());
+                snprintf(value, 32, "%s", mSysCfg.ssid_1.c_str());
             } else if (!strcmp(key, "password_1")) {
-                snprintf(value, 32, "%s", sys_cfg.password_1.c_str());
+                snprintf(value, 32, "%s", mSysCfg.password_1.c_str());
             }
             if (!strcmp(key, "ssid_2")) {
-                snprintf(value, 32, "%s", sys_cfg.ssid_2.c_str());
+                snprintf(value, 32, "%s", mSysCfg.ssid_2.c_str());
             } else if (!strcmp(key, "password_2")) {
-                snprintf(value, 32, "%s", sys_cfg.password_2.c_str());
+                snprintf(value, 32, "%s", mSysCfg.password_2.c_str());
             } else if (!strcmp(key, "power_mode")) {
-                snprintf(value, 32, "%u", sys_cfg.power_mode);
+                snprintf(value, 32, "%u", mSysCfg.power_mode);
             } else if (!strcmp(key, "backLight")) {
-                snprintf(value, 32, "%u", sys_cfg.backLight);
+                snprintf(value, 32, "%u", mSysCfg.backLight);
             } else if (!strcmp(key, "rotation")) {
-                snprintf(value, 32, "%u", sys_cfg.rotation);
+                snprintf(value, 32, "%u", mSysCfg.rotation);
             } else if (!strcmp(key, "auto_calibration_mpu")) {
-                snprintf(value, 32, "%u", sys_cfg.auto_calibration_mpu);
+                snprintf(value, 32, "%u", mSysCfg.auto_calibration_mpu);
             } else if (!strcmp(key, "mpu_order")) {
-                snprintf(value, 32, "%u", sys_cfg.mpu_order);
+                snprintf(value, 32, "%u", mSysCfg.mpu_order);
             } else if (!strcmp(key, "auto_start_app")) {
-                snprintf(value, 32, "%s", sys_cfg.auto_start_app.c_str());
+                snprintf(value, 32, "%s", mSysCfg.auto_start_app.c_str());
             }
         } break;
         case APP_MESSAGE_SET_PARAM: {
             if (!strcmp(key, "ssid_0")) {
-                sys_cfg.ssid_0 = value;
+                mSysCfg.ssid_0 = value;
             } else if (!strcmp(key, "password_0")) {
-                sys_cfg.password_0 = value;
+                mSysCfg.password_0 = value;
             } else if (!strcmp(key, "ssid_1")) {
-                sys_cfg.ssid_1 = value;
+                mSysCfg.ssid_1 = value;
             } else if (!strcmp(key, "password_1")) {
-                sys_cfg.password_1 = value;
+                mSysCfg.password_1 = value;
             } else if (!strcmp(key, "ssid_2")) {
-                sys_cfg.ssid_2 = value;
+                mSysCfg.ssid_2 = value;
             } else if (!strcmp(key, "password_2")) {
-                sys_cfg.password_2 = value;
+                mSysCfg.password_2 = value;
             } else if (!strcmp(key, "power_mode")) {
-                sys_cfg.power_mode = atol(value);
+                mSysCfg.power_mode = atol(value);
             } else if (!strcmp(key, "backLight")) {
-                sys_cfg.backLight = atol(value);
+                mSysCfg.backLight = atol(value);
             } else if (!strcmp(key, "rotation")) {
-                sys_cfg.rotation = atol(value);
+                mSysCfg.rotation = atol(value);
             } else if (!strcmp(key, "auto_calibration_mpu")) {
-                sys_cfg.auto_calibration_mpu = atol(value);
-                if (0 == sys_cfg.auto_calibration_mpu) {
-                    this->write_config(&this->mpu_cfg);
+                mSysCfg.auto_calibration_mpu = atol(value);
+                if (0 == mSysCfg.auto_calibration_mpu) {
+                    this->write_config(&this->mImuCfg);
                 }
             } else if (!strcmp(key, "mpu_order")) {
-                sys_cfg.mpu_order = atol(value);
+                mSysCfg.mpu_order = atol(value);
             } else if (!strcmp(key, "auto_start_app")) {
-                sys_cfg.auto_start_app = value;
+                mSysCfg.auto_start_app = value;
             }
         } break;
         case APP_MESSAGE_READ_CFG: {
-            read_config(&sys_cfg);
-            // read_config(&mpu_cfg);
+            read_config(&mSysCfg);
+            // read_config(&mImuCfg);
         } break;
         case APP_MESSAGE_WRITE_CFG: {
-            write_config(&sys_cfg);
-            // write_config(&mpu_cfg);  // 在取消自动校准的时候已经写过一次了
+            write_config(&mSysCfg);
+            // write_config(&mImuCfg);  // 在取消自动校准的时候已经写过一次了
         } break;
         default:
             break;

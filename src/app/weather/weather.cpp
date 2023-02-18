@@ -42,7 +42,7 @@ static void write_config(WT_Config *cfg)
     memset(tmp, 0, 16);
     snprintf(tmp, 16, "%lu\n", cfg->timeUpdataInterval);
     w_data += tmp;
-    g_flashCfg.writeFile(WEATHER_CONFIG_PATH, w_data.c_str());
+    gFlashCfg.writeFile(WEATHER_CONFIG_PATH, w_data.c_str());
 }
 
 static void read_config(WT_Config *cfg)
@@ -50,7 +50,7 @@ static void read_config(WT_Config *cfg)
     // 如果有需要持久化配置文件 可以调用此函数将数据存在flash中
     // 配置文件名最好以APP名为开头 以".cfg"结尾，以免多个APP读取混乱
     char info[128] = {0};
-    uint16_t size = g_flashCfg.readFile(WEATHER_CONFIG_PATH, (uint8_t *)info);
+    uint16_t size = gFlashCfg.readFile(WEATHER_CONFIG_PATH, (uint8_t *)info);
     info[size] = 0;
     if (size == 0) {
         // 默认值

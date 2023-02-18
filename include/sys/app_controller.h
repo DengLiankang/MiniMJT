@@ -7,7 +7,7 @@
 #include "interface.h"
 #include <list>
 
-#define CTRL_NAME "AppCtrl"
+#define CTRL_NAME "MJT_AppCtrl"
 #define APP_MAX_NUM 20             // 最大的可运行的APP数量
 #define WIFI_LIFE_CYCLE 60000      // wifi的生命周期（60s）
 #define MQTT_ALIVE_CYCLE 1000      // mqtt重连周期
@@ -23,6 +23,16 @@
 //     void *message;         // 附带数据，可以为任何数据类型
 // };
 
+// 系统状态
+// STATE_SYS_LOADING 开机加载阶段
+// STATE_APP_MENU app菜单界面
+// STATE_APP_RUNNING 前台运行某个app
+enum MJT_SYS_STATE {
+    STATE_SYS_LOADING,
+    STATE_APP_MENU,
+    STATE_APP_RUNNING,
+};
+
 struct EVENT_OBJ {
     const APP_OBJ *from;       // 发送请求服务的APP
     APP_MESSAGE_TYPE type;     // app的事件类型
@@ -37,8 +47,16 @@ class AppController
 public:
     AppController(const char *name = CTRL_NAME);
     ~AppController();
+
+    // 初始化driver gui
     void init(void);
-    void Display(void); // 显示接口
+
+    // 获取系统当前状态
+    MJT_SYS_STATE GetSystemState(void);
+
+    // 设置系统当前状态
+    void SetSystemState(MJT_SYS_STATE state);
+
     int app_auto_start();
     // 将APP注册到app_controller中
     int app_install(APP_OBJ *app, APP_TYPE app_type = APP_TYPE_REAL_TIME);
@@ -46,14 +64,18 @@ public:
     int app_uninstall(const APP_OBJ *app);
     // 将APP的后台任务从任务队列中移除(自能通过APP退出的时候，移除自身的后台任务)
     int remove_backgroud_task(void);
-    int main_process(ImuAction *act_info);
+    int main_process();
     void app_exit(void); // 提供给app退出的系统调用
     // 消息发送
     int send_to(const char *from, const char *to, APP_MESSAGE_TYPE type, void *message, void *ext_info);
     void deal_config(APP_MESSAGE_TYPE type, const char *key, char *value);
+
     // 事件处理
     int req_event_deal(void);
-    bool wifi_event(APP_MESSAGE_TYPE type); // wifi事件的处理
+
+    // wifi事件的处理
+    bool wifi_event(APP_MESSAGE_TYPE type);
+
     void read_config(SysUtilConfig *cfg);
     void write_config(SysUtilConfig *cfg);
     void read_config(SysMpuConfig *cfg);
@@ -76,12 +98,15 @@ private:
     boolean app_exit_flag; // 表示是否退出APP应用
     int cur_app_index;     // 当前运行的APP下标
     int pre_app_index;     // 上一次运行的APP下标
+    MJT_SYS_STATE mAppCtrlState;
 
-    TimerHandle_t xTimerEventDeal; // 事件处理定时器
+    TimerHandle_t mTimerAppCtrl; // 事件处理定时器
 
 public:
-    SysUtilConfig sys_cfg;
-    SysMpuConfig mpu_cfg;
+    SysUtilConfig mSysCfg;
+    SysMpuConfig mImuCfg;
 };
+
+extern AppController *gAppController;
 
 #endif

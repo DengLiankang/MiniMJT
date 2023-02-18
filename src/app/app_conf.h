@@ -24,7 +24,7 @@
 #endif
 
 // 文件管理器APP
-#define APP_FILE_MANAGER_USE 1
+#define APP_FILE_MANAGER_USE 0
 #if APP_FILE_MANAGER_USE
 #include "app/file_manager/file_manager.h"
 #endif
@@ -48,13 +48,13 @@
 #endif
 
 // 视频播放器APP
-#define APP_MEDIA_PLAYER_USE 1
+#define APP_MEDIA_PLAYER_USE 0
 #if APP_MEDIA_PLAYER_USE
 #include "app/media_player/media_player.h"
 #endif
 
 // 相册APP
-#define APP_PICTURE_USE 1
+#define APP_PICTURE_USE 0
 #if APP_PICTURE_USE
 #include "app/picture/picture.h"
 #endif
@@ -67,20 +67,20 @@
 
 // 网页配置服务APP
 // 此项用于配置小电视，为必选项，此处仅为了说明有这个app，此宏无作用
-#define APP_WEB_SERVER_USE 1
+#define APP_WEB_SERVER_USE 0
 #if APP_WEB_SERVER_USE
 #include "app/server/server.h"
 #endif
 
 // 设置APP
-#define APP_SETTING_USE 1
+#define APP_SETTING_USE 0
 #if APP_SETTING_USE
 #include "app/settings/settings.h"
 #endif
 
 // 天气APP
 // 如flash空间不够，首选配置天气app二选一，腾出大量flash空间
-#define APP_WEATHER_USE 1
+#define APP_WEATHER_USE 0
 #if APP_WEATHER_USE
 #include "app/weather/weather.h"
 #endif
