@@ -8,9 +8,6 @@ extern "C" {
 #endif
 
 #include "lvgl.h"
-#define ANIEND                                                                                                         \
-    while (lv_anim_count_running())                                                                                    \
-        lv_task_handler(); // 等待动画完成
 
 void file_maneger_gui_init(void);
 void display_file_manager_init(void);

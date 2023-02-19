@@ -7,10 +7,7 @@ extern "C" {
 
 #include "lvgl.h"
 
-#define ANIEND_WAIT                         \
-    do {                                    \
-        lv_task_handler();                  \
-    } while(lv_anim_count_running())
+#define ANIEND_WAIT while (lv_anim_count_running())
 
 void AppCtrlScreenInit(void);
 void AppCtrlLoadingGuiInit(void);

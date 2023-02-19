@@ -20,10 +20,6 @@ void TimerAppCtrlHandle(TimerHandle_t xTimer)
 {
     gIsRunEventDeal = true;
     gIsCheckAction = true;
-    // 加载阶段使用回调函数刷新屏幕
-    // if (lv_is_initialized() && gAppController->GetSystemState() == MJT_SYS_STATE::STATE_SYS_LOADING) {
-    //     MJT_LVGL_OPERATE_LOCK(lv_timer_handler());
-    // }
 }
 
 AppController::AppController(const char *name)
@@ -68,11 +64,9 @@ void AppController::init(void)
 
     AppCtrlScreenInit();
     AppCtrlLoadingGuiInit();
-    AppCtrlLoadingDisplay(40, NULL);
-
+    AppCtrlLoadingDisplay(10, "init amblight...");
     /*** Init ambient-light sensor ***/
     ambLight.init(ONE_TIME_H_RESOLUTION_MODE);
-
 
     /*** Init micro SD-Card ***/
     tf.init();
@@ -82,8 +76,7 @@ void AppController::init(void)
     /*** Init IMU as input device ***/
     // lv_port_indev_init();
 
-    AppCtrlLoadingDisplay(90, "init imu...");
-
+    AppCtrlLoadingDisplay(95, "init imu...");
     mpu.init(mSysCfg.mpu_order, mSysCfg.auto_calibration_mpu, &mImuCfg); // 初始化比较耗时
 
     AppCtrlLoadingDisplay(100, "finished.");
@@ -156,8 +149,6 @@ int AppController::app_auto_start()
 
 int AppController::main_process(void)
 {
-    lv_timer_handler();
-
     if (gIsCheckAction) {
         gIsCheckAction = false;
         gImuActionData = mpu.getAction();

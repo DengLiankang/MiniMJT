@@ -1,9 +1,5 @@
-#ifndef COMMON_H
-#define COMMON_H
-
-#define MJT_VERSION "2.0.1"
-#define GET_SYS_MILLIS xTaskGetTickCount // 获取系统毫秒数
-// #define GET_SYS_MILLIS millis            // 获取系统毫秒数
+#ifndef _COMMON_H_
+#define _COMMON_H_
 
 #include "Arduino.h"
 #include "driver/ambient.h"
@@ -12,6 +8,10 @@
 #include "driver/imu.h"
 #include "driver/sd_card.h"
 #include "network.h"
+#include <TFT_eSPI.h>
+
+#define MJT_VERSION "2.0.2"
+#define GET_SYS_MILLIS xTaskGetTickCount // 获取系统毫秒数
 
 // SD_Card
 #define SD_SCK 14
@@ -22,16 +22,6 @@
 // MUP6050
 #define IMU_I2C_SDA 32
 #define IMU_I2C_SCL 33
-
-extern IMU mpu; // 原则上只提供给主程序调用
-extern SdCard tf;
-// extern Config g_cfg;       // 全局配置文件
-extern Network g_network;  // 网络连接
-extern FlashFS gFlashCfg; // flash中的文件系统（替代原先的Preferences）
-extern Display screen;     // 屏幕对象
-extern Ambient ambLight;   // 光纤传感器对象
-
-boolean doDelayMillisTime(unsigned long interval, unsigned long *previousMillis, boolean state);
 
 // 光感 (与MPU6050一致)
 #define AMB_I2C_SDA 32
@@ -50,17 +40,6 @@ boolean doDelayMillisTime(unsigned long interval, unsigned long *previousMillis,
 // 最高为 configMAX_PRIORITIES-1
 #define TASK_LVGL_PRIORITY 2 // LVGL的页面优先级
 
-// lvgl 操作的锁
-extern SemaphoreHandle_t lvgl_mutex;
-// LVGL操作的安全宏（避免脏数据）
-#define MJT_LVGL_OPERATE_LOCK(CODE)                                     \
-    {                                                                   \
-        if (pdTRUE == xSemaphoreTake(lvgl_mutex, portMAX_DELAY)) {      \
-            CODE;                                                       \
-            xSemaphoreGive(lvgl_mutex);                                 \
-        }                                                               \
-    }
-
 struct SysUtilConfig {
     String ssid_0;
     String password_0;
@@ -76,25 +55,25 @@ struct SysUtilConfig {
     uint8_t mpu_order;            // 操作方向
 };
 
-#define GFX 0
-
-#if GFX
-#define TFT_MISO 19
-#define TFT_MOSI 23
-#define TFT_SCLK 18
-#define TFT_CS -1 // Not connected
-#define TFT_DC 2
-#define TFT_RST 4 // Connect reset to ensure display initialises
-#include <Arduino_GFX_Library.h>
-extern Arduino_HWSPI *bus;
-extern Arduino_ST7789 *tft;
-
-#else
-#include <TFT_eSPI.h>
-/*
-TFT pins should be set in path/to/Arduino/libraries/TFT_eSPI/User_Setups/Setup24_ST7789.h
-*/
+extern IMU mpu;           // 原则上只提供给主程序调用
+extern SdCard tf;
+extern Network g_network; // 网络连接
+extern FlashFS gFlashCfg; // flash中的文件系统（替代原先的Preferences）
+extern Display screen;    // 屏幕对象
+extern Ambient ambLight;  // 光纤传感器对象
 extern TFT_eSPI *tft;
-#endif
+extern SemaphoreHandle_t lvgl_mutex; // lvgl 操作的锁
+
+// LVGL操作的安全宏（避免脏数据）
+#define MJT_LVGL_OPERATE_LOCK(CODE)                                                                                    \
+    {                                                                                                                  \
+        if (pdTRUE == xSemaphoreTake(lvgl_mutex, portMAX_DELAY)) {                                                     \
+            CODE;                                                                                                      \
+            xSemaphoreGive(lvgl_mutex);                                                                                \
+        }                                                                                                              \
+    }
+
+boolean doDelayMillisTime(unsigned long interval, unsigned long *previousMillis, boolean state);
+void InitLvglTaskSetup(const char *name);
 
 #endif

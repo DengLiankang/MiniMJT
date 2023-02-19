@@ -56,11 +56,11 @@ void AppCtrlLoadingGuiInit(void)
 
     gLoadingBar = lv_bar_create(gAppCtrlScreen);
     lv_obj_remove_style_all(gLoadingBar);  /*To have a clean start*/
-    lv_obj_add_style(gLoadingBar, &style_bg, 0);
+    lv_obj_add_style(gLoadingBar, &style_bg, LV_PART_MAIN);
     lv_obj_add_style(gLoadingBar, &style_indic, LV_PART_INDICATOR);
     lv_obj_set_size(gLoadingBar, 120, 10);
     lv_obj_align(gLoadingBar, LV_ALIGN_CENTER, 0, 20);
-    lv_bar_set_value(gLoadingBar, 0, LV_ANIM_ON);
+    lv_bar_set_value(gLoadingBar, 0, LV_ANIM_OFF);
 
     gLoadingText = lv_label_create(gAppCtrlScreen);
     lv_obj_set_style_text_color(gLoadingText, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -76,14 +76,13 @@ void AppCtrlLoadingDisplay(int progress, const char *text)
 {
     int nowProgress = lv_bar_get_value(gLoadingBar);
     if (progress > nowProgress) {
-        int animTime = (nowProgress - progress) * 50;
-        lv_obj_set_style_anim_time(gLoadingBar, animTime, LV_STATE_DEFAULT);
+        int animTime = (progress - nowProgress) * 50;
+        lv_obj_set_style_anim_time(gLoadingBar, animTime, LV_PART_MAIN);
         lv_bar_set_value(gLoadingBar, progress, LV_ANIM_ON);
     }
     if (text != NULL) {
         lv_label_set_text(gLoadingText, text);
     }
-    lv_timer_handler();
 }
 
 void app_control_gui_release(void)
@@ -185,7 +184,6 @@ void app_control_display_scr(const void *src_img, const char *app_name, lv_scr_l
     lv_anim_start(&now_app);
     lv_anim_start(&pre_app);
     ANIEND_WAIT;
-    lv_timer_handler(); // 消除 ANIEND_WAIT 执行完后依然"卡顿一下"的问题
 
     lv_obj_del(pre_app_image); // 删除原先的图像
     pre_app_image = now_app_image;
