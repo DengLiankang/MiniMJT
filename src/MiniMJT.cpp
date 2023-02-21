@@ -26,49 +26,52 @@ void setup()
 
     gAppController = new AppController(); // APP控制器
 
-    gAppController->init();
+    gAppController->Init();
 
     // 将APP"安装"到controller里
 #if APP_WEATHER_USE
-    gAppController->app_install(&weather_app);
+    gAppController->AppInstall(&weather_app);
 #endif
 #if APP_PICTURE_USE
-    gAppController->app_install(&picture_app);
+    gAppController->AppInstall(&picture_app);
 #endif
 #if APP_MEDIA_PLAYER_USE
-    gAppController->app_install(&media_app);
+    gAppController->AppInstall(&media_app);
 #endif
 #if APP_SCREEN_SHARE_USE
-    gAppController->app_install(&screen_share_app);
+    gAppController->AppInstall(&screen_share_app);
 #endif
 #if APP_FILE_MANAGER_USE
-    gAppController->app_install(&file_manager_app);
+    gAppController->AppInstall(&file_manager_app);
 #endif
 #if APP_WEB_SERVER_USE
-    gAppController->app_install(&server_app);
+    gAppController->AppInstall(&server_app);
 #endif
 #if APP_IDEA_ANIM_USE
-    gAppController->app_install(&idea_app);
+    gAppController->AppInstall(&idea_app);
 #endif
 #if APP_SETTING_USE
-    gAppController->app_install(&settings_app);
+    gAppController->AppInstall(&settings_app);
 #endif
 #if APP_GAME_2048_USE
-    gAppController->app_install(&game_2048_app);
+    gAppController->AppInstall(&game_2048_app);
 #endif
 #if APP_ANNIVERSARY_USE
-    gAppController->app_install(&anniversary_app);
+    gAppController->AppInstall(&anniversary_app);
 #endif
 #if APP_HEARTBEAT_USE
-    gAppController->app_install(&heartbeat_app, APP_TYPE_BACKGROUND);
+    gAppController->AppInstall(&heartbeat_app, APP_TYPE_BACKGROUND);
 #endif
 
     // 自启动APP
-    gAppController->app_auto_start();
+    // gAppController->app_auto_start();
+
+    gAppController->ExitLoadingGui();
 
 #if LV_USE_LOG
     lv_log_register_print_cb(minimjt_print);
 #endif /*LV_USE_LOG*/
+
 }
 
 void loop()

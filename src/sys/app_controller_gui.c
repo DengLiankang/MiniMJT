@@ -72,13 +72,16 @@ void AppCtrlLoadingGuiInit(void)
     lv_obj_align(gBootingLogo, LV_ALIGN_CENTER, 0, -40);
 }
 
-void AppCtrlLoadingDisplay(int progress, const char *text)
+void AppCtrlLoadingDisplay(int progress, const char *text, bool wait)
 {
     int nowProgress = lv_bar_get_value(gLoadingBar);
     if (progress > nowProgress) {
         int animTime = (progress - nowProgress) * 50;
         lv_obj_set_style_anim_time(gLoadingBar, animTime, LV_PART_MAIN);
         lv_bar_set_value(gLoadingBar, progress, LV_ANIM_ON);
+    }
+    if (wait) {
+        ANIEND_WAIT;
     }
     if (text != NULL) {
         lv_label_set_text(gLoadingText, text);

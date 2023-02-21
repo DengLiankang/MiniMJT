@@ -11,7 +11,7 @@ extern "C" {
 
 void AppCtrlScreenInit(void);
 void AppCtrlLoadingGuiInit(void);
-void AppCtrlLoadingDisplay(int progress, const char *text);
+void AppCtrlLoadingDisplay(int progress, const char *text, bool wait);
 void app_control_gui_release(void);
 void display_app_scr_release(void);
 void display_app_scr_init(const void *src_img, const char *app_name);
