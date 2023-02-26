@@ -21,7 +21,7 @@ struct AN_Config {
 
 // static long long get_timestamp(String url);
 
-static void write_config(AN_Config *cfg)
+static void WriteConfig(AN_Config *cfg)
 {
     char tmp[16];
     // 将配置数据保存在文件中（持久化）
@@ -42,7 +42,7 @@ static void write_config(AN_Config *cfg)
     gFlashCfg.writeFile(ANNIVERSARY_CONFIG_PATH, w_data.c_str());
 }
 
-static void read_config(AN_Config *cfg)
+static void ReadConfig(AN_Config *cfg)
 {
     // 如果有需要持久化配置文件 可以调用此函数将数据存在flash中
     // 配置文件名最好以APP名为开头 以".cfg"结尾，以免多个APP读取混乱
@@ -61,7 +61,7 @@ static void read_config(AN_Config *cfg)
         cfg->target_date[1].tm_year = 2025;
         cfg->target_date[1].tm_mon = 7;
         cfg->target_date[1].tm_mday = 4;
-        write_config(cfg);
+        WriteConfig(cfg);
         Serial.printf("Write config successful\n");
     } else {
         // 解析数据
@@ -211,7 +211,7 @@ static int anniversary_init(AppController *sys)
 {
     anniversary_gui_init();
     // 获取配置参数
-    read_config(&cfg_data);
+    ReadConfig(&cfg_data);
     // 初始化运行时的参数
     run_data = (AnniversaryAppRunData *)calloc(1, sizeof(AnniversaryAppRunData));
     run_data->cur_anniversary = 0;
@@ -245,7 +245,7 @@ static void anniversary_process(AppController *sys, const ImuAction *act_info)
         // 尝试同步网络上的时钟
         sys->send_to(ANNIVERSARY_APP_NAME, CTRL_NAME, APP_MESSAGE_WIFI_CONN, NULL, NULL);
         run_data->coactusUpdateFlag = 0x00;
-        write_config(&cfg_data);
+        WriteConfig(&cfg_data);
     } else {
         get_date_diff();
     }
@@ -305,10 +305,10 @@ static void anniversary_message_handle(const char *from, const char *to, APP_MES
             // wifi心跳维持的响应 可以不做任何处理
         } break;
         case APP_MESSAGE_READ_CFG: {
-            read_config(&cfg_data);
+            ReadConfig(&cfg_data);
         } break;
         case APP_MESSAGE_WRITE_CFG: {
-            write_config(&cfg_data);
+            WriteConfig(&cfg_data);
         } break;
         case APP_MESSAGE_GET_PARAM: {
             char *param_key = (char *)message;

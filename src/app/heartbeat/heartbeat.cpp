@@ -48,7 +48,7 @@ void HeartbeatAppForeverData::callback(char *topic, byte *payload, unsigned int 
 
 HeartbeatAppForeverData hb_cfg;
 
-static void write_config(HeartbeatAppForeverData *cfg)
+static void WriteConfig(HeartbeatAppForeverData *cfg)
 {
     char tmp[32];
     String w_data;
@@ -96,7 +96,7 @@ static void write_config(HeartbeatAppForeverData *cfg)
     gFlashCfg.writeFile(HEARTBEAT_CONFIG_PATH, w_data.c_str());
 }
 
-static void read_config(HeartbeatAppForeverData *cfg)
+static void ReadConfig(HeartbeatAppForeverData *cfg)
 {
     // 如果有需要持久化配置文件 可以调用此函数将数据存在flash中
     // 配置文件名最好以APP名为开头 以".cfg"结尾，以免多个APP读取混乱
@@ -115,7 +115,7 @@ static void read_config(HeartbeatAppForeverData *cfg)
         cfg->port = DEFALUT_MQTT_PORT; // mqtt服务端口
         strcpy(cfg->server_user, "");
         strcpy(cfg->server_password, "");
-        write_config(cfg);
+        WriteConfig(cfg);
     } else {
         // 解析数据
         char *param[9] = {0};
@@ -218,7 +218,7 @@ static int heartbeat_init(AppController *sys)
     if (size != 0) // 如果已经设置过heartbeat了，则开启mqtt客户端
     {
         // 获取配置参数
-        read_config(&hb_cfg);
+        ReadConfig(&hb_cfg);
         if (NULL == hb_cfg.mqtt_client) {
             hb_cfg.mqtt_client = new PubSubClient(hb_cfg.mqtt_server, hb_cfg.port, hb_cfg.callback, hb_cfg.espClient);
             // hb_cfg.mqtt_client = new PubSubClient(DEFALUT_MQTT_IP_CLIMBL, hb_cfg.port, hb_cfg.callback,
@@ -370,10 +370,10 @@ static void heartbeat_message_handle(const char *from, const char *to, APP_MESSA
             }
         } break;
         case APP_MESSAGE_READ_CFG: {
-            read_config(&hb_cfg);
+            ReadConfig(&hb_cfg);
         } break;
         case APP_MESSAGE_WRITE_CFG: {
-            write_config(&hb_cfg);
+            WriteConfig(&hb_cfg);
         } break;
         case APP_MESSAGE_MQTT_DATA: {
             // if (run_data->send_cnt > 0) //已经手动发送过了

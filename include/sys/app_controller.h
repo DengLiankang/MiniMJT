@@ -67,7 +67,7 @@ public:
 
     // 将APP的后台任务从任务队列中移除(自能通过APP退出的时候，移除自身的后台任务)
     int remove_backgroud_task(void);
-    int main_process();
+    int MainProcess();
     void app_exit(void); // 提供给app退出的系统调用
     // 消息发送
     int send_to(const char *from, const char *to, APP_MESSAGE_TYPE type, void *message, void *ext_info);
@@ -79,10 +79,10 @@ public:
     // wifi事件的处理
     bool wifi_event(APP_MESSAGE_TYPE type);
 
-    void read_config(SysUtilConfig *cfg);
-    void write_config(SysUtilConfig *cfg);
-    void read_config(SysMpuConfig *cfg);
-    void write_config(SysMpuConfig *cfg);
+    void ReadConfig(SysUtilConfig *cfg);
+    void WriteConfig(SysUtilConfig *cfg);
+    void ReadConfig(SysMpuConfig *cfg);
+    void WriteConfig(SysMpuConfig *cfg);
 
 private:
     APP_OBJ *getAppByName(const char *name);

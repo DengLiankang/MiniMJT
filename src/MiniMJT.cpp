@@ -67,6 +67,7 @@ void setup()
     // gAppController->app_auto_start();
 
     gAppController->ExitLoadingGui();
+    DeleteLvglTask();
 
 #if LV_USE_LOG
     lv_log_register_print_cb(minimjt_print);
@@ -76,5 +77,5 @@ void setup()
 
 void loop()
 {
-    gAppController->main_process(); // 运行当前进程
+    gAppController->MainProcess(); // 运行当前进程
 }

@@ -16,17 +16,22 @@ SemaphoreHandle_t lvgl_mutex = xSemaphoreCreateMutex();
 void LvglTask(void *pvParameters)
 {
     while (!lv_is_initialized()) {
-        delay(5);
+        delay(1);
     }
     while (1) {
         MJT_LVGL_OPERATE_LOCK(lv_timer_handler());
-        delay(5);
+        delay(1);
     }
 }
 
 void InitLvglTaskSetup(const char *name)
 {
     xTaskCreate(LvglTask, name, 8 * 1024, NULL, TASK_LVGL_PRIORITY, &gTaskLvglHandle);
+}
+
+void DeleteLvglTask(void)
+{
+    vTaskDelete(gTaskLvglHandle);
 }
 
 boolean doDelayMillisTime(unsigned long interval, unsigned long *previousMillis, boolean state)

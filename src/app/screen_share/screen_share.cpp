@@ -21,7 +21,7 @@ struct SS_Config {
     uint8_t powerFlag; // 功耗控制（0低发热 1性能优先）
 };
 
-static void write_config(SS_Config *cfg)
+static void WriteConfig(SS_Config *cfg)
 {
     char tmp[16];
     // 将配置数据保存在文件中（持久化）
@@ -32,7 +32,7 @@ static void write_config(SS_Config *cfg)
     gFlashCfg.writeFile(SCREEN_SHARE_CONFIG_PATH, w_data.c_str());
 }
 
-static void read_config(SS_Config *cfg)
+static void ReadConfig(SS_Config *cfg)
 {
     // 如果有需要持久化配置文件 可以调用此函数将数据存在flash中
     // 配置文件名最好以APP名为开头 以".cfg"结尾，以免多个APP读取混乱
@@ -42,7 +42,7 @@ static void read_config(SS_Config *cfg)
     if (size == 0) {
         // 默认值
         cfg->powerFlag = 0; // 功耗控制（0低发热 1性能优先）
-        write_config(cfg);
+        WriteConfig(cfg);
     } else {
         // 解析数据
         char *param[1] = {0};
@@ -138,7 +138,7 @@ static bool readJpegFromBuffer(uint8_t *const end)
 static int screen_share_init(AppController *sys)
 {
     // 获取配置信息
-    read_config(&cfg_data);
+    ReadConfig(&cfg_data);
 
     if (0 == cfg_data.powerFlag) {
         // 设置CPU主频
@@ -352,10 +352,10 @@ static void screen_message_handle(const char *from, const char *to, APP_MESSAGE_
             }
         } break;
         case APP_MESSAGE_READ_CFG: {
-            read_config(&cfg_data);
+            ReadConfig(&cfg_data);
         } break;
         case APP_MESSAGE_WRITE_CFG: {
-            write_config(&cfg_data);
+            WriteConfig(&cfg_data);
         } break;
         default:
             break;

@@ -7,12 +7,23 @@ extern "C" {
 
 #include "lvgl.h"
 
-#define ANIEND_WAIT while (lv_anim_count_running())
+#define ANIEND_WAIT                     \
+    do {                                \
+        lv_timer_handler();             \
+        delay(1);                       \
+    } while (lv_anim_count_running())
 
-void AppCtrlScreenInit(void);
+struct AppCtrlMenuPage {
+    lv_obj_t *appMenuScr;
+    lv_obj_t *appImg;
+    lv_obj_t *appName;
+    struct AppCtrlMenuPage *nextPage;
+};
+
+void AppCtrlMenuGuiInit(void);
 void AppCtrlLoadingGuiInit(void);
 void AppCtrlLoadingDisplay(int progress, const char *text, bool wait);
-void app_control_gui_release(void);
+void AppCtrlMunuDisplay(const void *appImg, const char *appName, lv_scr_load_anim_t anim, bool delPre);
 void display_app_scr_release(void);
 void display_app_scr_init(const void *src_img, const char *app_name);
 void app_control_display_scr(const void *src_img, const char *app_name, lv_scr_load_anim_t anim_type, bool force);

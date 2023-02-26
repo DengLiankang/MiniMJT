@@ -28,7 +28,7 @@ struct WT_Config {
     unsigned long timeUpdataInterval;    // 日期时钟更新的时间间隔(s)
 };
 
-static void write_config(WT_Config *cfg)
+static void WriteConfig(WT_Config *cfg)
 {
     char tmp[16];
     // 将配置数据保存在文件中（持久化）
@@ -45,7 +45,7 @@ static void write_config(WT_Config *cfg)
     gFlashCfg.writeFile(WEATHER_CONFIG_PATH, w_data.c_str());
 }
 
-static void read_config(WT_Config *cfg)
+static void ReadConfig(WT_Config *cfg)
 {
     // 如果有需要持久化配置文件 可以调用此函数将数据存在flash中
     // 配置文件名最好以APP名为开头 以".cfg"结尾，以免多个APP读取混乱
@@ -57,7 +57,7 @@ static void read_config(WT_Config *cfg)
         cfg->tianqi_addr = "北京";
         cfg->weatherUpdataInterval = 900000; // 天气更新的时间间隔900000(900s)
         cfg->timeUpdataInterval = 900000;    // 日期时钟更新的时间间隔900000(900s)
-        write_config(cfg);
+        WriteConfig(cfg);
     } else {
         // 解析数据
         char *param[5] = {0};
@@ -248,7 +248,7 @@ static int weather_init(AppController *sys)
     tft->setSwapBytes(true);
     weather_gui_init();
     // 获取配置信息
-    read_config(&cfg_data);
+    ReadConfig(&cfg_data);
 
     // 初始化运行时参数
     run_data = (WeatherAppRunData *)calloc(1, sizeof(WeatherAppRunData));
@@ -453,10 +453,10 @@ static void weather_message_handle(const char *from, const char *to, APP_MESSAGE
             }
         } break;
         case APP_MESSAGE_READ_CFG: {
-            read_config(&cfg_data);
+            ReadConfig(&cfg_data);
         } break;
         case APP_MESSAGE_WRITE_CFG: {
-            write_config(&cfg_data);
+            WriteConfig(&cfg_data);
         } break;
         default:
             break;

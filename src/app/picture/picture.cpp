@@ -14,7 +14,7 @@ struct PIC_Config {
     unsigned long switchInterval; // 自动播放下一张的时间间隔 ms
 };
 
-static void write_config(PIC_Config *cfg)
+static void WriteConfig(PIC_Config *cfg)
 {
     char tmp[16];
     // 将配置数据保存在文件中（持久化）
@@ -25,7 +25,7 @@ static void write_config(PIC_Config *cfg)
     gFlashCfg.writeFile(PICTURE_CONFIG_PATH, w_data.c_str());
 }
 
-static void read_config(PIC_Config *cfg)
+static void ReadConfig(PIC_Config *cfg)
 {
     // 如果有需要持久化配置文件 可以调用此函数将数据存在flash中
     // 配置文件名最好以APP名为开头 以".cfg"结尾，以免多个APP读取混乱
@@ -35,7 +35,7 @@ static void read_config(PIC_Config *cfg)
     if (size == 0) {
         // 默认值
         cfg->switchInterval = 10000; // 是否自动播放下一个（0不切换 默认10000毫秒）
-        write_config(cfg);
+        WriteConfig(cfg);
     } else {
         // 解析数据
         char *param[1] = {0};
@@ -97,7 +97,7 @@ static int picture_init(AppController *sys)
 {
     photo_gui_init();
     // 获取配置信息
-    read_config(&cfg_data);
+    ReadConfig(&cfg_data);
     // 初始化运行时参数
     run_data = (PictureAppRunData *)malloc(sizeof(PictureAppRunData));
     run_data->pic_perMillis = 0;
@@ -215,10 +215,10 @@ static void picture_message_handle(const char *from, const char *to, APP_MESSAGE
             }
         } break;
         case APP_MESSAGE_READ_CFG: {
-            read_config(&cfg_data);
+            ReadConfig(&cfg_data);
         } break;
         case APP_MESSAGE_WRITE_CFG: {
-            write_config(&cfg_data);
+            WriteConfig(&cfg_data);
         } break;
         default:
             break;

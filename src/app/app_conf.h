@@ -73,7 +73,7 @@
 #endif
 
 // 设置APP
-#define APP_SETTING_USE 1
+#define APP_SETTING_USE 0
 #if APP_SETTING_USE
 #include "app/settings/settings.h"
 #endif

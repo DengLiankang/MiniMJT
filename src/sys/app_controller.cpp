@@ -33,11 +33,8 @@ AppController::AppController(const char *name)
     m_wifi_status = false;
     m_preWifiReqMillis = GET_SYS_MILLIS();
     mAppCtrlState = MJT_SYS_STATE::STATE_SYS_LOADING;
-
     // 定义一个定时器
-    mTimerAppCtrl = xTimerCreate("App Ctrl", 200 / portTICK_PERIOD_MS, pdTRUE, (void *)0, TimerAppCtrlHandle);
-    // 启动事件处理定时器
-    xTimerStart(mTimerAppCtrl, 500 / portTICK_PERIOD_MS);
+    mTimerAppCtrl = xTimerCreate("AppCtrlTimer", 200 / portTICK_PERIOD_MS, pdTRUE, (void *)0, TimerAppCtrlHandle);
 }
 
 AppController::~AppController() {}
@@ -47,8 +44,8 @@ void AppController::Init(void)
     // flashfs init first
     gFlashCfg.Init();
 
-    this->read_config(&mSysCfg);
-    this->read_config(&mImuCfg);
+    this->ReadConfig(&mSysCfg);
+    this->ReadConfig(&mImuCfg);
 
     // 设置CPU主频
     if (1 == mSysCfg.power_mode) {
@@ -64,9 +61,8 @@ void AppController::Init(void)
     /*** Init screen ***/
     screen.init(mSysCfg.rotation, mSysCfg.backLight);
 
-    AppCtrlScreenInit();
-    AppCtrlLoadingGuiInit();
-    AppCtrlLoadingDisplay(10, "init amblight...", true);
+    MJT_LVGL_OPERATE_LOCK(AppCtrlLoadingGuiInit());
+    MJT_LVGL_OPERATE_LOCK(AppCtrlLoadingDisplay(10, NULL, true));
     /*** Init ambient-light sensor ***/
     ambLight.init(ONE_TIME_H_RESOLUTION_MODE);
 
@@ -78,27 +74,31 @@ void AppController::Init(void)
     /*** Init IMU as input device ***/
     // lv_port_indev_init();
 
-    AppCtrlLoadingDisplay(80, "init imu...", false);
+    MJT_LVGL_OPERATE_LOCK(AppCtrlLoadingDisplay(80, "init imu...", false));
     mpu.init(mSysCfg.mpu_order, mSysCfg.auto_calibration_mpu, &mImuCfg); // 初始化比较耗时
 
-    AppCtrlLoadingDisplay(90, "install apps...", false);
+    MJT_LVGL_OPERATE_LOCK(AppCtrlLoadingDisplay(90, "install apps...", false));
     // mAppList[0] = new APP_OBJ();
     // mAppList[0]->app_image = &app_loading;
     // mAppList[0]->app_name = "Loading...";
 
     // app_control_display_scr(mAppList[cur_app_index]->app_image, mAppList[cur_app_index]->app_name,
     //                         LV_SCR_LOAD_ANIM_NONE, false);
+    // 启动事件处理定时器
+    xTimerStart(mTimerAppCtrl, 0);
 }
 
 void AppController::ExitLoadingGui(void)
 {
     if (!mAppNum) {
-        AppCtrlLoadingDisplay(100, LV_SYMBOL_WARNING "no app installed.", true);
+        MJT_LVGL_OPERATE_LOCK(AppCtrlLoadingDisplay(100, "#ff0000 " LV_SYMBOL_WARNING "# no app!", true));
         return;
     }
-    AppCtrlLoadingDisplay(100, "finished.", true);
-    // app_control_display_scr(mAppList[cur_app_index]->app_image, mAppList[cur_app_index]->app_name,
-    //                         LV_SCR_LOAD_ANIM_NONE, true);
+    MJT_LVGL_OPERATE_LOCK(AppCtrlLoadingDisplay(100, "finished.", true));
+
+    MJT_LVGL_OPERATE_LOCK(AppCtrlMenuGuiInit());
+    MJT_LVGL_OPERATE_LOCK(AppCtrlMunuDisplay(mAppList[cur_app_index]->app_image, mAppList[cur_app_index]->app_name, LV_SCR_LOAD_ANIM_FADE_IN, true));
+
     SetSystemState(STATE_APP_MENU);
 }
 
@@ -156,8 +156,10 @@ int AppController::app_auto_start()
     return 0;
 }
 
-int AppController::main_process(void)
+int AppController::MainProcess(void)
 {
+    MJT_LVGL_OPERATE_LOCK(lv_timer_handler());
+
     if (gIsCheckAction) {
         gIsCheckAction = false;
         gImuActionData = mpu.getAction();
@@ -211,7 +213,7 @@ int AppController::main_process(void)
     //     app_control_display_scr(mAppList[cur_app_index]->app_image, mAppList[cur_app_index]->app_name,
     //                             LV_SCR_LOAD_ANIM_NONE, false);
     //     // 运行APP进程 等效于把控制权交给当前APP
-    //     (*(mAppList[cur_app_index]->main_process))(this, gImuActionData);
+    //     (*(mAppList[cur_app_index]->MainProcess))(this, gImuActionData);
     // }
     gImuActionData->active = ACTIVE_TYPE::UNKNOWN;
     gImuActionData->isValid = 0;

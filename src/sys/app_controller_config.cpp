@@ -9,7 +9,7 @@
 
 static char gCfgInfo[MAX_CFG_INFO_LENGTH];
 
-void AppController::read_config(SysUtilConfig *cfg)
+void AppController::ReadConfig(SysUtilConfig *cfg)
 {
     // 如果有需要持久化配置文件 可以调用此函数将数据存在flash中
     // 配置文件名最好以APP名为开头 以".cfg"结尾，以免多个APP读取混乱
@@ -23,7 +23,7 @@ void AppController::read_config(SysUtilConfig *cfg)
         cfg->auto_calibration_mpu = 1; // 是否自动校准陀螺仪 0关闭自动校准 1打开自动校准
         cfg->mpu_order = 0;            // 操作方向
         cfg->auto_start_app = "None";  // 无指定开机自启APP
-        this->write_config(cfg);
+        this->WriteConfig(cfg);
     } else {
         // 解析数据
         char *param[12] = {0};
@@ -43,7 +43,7 @@ void AppController::read_config(SysUtilConfig *cfg)
     }
 }
 
-void AppController::write_config(SysUtilConfig *cfg)
+void AppController::WriteConfig(SysUtilConfig *cfg)
 {
     char tmp[25];
     // 将配置数据保存在文件中（持久化）
@@ -84,7 +84,7 @@ void AppController::write_config(SysUtilConfig *cfg)
     mpu.setOrder(cfg->mpu_order);
 }
 
-void AppController::read_config(SysMpuConfig *cfg)
+void AppController::ReadConfig(SysMpuConfig *cfg)
 {
     // 如果有需要持久化配置文件 可以调用此函数将数据存在flash中
     // 配置文件名最好以APP名为开头 以".cfg"结尾，以免多个APP读取混乱
@@ -99,7 +99,7 @@ void AppController::read_config(SysMpuConfig *cfg)
         cfg->y_accel_offset = 0;
         cfg->z_accel_offset = 0;
 
-        this->write_config(cfg);
+        this->WriteConfig(cfg);
     } else {
         // 解析数据
         char *param[6] = {0};
@@ -113,7 +113,7 @@ void AppController::read_config(SysMpuConfig *cfg)
     }
 }
 
-void AppController::write_config(SysMpuConfig *cfg)
+void AppController::WriteConfig(SysMpuConfig *cfg)
 {
     char tmp[25];
     // 将配置数据保存在文件中（持久化）
@@ -198,7 +198,7 @@ void AppController::deal_config(APP_MESSAGE_TYPE type, const char *key, char *va
             } else if (!strcmp(key, "auto_calibration_mpu")) {
                 mSysCfg.auto_calibration_mpu = atol(value);
                 if (0 == mSysCfg.auto_calibration_mpu) {
-                    this->write_config(&this->mImuCfg);
+                    this->WriteConfig(&this->mImuCfg);
                 }
             } else if (!strcmp(key, "mpu_order")) {
                 mSysCfg.mpu_order = atol(value);
@@ -207,12 +207,12 @@ void AppController::deal_config(APP_MESSAGE_TYPE type, const char *key, char *va
             }
         } break;
         case APP_MESSAGE_READ_CFG: {
-            read_config(&mSysCfg);
-            // read_config(&mImuCfg);
+            ReadConfig(&mSysCfg);
+            // ReadConfig(&mImuCfg);
         } break;
         case APP_MESSAGE_WRITE_CFG: {
-            write_config(&mSysCfg);
-            // write_config(&mImuCfg);  // 在取消自动校准的时候已经写过一次了
+            WriteConfig(&mSysCfg);
+            // WriteConfig(&mImuCfg);  // 在取消自动校准的时候已经写过一次了
         } break;
         default:
             break;

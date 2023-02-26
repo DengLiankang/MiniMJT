@@ -21,7 +21,7 @@ struct MP_Config {
     uint8_t powerFlag;  // 功耗控制（0低发热 1性能优先）
 };
 
-static void write_config(MP_Config *cfg)
+static void WriteConfig(MP_Config *cfg)
 {
     char tmp[16];
     // 将配置数据保存在文件中（持久化）
@@ -35,7 +35,7 @@ static void write_config(MP_Config *cfg)
     gFlashCfg.writeFile(MEDIA_CONFIG_PATH, w_data.c_str());
 }
 
-static void read_config(MP_Config *cfg)
+static void ReadConfig(MP_Config *cfg)
 {
     // 如果有需要持久化配置文件 可以调用此函数将数据存在flash中
     // 配置文件名最好以APP名为开头 以".cfg"结尾，以免多个APP读取混乱
@@ -46,7 +46,7 @@ static void read_config(MP_Config *cfg)
         // 默认值
         cfg->switchFlag = 1; // 是否自动播放下一个（0不切换 1自动切换）
         cfg->powerFlag = 0;  // 功耗控制（0低发热 1性能优先）
-        write_config(cfg);
+        WriteConfig(cfg);
     } else {
         // 解析数据
         char *param[2] = {0};
@@ -127,7 +127,7 @@ static void release_player_docoder(void)
 static int media_player_init(AppController *sys)
 {
     // 获取配置信息
-    read_config(&cfg_data);
+    ReadConfig(&cfg_data);
     // 初始化运行时参数
     // run_data = (MediaAppRunData *)malloc(sizeof(MediaAppRunData));
     // memset(run_data, 0, sizeof(MediaAppRunData));
@@ -273,10 +273,10 @@ static void media_player_message_handle(const char *from, const char *to, APP_ME
             }
         } break;
         case APP_MESSAGE_READ_CFG: {
-            read_config(&cfg_data);
+            ReadConfig(&cfg_data);
         } break;
         case APP_MESSAGE_WRITE_CFG: {
-            write_config(&cfg_data);
+            WriteConfig(&cfg_data);
         } break;
         default:
             break;
