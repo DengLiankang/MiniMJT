@@ -67,7 +67,7 @@ public:
 
     // 将APP的后台任务从任务队列中移除(自能通过APP退出的时候，移除自身的后台任务)
     int remove_backgroud_task(void);
-    int MainProcess();
+    void MainProcess();
     void app_exit(void); // 提供给app退出的系统调用
     // 消息发送
     int send_to(const char *from, const char *to, APP_MESSAGE_TYPE type, void *message, void *ext_info);
@@ -91,25 +91,25 @@ private:
 
 private:
     char name[APP_CONTROLLER_NAME_LEN]; // app控制器的名字
-    APP_OBJ *mAppList[APP_MAX_NUM];     // 预留APP_MAX_NUM个APP注册位
-    APP_TYPE appTypeList[APP_MAX_NUM];  // 对应APP的运行类型
+    APP_OBJ *m_appList[APP_MAX_NUM];     // 预留APP_MAX_NUM个APP注册位
+    APP_TYPE m_appTypeList[APP_MAX_NUM];  // 对应APP的运行类型
     // std::list<const APP_OBJ *> app_list; // APP注册位(为了C语言可移植，放弃使用链表)
     std::list<EVENT_OBJ> eventList;   // 用来储存事件
     boolean m_wifi_status;            // 表示是wifi状态 true开启 false关闭
     unsigned long m_preWifiReqMillis; // 保存上一回请求的时间戳
-    unsigned int mAppNum;
+    unsigned int m_appNum;
     boolean app_exit_flag; // 表示是否退出APP应用
-    int cur_app_index;     // 当前运行的APP下标
+    int mCurrentAppItem;     // 当前运行的APP下标
     int pre_app_index;     // 上一次运行的APP下标
-    MJT_SYS_STATE mAppCtrlState;
+    MJT_SYS_STATE m_appCtrlState;
 
-    TimerHandle_t mTimerAppCtrl; // 事件处理定时器
+    TimerHandle_t m_appCtrlTimer; // 事件处理定时器
 
 public:
-    SysUtilConfig mSysCfg;
-    SysMpuConfig mImuCfg;
+    SysUtilConfig m_sysCfg;
+    SysMpuConfig m_imuCfg;
 };
 
-extern AppController *gAppController;
+extern AppController *g_appController;
 
 #endif

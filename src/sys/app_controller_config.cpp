@@ -150,69 +150,69 @@ void AppController::deal_config(APP_MESSAGE_TYPE type, const char *key, char *va
 
         case APP_MESSAGE_GET_PARAM: {
             if (!strcmp(key, "ssid_0")) {
-                snprintf(value, 32, "%s", mSysCfg.ssid_0.c_str());
+                snprintf(value, 32, "%s", m_sysCfg.ssid_0.c_str());
             } else if (!strcmp(key, "password_0")) {
-                snprintf(value, 32, "%s", mSysCfg.password_0.c_str());
+                snprintf(value, 32, "%s", m_sysCfg.password_0.c_str());
             } else if (!strcmp(key, "ssid_1")) {
-                snprintf(value, 32, "%s", mSysCfg.ssid_1.c_str());
+                snprintf(value, 32, "%s", m_sysCfg.ssid_1.c_str());
             } else if (!strcmp(key, "password_1")) {
-                snprintf(value, 32, "%s", mSysCfg.password_1.c_str());
+                snprintf(value, 32, "%s", m_sysCfg.password_1.c_str());
             }
             if (!strcmp(key, "ssid_2")) {
-                snprintf(value, 32, "%s", mSysCfg.ssid_2.c_str());
+                snprintf(value, 32, "%s", m_sysCfg.ssid_2.c_str());
             } else if (!strcmp(key, "password_2")) {
-                snprintf(value, 32, "%s", mSysCfg.password_2.c_str());
+                snprintf(value, 32, "%s", m_sysCfg.password_2.c_str());
             } else if (!strcmp(key, "power_mode")) {
-                snprintf(value, 32, "%u", mSysCfg.power_mode);
+                snprintf(value, 32, "%u", m_sysCfg.power_mode);
             } else if (!strcmp(key, "backLight")) {
-                snprintf(value, 32, "%u", mSysCfg.backLight);
+                snprintf(value, 32, "%u", m_sysCfg.backLight);
             } else if (!strcmp(key, "rotation")) {
-                snprintf(value, 32, "%u", mSysCfg.rotation);
+                snprintf(value, 32, "%u", m_sysCfg.rotation);
             } else if (!strcmp(key, "auto_calibration_mpu")) {
-                snprintf(value, 32, "%u", mSysCfg.auto_calibration_mpu);
+                snprintf(value, 32, "%u", m_sysCfg.auto_calibration_mpu);
             } else if (!strcmp(key, "mpu_order")) {
-                snprintf(value, 32, "%u", mSysCfg.mpu_order);
+                snprintf(value, 32, "%u", m_sysCfg.mpu_order);
             } else if (!strcmp(key, "auto_start_app")) {
-                snprintf(value, 32, "%s", mSysCfg.auto_start_app.c_str());
+                snprintf(value, 32, "%s", m_sysCfg.auto_start_app.c_str());
             }
         } break;
         case APP_MESSAGE_SET_PARAM: {
             if (!strcmp(key, "ssid_0")) {
-                mSysCfg.ssid_0 = value;
+                m_sysCfg.ssid_0 = value;
             } else if (!strcmp(key, "password_0")) {
-                mSysCfg.password_0 = value;
+                m_sysCfg.password_0 = value;
             } else if (!strcmp(key, "ssid_1")) {
-                mSysCfg.ssid_1 = value;
+                m_sysCfg.ssid_1 = value;
             } else if (!strcmp(key, "password_1")) {
-                mSysCfg.password_1 = value;
+                m_sysCfg.password_1 = value;
             } else if (!strcmp(key, "ssid_2")) {
-                mSysCfg.ssid_2 = value;
+                m_sysCfg.ssid_2 = value;
             } else if (!strcmp(key, "password_2")) {
-                mSysCfg.password_2 = value;
+                m_sysCfg.password_2 = value;
             } else if (!strcmp(key, "power_mode")) {
-                mSysCfg.power_mode = atol(value);
+                m_sysCfg.power_mode = atol(value);
             } else if (!strcmp(key, "backLight")) {
-                mSysCfg.backLight = atol(value);
+                m_sysCfg.backLight = atol(value);
             } else if (!strcmp(key, "rotation")) {
-                mSysCfg.rotation = atol(value);
+                m_sysCfg.rotation = atol(value);
             } else if (!strcmp(key, "auto_calibration_mpu")) {
-                mSysCfg.auto_calibration_mpu = atol(value);
-                if (0 == mSysCfg.auto_calibration_mpu) {
-                    this->WriteConfig(&this->mImuCfg);
+                m_sysCfg.auto_calibration_mpu = atol(value);
+                if (0 == m_sysCfg.auto_calibration_mpu) {
+                    this->WriteConfig(&this->m_imuCfg);
                 }
             } else if (!strcmp(key, "mpu_order")) {
-                mSysCfg.mpu_order = atol(value);
+                m_sysCfg.mpu_order = atol(value);
             } else if (!strcmp(key, "auto_start_app")) {
-                mSysCfg.auto_start_app = value;
+                m_sysCfg.auto_start_app = value;
             }
         } break;
         case APP_MESSAGE_READ_CFG: {
-            ReadConfig(&mSysCfg);
-            // ReadConfig(&mImuCfg);
+            ReadConfig(&m_sysCfg);
+            // ReadConfig(&m_imuCfg);
         } break;
         case APP_MESSAGE_WRITE_CFG: {
-            WriteConfig(&mSysCfg);
-            // WriteConfig(&mImuCfg);  // 在取消自动校准的时候已经写过一次了
+            WriteConfig(&m_sysCfg);
+            // WriteConfig(&m_imuCfg);  // 在取消自动校准的时候已经写过一次了
         } break;
         default:
             break;
