@@ -1,5 +1,4 @@
 #include "sys/app_controller_gui.h"
-// #include "lvgl.h"
 
 // 必须定义为全局或者静态
 // Loading
@@ -13,7 +12,7 @@ static struct AppCtrlMenuPage g_appMenuPage1;
 static struct AppCtrlMenuPage g_appMenuPage2;
 static struct AppCtrlMenuPage *g_nextMenuPage;
 
-LV_IMG_DECLARE(LvImgBooting);
+LV_IMG_DECLARE(minimjt_logo);
 LV_FONT_DECLARE(lv_font_montserrat_24);
 
 void AppCtrlLoadingGuiInit(void)
@@ -52,7 +51,7 @@ void AppCtrlLoadingGuiInit(void)
     lv_label_set_text(gLv_labelLoading, "booting...");
 
     gLv_imgBooting = lv_img_create(gLv_scrLoading);
-    lv_img_set_src(gLv_imgBooting, &LvImgBooting);
+    lv_img_set_src(gLv_imgBooting, &minimjt_logo);
     lv_obj_align(gLv_imgBooting, LV_ALIGN_CENTER, 0, -40);
 
     lv_scr_load(gLv_scrLoading);
@@ -123,12 +122,4 @@ void AppCtrlMunuDisplay(const void *appImg, const char *appName, lv_scr_load_ani
     lv_scr_load_anim(g_nextMenuPage->appMenuScr, anim, 500, 500, delPre);
 
     g_nextMenuPage = g_nextMenuPage->nextPage;
-}
-
-void app_control_gui_release(void)
-{
-    if (NULL != g_appMenuPage1.appMenuScr) {
-        lv_obj_clean(g_appMenuPage1.appMenuScr);
-        g_appMenuPage1.appMenuScr = NULL;
-    }
 }
