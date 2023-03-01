@@ -68,7 +68,7 @@ public:
     // 将APP的后台任务从任务队列中移除(自能通过APP退出的时候，移除自身的后台任务)
     int remove_backgroud_task(void);
     void MainProcess();
-    void app_exit(void); // 提供给app退出的系统调用
+    void appExit(void); // 提供给app退出的系统调用
     // 消息发送
     int send_to(const char *from, const char *to, APP_MESSAGE_TYPE type, void *message, void *ext_info);
     void deal_config(APP_MESSAGE_TYPE type, const char *key, char *value);
@@ -98,8 +98,7 @@ private:
     boolean m_wifi_status;            // 表示是wifi状态 true开启 false关闭
     unsigned long m_preWifiReqMillis; // 保存上一回请求的时间戳
     unsigned int m_appNum;
-    boolean app_exit_flag; // 表示是否退出APP应用
-    int mCurrentAppItem;     // 当前运行的APP下标
+    int m_currentAppItem;     // 当前运行的APP下标
     int pre_app_index;     // 上一次运行的APP下标
     MJT_SYS_STATE m_appCtrlState;
 

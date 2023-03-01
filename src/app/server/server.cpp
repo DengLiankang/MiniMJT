@@ -107,7 +107,7 @@ static void server_process(AppController *sys, const ImuAction *action)
 
     if (RETURN == action->active) {
         stop_web_config();
-        sys->app_exit();
+        sys->appExit();
         return;
     }
 

@@ -73,7 +73,7 @@ static void idea_process(AppController *sys, const ImuAction *action)
     lv_scr_load_anim_t anim_type = LV_SCR_LOAD_ANIM_NONE;
 
     if (RETURN == action->active) {
-        sys->app_exit();
+        sys->appExit();
         return;
     }
 

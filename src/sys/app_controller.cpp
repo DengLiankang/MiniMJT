@@ -26,8 +26,7 @@ AppController::AppController(const char *name)
 {
     strncpy(this->name, name, APP_CONTROLLER_NAME_LEN);
     m_appNum = 0;
-    app_exit_flag = 0;
-    mCurrentAppItem = 0;
+    m_currentAppItem = 0;
     pre_app_index = 0;
     // m_appList = new APP_OBJ[APP_MAX_NUM];
     m_wifi_status = false;
@@ -91,7 +90,7 @@ void AppController::ExitLoadingGui(void)
     }
     MJT_LVGL_OPERATE_LOCK(AppCtrlLoadingDisplay(100, "finished.", true));
     MJT_LVGL_OPERATE_LOCK(AppCtrlMenuGuiInit());
-    MJT_LVGL_OPERATE_LOCK(AppCtrlMunuDisplay(m_appList[mCurrentAppItem]->appLogo, m_appList[mCurrentAppItem]->appName, LV_SCR_LOAD_ANIM_FADE_IN, true));
+    MJT_LVGL_OPERATE_LOCK(AppCtrlMunuDisplay(m_appList[m_currentAppItem]->appLogo, m_appList[m_currentAppItem]->appName, LV_SCR_LOAD_ANIM_FADE_IN, true));
 
     SetSystemState(STATE_APP_MENU);
 }
@@ -144,9 +143,9 @@ int AppController::app_auto_start()
         return 0;
     }
     // 进入自启动的APP
-    app_exit_flag = 1; // 进入app, 如果已经在
-    mCurrentAppItem = index;
-    (*(m_appList[mCurrentAppItem]->appInit))(this); // 执行APP初始化
+    SetSystemState(MJT_SYS_STATE::STATE_APP_RUNNING);
+    m_currentAppItem = index;
+    (*(m_appList[m_currentAppItem]->appInit))(this); // 执行APP初始化
     return 0;
 }
 
@@ -190,23 +189,23 @@ void AppController::MainProcess(void)
         // lv_scr_load_anim_t anim = LV_SCR_LOAD_ANIM_NONE;
 
         if (gImuActionData->active == ACTIVE_TYPE::TURN_LEFT) {
-            mCurrentAppItem = (mCurrentAppItem + 1) % m_appNum;
-            AppCtrlMunuDisplay(m_appList[mCurrentAppItem]->appLogo, m_appList[mCurrentAppItem]->appName, LV_SCR_LOAD_ANIM_MOVE_LEFT, false);
-            Serial.println(String("Current App: ") + m_appList[mCurrentAppItem]->appName);
+            m_currentAppItem = (m_currentAppItem + 1) % m_appNum;
+            AppCtrlMunuDisplay(m_appList[m_currentAppItem]->appLogo, m_appList[m_currentAppItem]->appName, LV_SCR_LOAD_ANIM_MOVE_LEFT, false);
+            Serial.println(String("Current App: ") + m_appList[m_currentAppItem]->appName);
             ANIEND_WAIT;
         } else if (gImuActionData->active == ACTIVE_TYPE::TURN_RIGHT) {
-            mCurrentAppItem = (mCurrentAppItem + m_appNum - 1) % m_appNum;
-            AppCtrlMunuDisplay(m_appList[mCurrentAppItem]->appLogo, m_appList[mCurrentAppItem]->appName, LV_SCR_LOAD_ANIM_MOVE_RIGHT, false);
-            Serial.println(String("Current App: ") + m_appList[mCurrentAppItem]->appName);
+            m_currentAppItem = (m_currentAppItem + m_appNum - 1) % m_appNum;
+            AppCtrlMunuDisplay(m_appList[m_currentAppItem]->appLogo, m_appList[m_currentAppItem]->appName, LV_SCR_LOAD_ANIM_MOVE_RIGHT, false);
+            Serial.println(String("Current App: ") + m_appList[m_currentAppItem]->appName);
             ANIEND_WAIT;
         } else if (gImuActionData->active == ACTIVE_TYPE::GO_FORWORD) {
-            if (m_appList[mCurrentAppItem]->appInit != NULL) {
-                (*(m_appList[mCurrentAppItem]->appInit))(this); // 执行APP初始化
+            if (m_appList[m_currentAppItem]->appInit != NULL) {
+                (*(m_appList[m_currentAppItem]->appInit))(this); // 执行APP初始化
                 g_appController->SetSystemState(MJT_SYS_STATE::STATE_APP_RUNNING);
             }
         }
     } else if (g_appController->GetSystemState() == MJT_SYS_STATE::STATE_APP_RUNNING) {
-        (*(m_appList[mCurrentAppItem]->MainProcess))(this, gImuActionData);
+        (*(m_appList[m_currentAppItem]->MainProcess))(this, gImuActionData);
     }
 
     // if (0 == app_exit_flag) {
@@ -214,34 +213,34 @@ void AppController::MainProcess(void)
     //     lv_scr_load_anim_t anim_type = LV_SCR_LOAD_ANIM_NONE;
     //     if (ACTIVE_TYPE::TURN_LEFT == gImuActionData->active) {
     //         anim_type = LV_SCR_LOAD_ANIM_MOVE_RIGHT;
-    //         pre_app_index = mCurrentAppItem;
-    //         mCurrentAppItem = (mCurrentAppItem + 1) % m_appNum;
-    //         Serial.println(String("Current App: ") + m_appList[mCurrentAppItem]->appName);
+    //         pre_app_index = m_currentAppItem;
+    //         m_currentAppItem = (m_currentAppItem + 1) % m_appNum;
+    //         Serial.println(String("Current App: ") + m_appList[m_currentAppItem]->appName);
     //     } else if (ACTIVE_TYPE::TURN_RIGHT == gImuActionData->active) {
     //         anim_type = LV_SCR_LOAD_ANIM_MOVE_LEFT;
-    //         pre_app_index = mCurrentAppItem;
+    //         pre_app_index = m_currentAppItem;
     //         // 以下等效与 processId = (processId - 1 + m_appNum) % 4;
     //         // +3为了不让数据溢出成负数，而导致取模逻辑错误
-    //         mCurrentAppItem = (mCurrentAppItem - 1 + m_appNum) % m_appNum; // 此处的3与p_processList的长度一致
-    //         Serial.println(String("Current App: ") + m_appList[mCurrentAppItem]->appName);
+    //         m_currentAppItem = (m_currentAppItem - 1 + m_appNum) % m_appNum; // 此处的3与p_processList的长度一致
+    //         Serial.println(String("Current App: ") + m_appList[m_currentAppItem]->appName);
     //     } else if (ACTIVE_TYPE::GO_FORWORD == gImuActionData->active) {
     //         app_exit_flag = 1; // 进入app
-    //         if (NULL != m_appList[mCurrentAppItem]->appInit) {
-    //             (*(m_appList[mCurrentAppItem]->appInit))(this); // 执行APP初始化
+    //         if (NULL != m_appList[m_currentAppItem]->appInit) {
+    //             (*(m_appList[m_currentAppItem]->appInit))(this); // 执行APP初始化
     //         }
     //     }
 
     //     if (ACTIVE_TYPE::GO_FORWORD != gImuActionData->active) // && UNKNOWN != gImuActionData->active
     //     {
-    //         app_control_display_scr(m_appList[mCurrentAppItem]->appLogo, m_appList[mCurrentAppItem]->appName, anim_type,
+    //         app_control_display_scr(m_appList[m_currentAppItem]->appLogo, m_appList[m_currentAppItem]->appName, anim_type,
     //                                 false);
     //         vTaskDelay(200 / portTICK_PERIOD_MS);
     //     }
     // } else {
-    //     app_control_display_scr(m_appList[mCurrentAppItem]->appLogo, m_appList[mCurrentAppItem]->appName,
+    //     app_control_display_scr(m_appList[m_currentAppItem]->appLogo, m_appList[m_currentAppItem]->appName,
     //                             LV_SCR_LOAD_ANIM_NONE, false);
     //     // 运行APP进程 等效于把控制权交给当前APP
-    //     (*(m_appList[mCurrentAppItem]->MainProcess))(this, gImuActionData);
+    //     (*(m_appList[m_currentAppItem]->MainProcess))(this, gImuActionData);
     // }
     gImuActionData->active = ACTIVE_TYPE::UNKNOWN;
     gImuActionData->isValid = 0;
@@ -380,16 +379,16 @@ bool AppController::wifi_event(APP_MESSAGE_TYPE type)
         } break;
         case APP_MESSAGE_MQTT_DATA: {
             Serial.println("APP_MESSAGE_MQTT_DATA");
-            if (app_exit_flag == 1 && mCurrentAppItem != getAppIdxByName("Heartbeat")) // 在其他app中
-            {
-                app_exit_flag = 0;
-                (*(m_appList[mCurrentAppItem]->appExit))(NULL); // 退出当前app
-            }
-            if (app_exit_flag == 0) {
-                app_exit_flag = 1; // 进入app, 如果已经在
-                mCurrentAppItem = getAppIdxByName("Heartbeat");
-                (*(getAppByName("Heartbeat")->appInit))(this); // 执行APP初始化
-            }
+            // if (app_exit_flag == 1 && m_currentAppItem != getAppIdxByName("Heartbeat")) // 在其他app中
+            // {
+            //     app_exit_flag = 0;
+            //     (*(m_appList[m_currentAppItem]->appExit))(NULL); // 退出当前app
+            // }
+            // if (app_exit_flag == 0) {
+            //     app_exit_flag = 1; // 进入app, 如果已经在
+            //     m_currentAppItem = getAppIdxByName("Heartbeat");
+            //     (*(getAppByName("Heartbeat")->appInit))(this); // 执行APP初始化
+            // }
         } break;
         default:
             break;
@@ -398,25 +397,25 @@ bool AppController::wifi_event(APP_MESSAGE_TYPE type)
     return true;
 }
 
-void AppController::app_exit()
+void AppController::appExit()
 {
-    app_exit_flag = 0; // 退出APP
+    lv_anim_del_all();
+    AppCtrlMunuDisplay(m_appList[m_currentAppItem]->appLogo, m_appList[m_currentAppItem]->appName, LV_SCR_LOAD_ANIM_FADE_IN, false);
+    ANIEND_WAIT;
 
     // 清空该对象的所有请求
     for (std::list<EVENT_OBJ>::iterator event = eventList.begin(); event != eventList.end();) {
-        if (m_appList[mCurrentAppItem] == (*event).from) {
+        if (m_appList[m_currentAppItem] == (*event).from) {
             event = eventList.erase(event); // 删除该响应事件
         } else {
             ++event;
         }
     }
 
-    if (NULL != m_appList[mCurrentAppItem]->appExit) {
+    if (NULL != m_appList[m_currentAppItem]->appExit) {
         // 执行APP退出回调
-        (*(m_appList[mCurrentAppItem]->appExit))(NULL);
+        (*(m_appList[m_currentAppItem]->appExit))(NULL);
     }
-    // app_control_display_scr(m_appList[mCurrentAppItem]->appLogo, m_appList[mCurrentAppItem]->appName,
-    //                         LV_SCR_LOAD_ANIM_NONE, true);
 
     // 设置CPU主频
     if (1 == this->m_sysCfg.power_mode) {

@@ -53,7 +53,7 @@ static int example_init(AppController *sys)
 static void example_process(AppController *sys, const ImuAction *act_info)
 {
     if (RETURN == act_info->active) {
-        sys->app_exit(); // 退出APP
+        sys->appExit(); // 退出APP
         return;
     }
     // 发送请求。如果是wifi相关的消息，当请求完成后自动会调用 example_message_handle 函数

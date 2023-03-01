@@ -281,7 +281,7 @@ static void weather_process(AppController *sys, const ImuAction *act_info)
     lv_scr_load_anim_t anim_type = LV_SCR_LOAD_ANIM_NONE;
 
     if (RETURN == act_info->active) {
-        sys->app_exit();
+        sys->appExit();
         return;
     } else if (GO_FORWORD == act_info->active) {
         // 间接强制更新
