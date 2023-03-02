@@ -6,7 +6,6 @@ SdCard tf;
 Network g_network; // 网络连接
 FlashFS gFlashCfg; // flash中的文件系统（替代原先的Preferences）
 Display screen;    // 屏幕对象
-Ambient ambLight;  // 光线传感器对象
 
 TaskHandle_t gTaskLvglHandle;
 

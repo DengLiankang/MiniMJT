@@ -63,16 +63,14 @@ void setup()
     g_appController->AppInstall(&heartbeat_app, APP_TYPE_BACKGROUND);
 #endif
 
-    // 自启动APP
-    // g_appController->app_auto_start();
-
     g_appController->ExitLoadingGui();
-    DeleteLvglTask();
+
+    // 自启动APP
+    g_appController->AppAutoStart();
 
 #if LV_USE_LOG
     lv_log_register_print_cb(LvglLog);
 #endif /*LV_USE_LOG*/
-
 }
 
 void loop()

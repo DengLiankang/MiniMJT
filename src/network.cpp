@@ -7,8 +7,8 @@ IPAddress gateway(192, 168, 4, 2);  // Set your network Gateway usually your Rou
 IPAddress subnet(255, 255, 255, 0); // Set your network sub-network mask here
 IPAddress dns(192, 168, 4, 1);      // Set your network DNS usually your Router base address
 
-const char *AP_SSID = "HoloCubic_AIO"; // 热点名称
-const char *HOST_NAME = "HoloCubic";   // 主机名
+const char *AP_SSID = "MiniMJT"; // 热点名称
+const char *HOST_NAME = "MiniMJT";   // 主机名
 
 uint16_t ap_timeout = 0; // ap无连接的超时时间
 
@@ -148,8 +148,6 @@ boolean Network::open_ap(const char *ap_ssid, const char *ap_password)
         // 开启热点失败
         Serial.println(F("WiFiAP Failed"));
         return false;
-        delay(1000);
-        ESP.restart(); // 复位esp32
     }
     // 设置域名
     if (MDNS.begin(HOST_NAME)) {

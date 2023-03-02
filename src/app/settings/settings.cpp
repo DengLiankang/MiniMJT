@@ -138,7 +138,7 @@ static int settings_init(AppController *sys)
 static void settings_process(AppController *sys, const ImuAction *act_info)
 {
     if (RETURN == act_info->active) {
-        sys->appExit(); // 退出APP
+        sys->AppExit(); // 退出APP
         return;
     }
 

@@ -229,7 +229,7 @@ static void anniversary_process(AppController *sys, const ImuAction *act_info)
 {
     lv_scr_load_anim_t anim_type = LV_SCR_LOAD_ANIM_NONE;
     if (RETURN == act_info->active) {
-        sys->appExit(); // 退出APP
+        sys->AppExit(); // 退出APP
         return;
     } else if (TURN_RIGHT == act_info->active) {
         anim_type = LV_SCR_LOAD_ANIM_MOVE_RIGHT;

@@ -46,7 +46,7 @@ struct APP_OBJ {
     void (*backgroudTask)(AppController *sys, const ImuAction *act_info);
 
     // 退出之前需要处理的回调函数 可为空
-    int (*appExit)(void *param);
+    int (*AppExit)(void *param);
 
     // 消息处理机制
     void (*messageHandle)(const char *from, const char *to, APP_MESSAGE_TYPE type, void *message, void *ext_info);

@@ -15,8 +15,6 @@
 // Bilibili的持久化配置
 #define HEARTBEAT_CONFIG_PATH "/heartbeat_v2.0.cfg"
 
-extern AppController *app_controller; // APP控制器
-
 // 常驻数据，可以不随APP的生命周期而释放或删除
 struct HeartbeatAppForeverData {
     int role;                   // 0: heart, 1: beat
@@ -43,7 +41,7 @@ void HeartbeatAppForeverData::callback(char *topic, byte *payload, unsigned int 
     }
     Serial.println();
 
-    app_controller->send_to(HEARTBEAT_APP_NAME, CTRL_NAME, APP_MESSAGE_MQTT_DATA, NULL, NULL);
+    g_appController->send_to(HEARTBEAT_APP_NAME, CTRL_NAME, APP_MESSAGE_MQTT_DATA, NULL, NULL);
 }
 
 HeartbeatAppForeverData hb_cfg;
@@ -234,7 +232,7 @@ static void heartbeat_process(AppController *sys, const ImuAction *act_info)
 {
     lv_scr_load_anim_t anim_type = LV_SCR_LOAD_ANIM_NONE;
     if (RETURN == act_info->active) {
-        sys->appExit(); // 退出APP
+        sys->AppExit(); // 退出APP
         return;
     } else if (GO_FORWORD == act_info->active) // 向前按发送一条消息
     {

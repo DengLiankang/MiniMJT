@@ -2,7 +2,6 @@
 #define _COMMON_H_
 
 #include "Arduino.h"
-#include "driver/ambient.h"
 #include "driver/display.h"
 #include "driver/flash_fs.h"
 #include "driver/imu.h"
@@ -10,7 +9,7 @@
 #include "network.h"
 #include <TFT_eSPI.h>
 
-#define MJT_VERSION "2.1.3"
+#define MJT_VERSION "2.1.5"
 #define GET_SYS_MILLIS xTaskGetTickCount // 获取系统毫秒数
 
 // SD_Card
@@ -22,10 +21,6 @@
 // MUP6050
 #define IMU_I2C_SDA 32
 #define IMU_I2C_SCL 33
-
-// 光感 (与MPU6050一致)
-#define AMB_I2C_SDA 32
-#define AMB_I2C_SCL 33
 
 // 屏幕尺寸
 #define SCREEN_HOR_RES 240 // 水平
@@ -60,7 +55,6 @@ extern SdCard tf;
 extern Network g_network; // 网络连接
 extern FlashFS gFlashCfg; // flash中的文件系统（替代原先的Preferences）
 extern Display screen;    // 屏幕对象
-extern Ambient ambLight;  // 光纤传感器对象
 extern TFT_eSPI *tft;
 extern SemaphoreHandle_t lvgl_mutex; // lvgl 操作的锁
 

@@ -154,7 +154,7 @@ static int media_player_init(AppController *sys)
 static void media_player_process(AppController *sys, const ImuAction *act_info)
 {
     if (RETURN == act_info->active) {
-        sys->appExit(); // 退出APP
+        sys->AppExit(); // 退出APP
         return;
     } else if (UNKNOWN != act_info->active) {
         // 记录下操作的时间点
@@ -165,7 +165,7 @@ static void media_player_process(AppController *sys, const ImuAction *act_info)
 
     if (NULL == run_data->pfile) {
         Serial.println(F("Not Found File."));
-        sys->appExit(); // 退出APP
+        sys->AppExit(); // 退出APP
         return;
     }
 
@@ -187,7 +187,7 @@ static void media_player_process(AppController *sys, const ImuAction *act_info)
 
     if (NULL == run_data->pfile) {
         // 不存在可以播放的文件
-        sys->appExit(); // 退出APP
+        sys->AppExit(); // 退出APP
         return;
     }
 

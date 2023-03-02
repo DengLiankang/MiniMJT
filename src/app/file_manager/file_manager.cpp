@@ -45,7 +45,7 @@ static void file_maneger_process(AppController *sys, const ImuAction *action)
     // lv_scr_load_anim_t anim_type = LV_SCR_LOAD_ANIM_NONE;
 
     if (RETURN == action->active) {
-        sys->appExit();
+        sys->AppExit();
         return;
     }
 

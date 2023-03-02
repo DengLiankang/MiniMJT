@@ -125,7 +125,7 @@ static void picture_process(AppController *sys, const ImuAction *act_info)
     lv_scr_load_anim_t anim_type = LV_SCR_LOAD_ANIM_FADE_ON;
 
     if (RETURN == act_info->active) {
-        sys->appExit();
+        sys->AppExit();
         return;
     }
 
@@ -140,7 +140,7 @@ static void picture_process(AppController *sys, const ImuAction *act_info)
     }
 
     if (NULL == run_data->image_file) {
-        sys->appExit();
+        sys->AppExit();
         return;
     }
 

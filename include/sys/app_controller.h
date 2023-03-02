@@ -57,7 +57,7 @@ public:
     // 设置系统当前状态
     void SetSystemState(MJT_SYS_STATE state);
 
-    int app_auto_start();
+    int AppAutoStart();
 
     // 将APP注册到app_controller中
     int AppInstall(APP_OBJ *app, APP_TYPE appType = APP_TYPE_REALTIME);
@@ -68,7 +68,7 @@ public:
     // 将APP的后台任务从任务队列中移除(自能通过APP退出的时候，移除自身的后台任务)
     int remove_backgroud_task(void);
     void MainProcess();
-    void appExit(void); // 提供给app退出的系统调用
+    void AppExit(void); // 提供给app退出的系统调用
     // 消息发送
     int send_to(const char *from, const char *to, APP_MESSAGE_TYPE type, void *message, void *ext_info);
     void deal_config(APP_MESSAGE_TYPE type, const char *key, char *value);
@@ -85,12 +85,12 @@ public:
     void WriteConfig(SysMpuConfig *cfg);
 
 private:
-    APP_OBJ *getAppByName(const char *name);
-    int getAppIdxByName(const char *name);
+    APP_OBJ *GetAppByName(const char *name);
+    int GetAppIndexByName(const char *name);
     int AppIsLegal(const APP_OBJ *appObj);
 
 private:
-    char name[APP_CONTROLLER_NAME_LEN]; // app控制器的名字
+    char m_name[APP_CONTROLLER_NAME_LEN]; // app控制器的名字
     APP_OBJ *m_appList[APP_MAX_NUM];     // 预留APP_MAX_NUM个APP注册位
     APP_TYPE m_appTypeList[APP_MAX_NUM];  // 对应APP的运行类型
     // std::list<const APP_OBJ *> app_list; // APP注册位(为了C语言可移植，放弃使用链表)
@@ -99,9 +99,7 @@ private:
     unsigned long m_preWifiReqMillis; // 保存上一回请求的时间戳
     unsigned int m_appNum;
     int m_currentAppItem;     // 当前运行的APP下标
-    int pre_app_index;     // 上一次运行的APP下标
     MJT_SYS_STATE m_appCtrlState;
-
     TimerHandle_t m_appCtrlTimer; // 事件处理定时器
 
 public:

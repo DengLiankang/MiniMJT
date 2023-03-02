@@ -11,14 +11,8 @@
 
 // 在开发新的app时，可以先把其他所有APP关闭，这样烧录速度也比较快
 
-// 范例APP 默认不开启
-#define APP_EXAMPLE_USE 0
-#if APP_EXAMPLE_USE
-#include "app/example/example.h"
-#endif
-
 // 纪念日APP
-#define APP_ANNIVERSARY_USE 0
+#define APP_ANNIVERSARY_USE 1
 #if APP_ANNIVERSARY_USE
 #include "app/anniversary/anniversary.h"
 #endif
@@ -36,7 +30,7 @@
 #endif
 
 // 心跳APP
-#define APP_HEARTBEAT_USE 0
+#define APP_HEARTBEAT_USE 1
 #if APP_HEARTBEAT_USE
 #include "app/heartbeat/heartbeat.h"
 #endif
@@ -54,13 +48,13 @@
 #endif
 
 // 相册APP
-#define APP_PICTURE_USE 0
+#define APP_PICTURE_USE 1
 #if APP_PICTURE_USE
 #include "app/picture/picture.h"
 #endif
 
 // 屏幕分享/投屏APP
-#define APP_SCREEN_SHARE_USE 0
+#define APP_SCREEN_SHARE_USE 1
 #if APP_SCREEN_SHARE_USE
 #include "app/screen_share/screen_share.h"
 #endif
@@ -73,13 +67,12 @@
 #endif
 
 // 设置APP
-#define APP_SETTING_USE 0
+#define APP_SETTING_USE 1
 #if APP_SETTING_USE
 #include "app/settings/settings.h"
 #endif
 
 // 天气APP
-// 如flash空间不够，首选配置天气app二选一，腾出大量flash空间
 #define APP_WEATHER_USE 1
 #if APP_WEATHER_USE
 #include "app/weather/weather.h"
