@@ -57,8 +57,6 @@ void display_settings_init(void)
     if (act_obj == settings_scr)
         return;
 
-    lv_obj_clean(act_obj); // 清空此前页面
-
     // 本地的ip地址
     settings_scr = lv_obj_create(NULL);
     lv_obj_add_style(settings_scr, &default_style, LV_STATE_DEFAULT);

@@ -36,8 +36,6 @@ void display_file_manager_init(void)
     if (act_obj == file_manager_scr)
         return;
 
-    lv_obj_clean(act_obj); // 清空此前页面
-
     // 本地的ip地址
     file_manager_scr = lv_obj_create(NULL);
     lv_obj_add_style(file_manager_scr, &default_style, LV_STATE_DEFAULT);

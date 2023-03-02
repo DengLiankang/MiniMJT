@@ -114,7 +114,7 @@ void AppCtrlMenuGuiInit(void)
     g_nextMenuPage = &g_appMenuPage1;
 }
 
-void AppCtrlMunuDisplay(const void *appImg, const char *appName, lv_scr_load_anim_t anim, bool delPre)
+void AppCtrlMenuDisplay(const void *appImg, const char *appName, lv_scr_load_anim_t anim, bool delPre)
 {
     lv_img_set_src(g_nextMenuPage->appImg, appImg);
     lv_label_set_text(g_nextMenuPage->appName, appName);

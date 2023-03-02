@@ -36,7 +36,6 @@ void display_share_init(void)
     // if (act_obj == share_main_scr)
     //     return;
 
-    lv_obj_clean(act_obj); // 清空此前页面
     screen_share_gui_del();
 
     // 本地的ip地址

@@ -101,7 +101,6 @@ void display_heartbeat(const char *file_name, lv_scr_load_anim_t anim_type)
         return;
 
     heartbeat_gui_del();   // 清空对象
-    lv_obj_clean(act_obj); // 清空此前页面
 
     heartbeat_gui = lv_obj_create(NULL);
     lv_obj_add_style(heartbeat_gui, &default_style, LV_STATE_DEFAULT);

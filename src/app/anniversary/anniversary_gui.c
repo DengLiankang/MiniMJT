@@ -70,7 +70,6 @@ void display_anniversary(const char *file_name, lv_scr_load_anim_t anim_type, st
         return;
 
     anniversary_gui_del(); // 清空对象
-    lv_obj_clean(act_obj); // 清空此前页面
 
     anniversary_gui = lv_obj_create(NULL);
     lv_obj_add_style(anniversary_gui, &default_style, LV_STATE_DEFAULT);

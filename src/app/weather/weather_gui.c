@@ -76,7 +76,6 @@ void display_curve_init(lv_scr_load_anim_t anim_type)
         return;
 
     weather_gui_release();
-    lv_obj_clean(act_obj); // 清空此前页面
 
     scr_2 = lv_obj_create(NULL);
     lv_obj_add_style(scr_2, &default_style, LV_STATE_DEFAULT);
@@ -132,7 +131,6 @@ void display_weather_init(lv_scr_load_anim_t anim_type)
         return;
 
     weather_gui_release();
-    lv_obj_clean(act_obj); // 清空此前页面
 
     scr_1 = lv_obj_create(NULL);
     lv_obj_add_style(scr_1, &default_style, LV_STATE_DEFAULT);

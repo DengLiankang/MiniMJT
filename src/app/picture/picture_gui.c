@@ -25,7 +25,6 @@ void display_photo_init()
     lv_obj_t *act_obj = lv_scr_act(); // 获取当前活动页
     if (act_obj == image_scr)
         return;
-    lv_obj_clean(act_obj); // 清空此前页面
     photo_image = lv_img_create(image_scr);
 }
 

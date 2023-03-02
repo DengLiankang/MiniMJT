@@ -90,7 +90,7 @@ void AppController::ExitLoadingGui(void)
     }
     MJT_LVGL_OPERATE_LOCK(AppCtrlLoadingDisplay(100, "finished.", true));
     MJT_LVGL_OPERATE_LOCK(AppCtrlMenuGuiInit());
-    MJT_LVGL_OPERATE_LOCK(AppCtrlMunuDisplay(m_appList[m_currentAppItem]->appLogo, m_appList[m_currentAppItem]->appName, LV_SCR_LOAD_ANIM_FADE_IN, true));
+    MJT_LVGL_OPERATE_LOCK(AppCtrlMenuDisplay(m_appList[m_currentAppItem]->appLogo, m_appList[m_currentAppItem]->appName, LV_SCR_LOAD_ANIM_FADE_IN, true));
 
     SetSystemState(STATE_APP_MENU);
 }
@@ -190,12 +190,12 @@ void AppController::MainProcess(void)
 
         if (gImuActionData->active == ACTIVE_TYPE::TURN_LEFT) {
             m_currentAppItem = (m_currentAppItem + 1) % m_appNum;
-            AppCtrlMunuDisplay(m_appList[m_currentAppItem]->appLogo, m_appList[m_currentAppItem]->appName, LV_SCR_LOAD_ANIM_MOVE_LEFT, false);
+            AppCtrlMenuDisplay(m_appList[m_currentAppItem]->appLogo, m_appList[m_currentAppItem]->appName, LV_SCR_LOAD_ANIM_MOVE_LEFT, false);
             Serial.println(String("Current App: ") + m_appList[m_currentAppItem]->appName);
             ANIEND_WAIT;
         } else if (gImuActionData->active == ACTIVE_TYPE::TURN_RIGHT) {
             m_currentAppItem = (m_currentAppItem + m_appNum - 1) % m_appNum;
-            AppCtrlMunuDisplay(m_appList[m_currentAppItem]->appLogo, m_appList[m_currentAppItem]->appName, LV_SCR_LOAD_ANIM_MOVE_RIGHT, false);
+            AppCtrlMenuDisplay(m_appList[m_currentAppItem]->appLogo, m_appList[m_currentAppItem]->appName, LV_SCR_LOAD_ANIM_MOVE_RIGHT, false);
             Serial.println(String("Current App: ") + m_appList[m_currentAppItem]->appName);
             ANIEND_WAIT;
         } else if (gImuActionData->active == ACTIVE_TYPE::GO_FORWORD) {
@@ -400,7 +400,7 @@ bool AppController::wifi_event(APP_MESSAGE_TYPE type)
 void AppController::appExit()
 {
     lv_anim_del_all();
-    AppCtrlMunuDisplay(m_appList[m_currentAppItem]->appLogo, m_appList[m_currentAppItem]->appName, LV_SCR_LOAD_ANIM_FADE_IN, false);
+    AppCtrlMenuDisplay(m_appList[m_currentAppItem]->appLogo, m_appList[m_currentAppItem]->appName, LV_SCR_LOAD_ANIM_FADE_IN, false);
     ANIEND_WAIT;
 
     // 清空该对象的所有请求

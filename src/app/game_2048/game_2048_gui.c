@@ -18,7 +18,6 @@ void game_2048_gui_init(void)
     lv_obj_t *act_obj = lv_scr_act(); // 获取当前活动页
     if (act_obj == game_2048_gui)
         return;
-    lv_obj_clean(act_obj); // 清空此前页面
 
     // 创建屏幕对象
     game_2048_gui = lv_obj_create(NULL);

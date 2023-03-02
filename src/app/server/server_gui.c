@@ -40,8 +40,6 @@ void display_setting_init(void)
         lv_obj_clean(main_scr);
     }
 
-    lv_obj_clean(act_obj); // 清空此前页面
-
     // 本地的ip地址
     main_scr = lv_obj_create(NULL);
     lv_obj_set_size(main_scr, 240, 240);

@@ -24,13 +24,13 @@
 #endif
 
 // 文件管理器APP
-#define APP_FILE_MANAGER_USE 0
+#define APP_FILE_MANAGER_USE 1
 #if APP_FILE_MANAGER_USE
 #include "app/file_manager/file_manager.h"
 #endif
 
 // 2048游戏APP
-#define APP_GAME_2048_USE 0
+#define APP_GAME_2048_USE 1
 #if APP_GAME_2048_USE
 #include "app/game_2048/game_2048.h"
 #endif
@@ -42,13 +42,13 @@
 #endif
 
 // 特效动画APP
-#define APP_IDEA_ANIM_USE 0
+#define APP_IDEA_ANIM_USE 1
 #if APP_IDEA_ANIM_USE
 #include "app/idea_anim/idea.h"
 #endif
 
 // 视频播放器APP
-#define APP_MEDIA_PLAYER_USE 0
+#define APP_MEDIA_PLAYER_USE 1
 #if APP_MEDIA_PLAYER_USE
 #include "app/media_player/media_player.h"
 #endif
