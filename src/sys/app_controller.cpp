@@ -1,7 +1,6 @@
 #include "sys/app_controller.h"
 #include "Arduino.h"
 #include "common.h"
-#include "driver/lv_port_fs.h"
 #include "sys/app_controller_gui.h"
 #include "sys/interface.h"
 
@@ -190,12 +189,10 @@ void AppController::MainProcess(void)
             m_currentAppItem = (m_currentAppItem + 1) % m_appNum;
             AppCtrlMenuDisplay(m_appList[m_currentAppItem]->appLogo, m_appList[m_currentAppItem]->appName, LV_SCR_LOAD_ANIM_MOVE_LEFT, false);
             Serial.println(String("Current App: ") + m_appList[m_currentAppItem]->appName);
-            ANIEND_WAIT;
         } else if (gImuActionData->active == ACTIVE_TYPE::TURN_RIGHT) {
             m_currentAppItem = (m_currentAppItem + m_appNum - 1) % m_appNum;
             AppCtrlMenuDisplay(m_appList[m_currentAppItem]->appLogo, m_appList[m_currentAppItem]->appName, LV_SCR_LOAD_ANIM_MOVE_RIGHT, false);
             Serial.println(String("Current App: ") + m_appList[m_currentAppItem]->appName);
-            ANIEND_WAIT;
         } else if (gImuActionData->active == ACTIVE_TYPE::GO_FORWORD) {
             if (m_appList[m_currentAppItem]->appInit != NULL) {
                 (*(m_appList[m_currentAppItem]->appInit))(this); // 执行APP初始化
@@ -206,38 +203,6 @@ void AppController::MainProcess(void)
         (*(m_appList[m_currentAppItem]->MainProcess))(this, gImuActionData);
     }
 
-    // if (0 == app_exit_flag) {
-    //     // 当前没有进入任何app
-    //     lv_scr_load_anim_t anim_type = LV_SCR_LOAD_ANIM_NONE;
-    //     if (ACTIVE_TYPE::TURN_LEFT == gImuActionData->active) {
-    //         anim_type = LV_SCR_LOAD_ANIM_MOVE_RIGHT;
-    //         m_currentAppItem = (m_currentAppItem + 1) % m_appNum;
-    //         Serial.println(String("Current App: ") + m_appList[m_currentAppItem]->appName);
-    //     } else if (ACTIVE_TYPE::TURN_RIGHT == gImuActionData->active) {
-    //         anim_type = LV_SCR_LOAD_ANIM_MOVE_LEFT;
-    //         // 以下等效与 processId = (processId - 1 + m_appNum) % 4;
-    //         // +3为了不让数据溢出成负数，而导致取模逻辑错误
-    //         m_currentAppItem = (m_currentAppItem - 1 + m_appNum) % m_appNum; // 此处的3与p_processList的长度一致
-    //         Serial.println(String("Current App: ") + m_appList[m_currentAppItem]->appName);
-    //     } else if (ACTIVE_TYPE::GO_FORWORD == gImuActionData->active) {
-    //         app_exit_flag = 1; // 进入app
-    //         if (NULL != m_appList[m_currentAppItem]->appInit) {
-    //             (*(m_appList[m_currentAppItem]->appInit))(this); // 执行APP初始化
-    //         }
-    //     }
-
-    //     if (ACTIVE_TYPE::GO_FORWORD != gImuActionData->active) // && UNKNOWN != gImuActionData->active
-    //     {
-    //         app_control_display_scr(m_appList[m_currentAppItem]->appLogo, m_appList[m_currentAppItem]->appName, anim_type,
-    //                                 false);
-    //         vTaskDelay(200 / portTICK_PERIOD_MS);
-    //     }
-    // } else {
-    //     app_control_display_scr(m_appList[m_currentAppItem]->appLogo, m_appList[m_currentAppItem]->appName,
-    //                             LV_SCR_LOAD_ANIM_NONE, false);
-    //     // 运行APP进程 等效于把控制权交给当前APP
-    //     (*(m_appList[m_currentAppItem]->MainProcess))(this, gImuActionData);
-    // }
     gImuActionData->active = ACTIVE_TYPE::UNKNOWN;
     gImuActionData->isValid = 0;
 }
@@ -397,7 +362,6 @@ void AppController::AppExit()
 {
     lv_anim_del_all();
     AppCtrlMenuDisplay(m_appList[m_currentAppItem]->appLogo, m_appList[m_currentAppItem]->appName, LV_SCR_LOAD_ANIM_FADE_IN, false);
-    ANIEND_WAIT;
 
     // 清空该对象的所有请求
     for (std::list<EVENT_OBJ>::iterator event = eventList.begin(); event != eventList.end();) {

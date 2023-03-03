@@ -9,7 +9,7 @@
 #include "network.h"
 #include <TFT_eSPI.h>
 
-#define MJT_VERSION "2.1.5"
+#define MJT_VERSION "2.1.6"
 #define GET_SYS_MILLIS xTaskGetTickCount // 获取系统毫秒数
 
 // SD_Card

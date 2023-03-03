@@ -1,5 +1,4 @@
 #include "driver/sd_card.h"
-#include "SD_MMC.h"
 #include "common.h"
 #include <string.h>
 
@@ -81,14 +80,6 @@ void SdCard::init()
     }
     tf_vfs = &SD;
     uint8_t cardType = SD.cardType();
-
-    // 目前SD_MMC驱动与硬件引脚存在冲突
-    // if(!SD_MMC.begin("/", true)){
-    //     Serial.println("Card Mount Failed");
-    //     return;
-    // }
-    // tf_vfs = &SD_MMC;
-    // uint8_t cardType = SD_MMC.cardType();
 
     if (cardType == CARD_NONE) {
         Serial.println("No SD card attached");

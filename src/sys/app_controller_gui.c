@@ -121,5 +121,7 @@ void AppCtrlMenuDisplay(const void *appImg, const char *appName, lv_scr_load_ani
 
     lv_scr_load_anim(g_nextMenuPage->appMenuScr, anim, 500, 500, delPre);
 
+    ANIEND_WAIT;
+
     g_nextMenuPage = g_nextMenuPage->nextPage;
 }
