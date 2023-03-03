@@ -257,7 +257,7 @@ void SdCard::removeDir(const char *path)
     }
 }
 
-void SdCard::readFile(const char *path)
+void SdCard::ReadFile(const char *path)
 {
     TF_VFS_IS_NULL()
 
@@ -276,7 +276,7 @@ void SdCard::readFile(const char *path)
     file.close();
 }
 
-String SdCard::readFileLine(const char *path, int num)
+String SdCard::ReadFileLine(const char *path, int num)
 {
     TF_VFS_IS_NULL("")
 
@@ -307,7 +307,7 @@ String SdCard::readFileLine(const char *path, int num)
     return String("error parameter!");
 }
 
-void SdCard::writeFile(const char *path, const char *info)
+void SdCard::WriteFile(const char *path, const char *info)
 {
     TF_VFS_IS_NULL()
 

@@ -39,7 +39,7 @@ static void WriteConfig(AN_Config *cfg)
     memset(tmp, 0, 16);
     snprintf(tmp, 16, "%d.%d.%d\n", cfg->current_date.tm_year, cfg->current_date.tm_mon, cfg->current_date.tm_mday);
     w_data += tmp;
-    gFlashCfg.writeFile(ANNIVERSARY_CONFIG_PATH, w_data.c_str());
+    g_flashFs.WriteFile(ANNIVERSARY_CONFIG_PATH, w_data.c_str());
 }
 
 static void ReadConfig(AN_Config *cfg)
@@ -47,7 +47,7 @@ static void ReadConfig(AN_Config *cfg)
     // 如果有需要持久化配置文件 可以调用此函数将数据存在flash中
     // 配置文件名最好以APP名为开头 以".cfg"结尾，以免多个APP读取混乱
     char info[128] = {0};
-    uint16_t size = gFlashCfg.readFile(ANNIVERSARY_CONFIG_PATH, (uint8_t *)info);
+    uint16_t size = g_flashFs.ReadFile(ANNIVERSARY_CONFIG_PATH, (uint8_t *)info);
     Serial.printf("size %d\n", size);
     info[size] = 0;
     if (size == 0) {
@@ -66,7 +66,7 @@ static void ReadConfig(AN_Config *cfg)
     } else {
         // 解析数据
         char *param[MAX_ANNIVERSARY_CNT * 2 + 2] = {0};
-        analyseParam(info, MAX_ANNIVERSARY_CNT * 2 + 2, param);
+        ParseParam(info, MAX_ANNIVERSARY_CNT * 2 + 2, param);
         cfg->anniversary_cnt = atol(param[0]);
         for (int i = 0; i < MAX_ANNIVERSARY_CNT; ++i) {
             cfg->event_name[i] = param[2 * i + 1];

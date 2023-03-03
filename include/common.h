@@ -9,7 +9,7 @@
 #include "network.h"
 #include <TFT_eSPI.h>
 
-#define MJT_VERSION "2.1.6"
+#define MJT_VERSION "2.1.7"
 #define GET_SYS_MILLIS xTaskGetTickCount // 获取系统毫秒数
 
 // SD_Card
@@ -35,6 +35,8 @@
 // 最高为 configMAX_PRIORITIES-1
 #define TASK_LVGL_PRIORITY 2 // LVGL的页面优先级
 
+#define MAX_CFG_INFO_LENGTH 64
+
 struct SysUtilConfig {
     String ssid_0;
     String password_0;
@@ -53,7 +55,7 @@ struct SysUtilConfig {
 extern IMU mpu;           // 原则上只提供给主程序调用
 extern SdCard tf;
 extern Network g_network; // 网络连接
-extern FlashFS gFlashCfg; // flash中的文件系统（替代原先的Preferences）
+extern FlashFs g_flashFs; // flash中的文件系统（替代原先的Preferences）
 extern Display screen;    // 屏幕对象
 extern TFT_eSPI *tft;
 extern SemaphoreHandle_t lvgl_mutex; // lvgl 操作的锁
@@ -67,8 +69,9 @@ extern SemaphoreHandle_t lvgl_mutex; // lvgl 操作的锁
         }                                                                                                              \
     }
 
-boolean doDelayMillisTime(unsigned long interval, unsigned long *previousMillis, boolean state);
 void InitLvglTaskSetup(const char *name);
 void DeleteLvglTask(void);
+boolean doDelayMillisTime(unsigned long interval, unsigned long *previousMillis, boolean state);
+void ParseParam(char *info, int argc, char **argv);
 
 #endif

@@ -22,7 +22,7 @@ static void WriteConfig(PIC_Config *cfg)
     memset(tmp, 0, 16);
     snprintf(tmp, 16, "%lu\n", cfg->switchInterval);
     w_data += tmp;
-    gFlashCfg.writeFile(PICTURE_CONFIG_PATH, w_data.c_str());
+    g_flashFs.WriteFile(PICTURE_CONFIG_PATH, w_data.c_str());
 }
 
 static void ReadConfig(PIC_Config *cfg)
@@ -30,7 +30,7 @@ static void ReadConfig(PIC_Config *cfg)
     // 如果有需要持久化配置文件 可以调用此函数将数据存在flash中
     // 配置文件名最好以APP名为开头 以".cfg"结尾，以免多个APP读取混乱
     char info[128] = {0};
-    uint16_t size = gFlashCfg.readFile(PICTURE_CONFIG_PATH, (uint8_t *)info);
+    uint16_t size = g_flashFs.ReadFile(PICTURE_CONFIG_PATH, (uint8_t *)info);
     info[size] = 0;
     if (size == 0) {
         // 默认值
@@ -39,7 +39,7 @@ static void ReadConfig(PIC_Config *cfg)
     } else {
         // 解析数据
         char *param[1] = {0};
-        analyseParam(info, 1, param);
+        ParseParam(info, 1, param);
         cfg->switchInterval = atol(param[0]);
     }
 }

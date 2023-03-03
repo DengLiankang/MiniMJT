@@ -32,7 +32,7 @@ static void WriteConfig(MP_Config *cfg)
     memset(tmp, 0, 16);
     snprintf(tmp, 16, "%u\n", cfg->powerFlag);
     w_data += tmp;
-    gFlashCfg.writeFile(MEDIA_CONFIG_PATH, w_data.c_str());
+    g_flashFs.WriteFile(MEDIA_CONFIG_PATH, w_data.c_str());
 }
 
 static void ReadConfig(MP_Config *cfg)
@@ -40,7 +40,7 @@ static void ReadConfig(MP_Config *cfg)
     // 如果有需要持久化配置文件 可以调用此函数将数据存在flash中
     // 配置文件名最好以APP名为开头 以".cfg"结尾，以免多个APP读取混乱
     char info[128] = {0};
-    uint16_t size = gFlashCfg.readFile(MEDIA_CONFIG_PATH, (uint8_t *)info);
+    uint16_t size = g_flashFs.ReadFile(MEDIA_CONFIG_PATH, (uint8_t *)info);
     info[size] = 0;
     if (size == 0) {
         // 默认值
@@ -50,7 +50,7 @@ static void ReadConfig(MP_Config *cfg)
     } else {
         // 解析数据
         char *param[2] = {0};
-        analyseParam(info, 2, param);
+        ParseParam(info, 2, param);
         cfg->switchFlag = atol(param[0]);
         cfg->powerFlag = atol(param[1]);
     }

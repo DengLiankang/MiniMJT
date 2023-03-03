@@ -47,11 +47,11 @@ public:
 
     void removeDir(const char *path);
 
-    void readFile(const char *path);
+    void ReadFile(const char *path);
 
-    String readFileLine(const char *path, int num);
+    String ReadFileLine(const char *path, int num);
 
-    void writeFile(const char *path, const char *message1);
+    void WriteFile(const char *path, const char *message1);
 
     File open(const String &path, const char *mode = FILE_READ);
 

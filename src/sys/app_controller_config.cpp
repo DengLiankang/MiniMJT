@@ -1,3 +1,5 @@
+//TODO:合并sys.cfg和mpu.cfg
+
 #include "Arduino.h"
 #include "common.h"
 #include "sys/app_controller.h"
@@ -5,16 +7,14 @@
 
 #define SYS_CONFIG_PATH         "/sys.cfg"
 #define MPU_CONFIG_PATH         "/mpu.cfg"
-#define MAX_CFG_INFO_LENGTH     64
-
-static char gCfgInfo[MAX_CFG_INFO_LENGTH];
 
 void AppController::ReadConfig(SysUtilConfig *cfg)
 {
     // 如果有需要持久化配置文件 可以调用此函数将数据存在flash中
     // 配置文件名最好以APP名为开头 以".cfg"结尾，以免多个APP读取混乱
-    uint16_t size = gFlashCfg.readFile(SYS_CONFIG_PATH, (uint8_t *)gCfgInfo);
-    gCfgInfo[size] = 0;
+    char cfgInfo[MAX_CFG_INFO_LENGTH];
+    uint16_t size = g_flashFs.ReadFile(SYS_CONFIG_PATH, (uint8_t *)cfgInfo);
+    cfgInfo[size] = 0;
     if (size == 0) {
         // 默认值
         cfg->power_mode = 0;           // 功耗模式（0为节能模式 1为性能模式）
@@ -27,7 +27,7 @@ void AppController::ReadConfig(SysUtilConfig *cfg)
     } else {
         // 解析数据
         char *param[12] = {0};
-        analyseParam(gCfgInfo, 12, param);
+        ParseParam(cfgInfo, 12, param);
         cfg->ssid_0 = param[0];
         cfg->password_0 = param[1];
         cfg->ssid_1 = param[2];
@@ -76,7 +76,7 @@ void AppController::WriteConfig(SysUtilConfig *cfg)
 
     w_data = w_data + cfg->auto_start_app + "\n";
 
-    gFlashCfg.writeFile(SYS_CONFIG_PATH, w_data.c_str());
+    g_flashFs.WriteFile(SYS_CONFIG_PATH, w_data.c_str());
 
     // 立即生效相关配置
     screen.setBackLight(cfg->backLight / 100.0);
@@ -88,8 +88,9 @@ void AppController::ReadConfig(SysMpuConfig *cfg)
 {
     // 如果有需要持久化配置文件 可以调用此函数将数据存在flash中
     // 配置文件名最好以APP名为开头 以".cfg"结尾，以免多个APP读取混乱
-    uint16_t size = gFlashCfg.readFile(MPU_CONFIG_PATH, (uint8_t *)gCfgInfo);
-    gCfgInfo[size] = 0;
+    char cfgInfo[MAX_CFG_INFO_LENGTH];
+    uint16_t size = g_flashFs.ReadFile(MPU_CONFIG_PATH, (uint8_t *)cfgInfo);
+    cfgInfo[size] = 0;
     if (size == 0) {
         // 默认值
         cfg->x_gyro_offset = 0;
@@ -103,7 +104,7 @@ void AppController::ReadConfig(SysMpuConfig *cfg)
     } else {
         // 解析数据
         char *param[6] = {0};
-        analyseParam(gCfgInfo, 6, param);
+        ParseParam(cfgInfo, 6, param);
         cfg->x_gyro_offset = atol(param[0]);
         cfg->y_gyro_offset = atol(param[1]);
         cfg->z_gyro_offset = atol(param[2]);
@@ -141,7 +142,7 @@ void AppController::WriteConfig(SysMpuConfig *cfg)
     memset(tmp, 0, 25);
     snprintf(tmp, 25, "%d\n", cfg->z_accel_offset);
     w_data += tmp;
-    gFlashCfg.writeFile(MPU_CONFIG_PATH, w_data.c_str());
+    g_flashFs.WriteFile(MPU_CONFIG_PATH, w_data.c_str());
 }
 
 void AppController::deal_config(APP_MESSAGE_TYPE type, const char *key, char *value)

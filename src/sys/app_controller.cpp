@@ -38,8 +38,8 @@ AppController::~AppController() {}
 
 void AppController::Init(void)
 {
-    // flashfs init first
-    gFlashCfg.Init();
+    // FlashFs init first
+    g_flashFs.Init();
 
     this->ReadConfig(&m_sysCfg);
     this->ReadConfig(&m_imuCfg);
@@ -56,6 +56,7 @@ void AppController::Init(void)
     Serial.println(getCpuFrequencyMhz());
 
     /*** Init screen ***/
+    tft = new TFT_eSPI(SCREEN_HOR_RES, SCREEN_VER_RES);
     screen.init(m_sysCfg.rotation, m_sysCfg.backLight);
 
     MJT_LVGL_OPERATE_LOCK(AppCtrlLoadingGuiInit());
