@@ -1,8 +1,5 @@
 #include "app/app_conf.h"
-#include "common.h"
-#include "driver/lv_port_indev.h"
 #include "sys/app_controller.h"
-#include <SPIFFS.h>
 
 #if LV_USE_LOG
 void LvglLog(const char *buf)
@@ -21,6 +18,7 @@ void setup()
     // MAC ID可用作芯片唯一标识
     Serial.print(F("ChipID(EfuseMac): "));
     Serial.println(ESP.getEfuseMac());
+    Serial.flush();
 
     g_appController = new AppController(); // APP控制器
 

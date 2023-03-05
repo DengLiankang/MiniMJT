@@ -42,16 +42,7 @@ void weather_gui_del(void);
 void display_space(void);
 int airQulityLevel(int q);
 
-#ifdef __cplusplus
-} /* extern "C" */
-#endif
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#include "lvgl.h"
-extern const lv_img_dsc_t app_weather;
+LV_IMG_DECLARE(WeatherAppLogo);
 
 #ifdef __cplusplus
 } /* extern "C" */

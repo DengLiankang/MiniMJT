@@ -54,7 +54,9 @@ static void ReadConfig(WT_Config *cfg)
     info[size] = 0;
     if (size == 0) {
         // 默认值
-        cfg->tianqi_addr = "北京";
+        cfg->tianqi_appid = "22513773";
+        cfg->tianqi_appsecret = "rq2r6sXd";
+        cfg->tianqi_addr = "武冈";
         cfg->weatherUpdataInterval = 900000; // 天气更新的时间间隔900000(900s)
         cfg->timeUpdataInterval = 900000;    // 日期时钟更新的时间间隔900000(900s)
         WriteConfig(cfg);
@@ -463,6 +465,6 @@ static void weather_message_handle(const char *from, const char *to, APP_MESSAGE
     }
 }
 
-APP_OBJ weather_app = {WEATHER_APP_NAME,      &app_weather,          "",
+APP_OBJ weather_app = {WEATHER_APP_NAME,      &WeatherAppLogo,          "",
                        weather_init,          weather_process,       weather_background_task,
                        weather_exit_callback, weather_message_handle};

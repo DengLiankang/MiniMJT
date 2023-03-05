@@ -14,16 +14,7 @@ void display_photo_init(void);
 void display_photo(const char *file_name, lv_scr_load_anim_t anim_type);
 void photo_gui_del(void);
 
-#ifdef __cplusplus
-} /* extern "C" */
-#endif
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#include "lvgl.h"
-extern const lv_img_dsc_t app_picture;
+LV_IMG_DECLARE(PictureAppLogo);
 
 #ifdef __cplusplus
 } /* extern "C" */

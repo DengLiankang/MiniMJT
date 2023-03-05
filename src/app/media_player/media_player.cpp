@@ -284,7 +284,7 @@ static void media_player_message_handle(const char *from, const char *to, APP_ME
 }
 
 APP_OBJ media_app = {MEDIA_PLAYER_APP_NAME,
-                     &app_movie,
+                     &VideoAppLogo,
                      "",
                      media_player_init,
                      media_player_process,

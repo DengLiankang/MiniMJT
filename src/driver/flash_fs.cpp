@@ -6,18 +6,18 @@ FlashFs::~FlashFs() {}
 
 void FlashFs::Init(void)
 {
-    if (!FFat.begin()) {
-        Serial.println("Flash FFat Mount Failed");
+    if (!SPIFFS.begin(true)) {
+        Serial.println("SPIFFS Mount Failed");
         return;
     }
-    Serial.printf("Flash FFat Total Space: %10u\n", FFat.totalBytes());
+    Serial.printf("SPIFFS Mount Success\nTotal Space: %u\n", SPIFFS.totalBytes());
 }
 
 void FlashFs::ListDir(const char *dirname, uint8_t levels)
 {
     Serial.printf("Listing directory: %s\r\n", dirname);
 
-    File root = FFat.open(dirname);
+    File root = SPIFFS.open(dirname);
     if (!root) {
         Serial.println("- failed to open directory");
         return;
@@ -49,7 +49,7 @@ uint16_t FlashFs::ReadFile(const char *path, uint8_t *info)
 {
     Serial.printf("Reading file: %s\r\n", path);
 
-    File file = FFat.open(path);
+    File file = SPIFFS.open(path);
     uint16_t retLen = 0;
     if (!file || file.isDirectory()) {
         Serial.println("- failed to open file for reading");
@@ -67,7 +67,7 @@ void FlashFs::WriteFile(const char *path, const char *message)
 {
     Serial.printf("Writing file: %s\r\n", path);
 
-    File file = FFat.open(path, FILE_WRITE);
+    File file = SPIFFS.open(path, FILE_WRITE);
     if (!file) {
         Serial.println("- failed to open file for writing");
         return;
@@ -84,7 +84,7 @@ void FlashFs::AppendFile(const char *path, const char *message)
 {
     Serial.printf("Appending to file: %s\r\n", path);
 
-    File file = FFat.open(path, FILE_APPEND);
+    File file = SPIFFS.open(path, FILE_APPEND);
     if (!file) {
         Serial.println("- failed to open file for appending");
         return;
@@ -100,7 +100,7 @@ void FlashFs::AppendFile(const char *path, const char *message)
 void FlashFs::RenameFile(const char *path1, const char *path2)
 {
     Serial.printf("Renaming file %s to %s\r\n", path1, path2);
-    if (FFat.rename(path1, path2)) {
+    if (SPIFFS.rename(path1, path2)) {
         Serial.println("- file renamed");
     } else {
         Serial.println("- rename failed");
@@ -110,7 +110,7 @@ void FlashFs::RenameFile(const char *path1, const char *path2)
 void FlashFs::DeleteFile(const char *path)
 {
     Serial.printf("Deleting file: %s\r\n", path);
-    if (FFat.remove(path)) {
+    if (SPIFFS.remove(path)) {
         Serial.println("- file deleted");
     } else {
         Serial.println("- delete failed");

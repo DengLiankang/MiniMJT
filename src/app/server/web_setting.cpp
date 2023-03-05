@@ -4,6 +4,7 @@
 #include "web_setting.h"
 #include "FS.h"
 #include "HardwareSerial.h"
+#include "app/app_conf.h"
 #include "common.h"
 #include "network.h"
 #include "server.h"
@@ -249,14 +250,14 @@ void sys_setting()
     g_appController->send_to(SERVER_APP_NAME, "MJT_AppCtrl", APP_MESSAGE_GET_PARAM, (void *)"rotation", rotation);
     g_appController->send_to(SERVER_APP_NAME, "MJT_AppCtrl", APP_MESSAGE_GET_PARAM, (void *)"mpu_order", mpu_order);
     g_appController->send_to(SERVER_APP_NAME, "MJT_AppCtrl", APP_MESSAGE_GET_PARAM, (void *)"min_brightness",
-                            min_brightness);
+                             min_brightness);
     g_appController->send_to(SERVER_APP_NAME, "MJT_AppCtrl", APP_MESSAGE_GET_PARAM, (void *)"max_brightness",
-                            max_brightness);
+                             max_brightness);
     g_appController->send_to(SERVER_APP_NAME, "MJT_AppCtrl", APP_MESSAGE_GET_PARAM, (void *)"time", time);
     g_appController->send_to(SERVER_APP_NAME, "MJT_AppCtrl", APP_MESSAGE_GET_PARAM, (void *)"auto_calibration_mpu",
-                            auto_calibration_mpu);
+                             auto_calibration_mpu);
     g_appController->send_to(SERVER_APP_NAME, "MJT_AppCtrl", APP_MESSAGE_GET_PARAM, (void *)"auto_start_app",
-                            auto_start_app);
+                             auto_start_app);
     SysUtilConfig cfg = g_appController->m_sysCfg;
     // 主要为了处理启停MPU自动校准的单选框
     if (0 == cfg.imuAutoCalibration) {
@@ -282,12 +283,12 @@ void weather_setting()
     g_appController->send_to(SERVER_APP_NAME, "Weather", APP_MESSAGE_READ_CFG, NULL, NULL);
     g_appController->send_to(SERVER_APP_NAME, "Weather", APP_MESSAGE_GET_PARAM, (void *)"tianqi_appid", tianqi_appid);
     g_appController->send_to(SERVER_APP_NAME, "Weather", APP_MESSAGE_GET_PARAM, (void *)"tianqi_appsecret",
-                            tianqi_appsecret);
+                             tianqi_appsecret);
     g_appController->send_to(SERVER_APP_NAME, "Weather", APP_MESSAGE_GET_PARAM, (void *)"tianqi_addr", tianqi_addr);
     g_appController->send_to(SERVER_APP_NAME, "Weather", APP_MESSAGE_GET_PARAM, (void *)"weatherUpdataInterval",
-                            weatherUpdataInterval);
+                             weatherUpdataInterval);
     g_appController->send_to(SERVER_APP_NAME, "Weather", APP_MESSAGE_GET_PARAM, (void *)"timeUpdataInterval",
-                            timeUpdataInterval);
+                             timeUpdataInterval);
     sprintf(buf, WEATHER_SETTING, tianqi_appid, tianqi_appsecret, tianqi_addr, weatherUpdataInterval,
             timeUpdataInterval);
     webpage = buf;
@@ -301,7 +302,7 @@ void picture_setting()
     // 读取数据
     g_appController->send_to(SERVER_APP_NAME, "Picture", APP_MESSAGE_READ_CFG, NULL, NULL);
     g_appController->send_to(SERVER_APP_NAME, "Picture", APP_MESSAGE_GET_PARAM, (void *)"switchInterval",
-                            switchInterval);
+                             switchInterval);
     sprintf(buf, PICTURE_SETTING, switchInterval);
     webpage = buf;
     Send_HTML(webpage);
@@ -353,7 +354,7 @@ void heartbeat_setting()
     g_appController->send_to(SERVER_APP_NAME, "Heartbeat", APP_MESSAGE_GET_PARAM, (void *)"port", port);
     g_appController->send_to(SERVER_APP_NAME, "Heartbeat", APP_MESSAGE_GET_PARAM, (void *)"server_user", server_user);
     g_appController->send_to(SERVER_APP_NAME, "Heartbeat", APP_MESSAGE_GET_PARAM, (void *)"server_password",
-                            server_password);
+                             server_password);
 
     sprintf(buf, HEARTBEAT_SETTING, role, client_id, subtopic, mqtt_server, port, server_user, server_password);
     webpage = buf;
@@ -371,10 +372,10 @@ void anniversary_setting()
     g_appController->send_to(SERVER_APP_NAME, "Anniversary", APP_MESSAGE_READ_CFG, NULL, NULL);
     g_appController->send_to(SERVER_APP_NAME, "Anniversary", APP_MESSAGE_GET_PARAM, (void *)"event_name0", event_name0);
     g_appController->send_to(SERVER_APP_NAME, "Anniversary", APP_MESSAGE_GET_PARAM, (void *)"target_date0",
-                            target_date0);
+                             target_date0);
     g_appController->send_to(SERVER_APP_NAME, "Anniversary", APP_MESSAGE_GET_PARAM, (void *)"event_name1", event_name1);
     g_appController->send_to(SERVER_APP_NAME, "Anniversary", APP_MESSAGE_GET_PARAM, (void *)"target_date1",
-                            target_date1);
+                             target_date1);
     sprintf(buf, ANNIVERSARY_SETTING, event_name0, target_date0, event_name1, target_date1);
     webpage = buf;
     Send_HTML(webpage);
@@ -385,21 +386,21 @@ void saveSysConf(void)
     Send_HTML(F("<h1>设置成功! 退出APP或者继续其他设置.</h1>"));
 
     g_appController->send_to(SERVER_APP_NAME, "MJT_AppCtrl", APP_MESSAGE_SET_PARAM, (void *)"ssid_0",
-                            (void *)server.arg("ssid_0").c_str());
+                             (void *)server.arg("ssid_0").c_str());
     g_appController->send_to(SERVER_APP_NAME, "MJT_AppCtrl", APP_MESSAGE_SET_PARAM, (void *)"password_0",
-                            (void *)server.arg("password_0").c_str());
+                             (void *)server.arg("password_0").c_str());
     g_appController->send_to(SERVER_APP_NAME, "MJT_AppCtrl", APP_MESSAGE_SET_PARAM, (void *)"power_mode",
-                            (void *)server.arg("power_mode").c_str());
+                             (void *)server.arg("power_mode").c_str());
     g_appController->send_to(SERVER_APP_NAME, "MJT_AppCtrl", APP_MESSAGE_SET_PARAM, (void *)"backlight",
-                            (void *)server.arg("backlight").c_str());
+                             (void *)server.arg("backlight").c_str());
     g_appController->send_to(SERVER_APP_NAME, "MJT_AppCtrl", APP_MESSAGE_SET_PARAM, (void *)"rotation",
-                            (void *)server.arg("rotation").c_str());
+                             (void *)server.arg("rotation").c_str());
     g_appController->send_to(SERVER_APP_NAME, "MJT_AppCtrl", APP_MESSAGE_SET_PARAM, (void *)"mpu_order",
-                            (void *)server.arg("mpu_order").c_str());
+                             (void *)server.arg("mpu_order").c_str());
     g_appController->send_to(SERVER_APP_NAME, "MJT_AppCtrl", APP_MESSAGE_SET_PARAM, (void *)"auto_calibration_mpu",
-                            (void *)server.arg("auto_calibration_mpu").c_str());
+                             (void *)server.arg("auto_calibration_mpu").c_str());
     g_appController->send_to(SERVER_APP_NAME, "MJT_AppCtrl", APP_MESSAGE_SET_PARAM, (void *)"auto_start_app",
-                            (void *)server.arg("auto_start_app").c_str());
+                             (void *)server.arg("auto_start_app").c_str());
     // 持久化数据
     g_appController->send_to(SERVER_APP_NAME, "MJT_AppCtrl", APP_MESSAGE_WRITE_CFG, NULL, NULL);
 }
@@ -409,15 +410,15 @@ void saveWeatherConf(void)
     Send_HTML(F("<h1>设置成功! 退出APP或者继续其他设置.</h1>"));
 
     g_appController->send_to(SERVER_APP_NAME, "Weather", APP_MESSAGE_SET_PARAM, (void *)"tianqi_appid",
-                            (void *)server.arg("tianqi_appid").c_str());
+                             (void *)server.arg("tianqi_appid").c_str());
     g_appController->send_to(SERVER_APP_NAME, "Weather", APP_MESSAGE_SET_PARAM, (void *)"tianqi_appsecret",
-                            (void *)server.arg("tianqi_appsecret").c_str());
+                             (void *)server.arg("tianqi_appsecret").c_str());
     g_appController->send_to(SERVER_APP_NAME, "Weather", APP_MESSAGE_SET_PARAM, (void *)"tianqi_addr",
-                            (void *)server.arg("tianqi_addr").c_str());
+                             (void *)server.arg("tianqi_addr").c_str());
     g_appController->send_to(SERVER_APP_NAME, "Weather", APP_MESSAGE_SET_PARAM, (void *)"weatherUpdataInterval",
-                            (void *)server.arg("weatherUpdataInterval").c_str());
+                             (void *)server.arg("weatherUpdataInterval").c_str());
     g_appController->send_to(SERVER_APP_NAME, "Weather", APP_MESSAGE_SET_PARAM, (void *)"timeUpdataInterval",
-                            (void *)server.arg("timeUpdataInterval").c_str());
+                             (void *)server.arg("timeUpdataInterval").c_str());
     // 持久化数据
     g_appController->send_to(SERVER_APP_NAME, "Weather", APP_MESSAGE_WRITE_CFG, NULL, NULL);
 }
@@ -426,7 +427,7 @@ void savePictureConf(void)
 {
     Send_HTML(F("<h1>设置成功! 退出APP或者继续其他设置.</h1>"));
     g_appController->send_to(SERVER_APP_NAME, "Picture", APP_MESSAGE_SET_PARAM, (void *)"switchInterval",
-                            (void *)server.arg("switchInterval").c_str());
+                             (void *)server.arg("switchInterval").c_str());
     // 持久化数据
     g_appController->send_to(SERVER_APP_NAME, "Picture", APP_MESSAGE_WRITE_CFG, NULL, NULL);
 }
@@ -435,9 +436,9 @@ void saveMediaConf(void)
 {
     Send_HTML(F("<h1>设置成功! 退出APP或者继续其他设置.</h1>"));
     g_appController->send_to(SERVER_APP_NAME, "Media", APP_MESSAGE_SET_PARAM, (void *)"switchFlag",
-                            (void *)server.arg("switchFlag").c_str());
+                             (void *)server.arg("switchFlag").c_str());
     g_appController->send_to(SERVER_APP_NAME, "Media", APP_MESSAGE_SET_PARAM, (void *)"powerFlag",
-                            (void *)server.arg("powerFlag").c_str());
+                             (void *)server.arg("powerFlag").c_str());
     // 持久化数据
     g_appController->send_to(SERVER_APP_NAME, "Media", APP_MESSAGE_WRITE_CFG, NULL, NULL);
 }
@@ -446,7 +447,7 @@ void saveScreenConf(void)
 {
     Send_HTML(F("<h1>设置成功! 退出APP或者继续其他设置.</h1>"));
     g_appController->send_to(SERVER_APP_NAME, "Screen share", APP_MESSAGE_SET_PARAM, (void *)"powerFlag",
-                            (void *)server.arg("powerFlag").c_str());
+                             (void *)server.arg("powerFlag").c_str());
     // 持久化数据
     g_appController->send_to(SERVER_APP_NAME, "Screen share", APP_MESSAGE_WRITE_CFG, NULL, NULL);
 }
@@ -455,19 +456,19 @@ void saveHeartbeatConf(void)
 {
     Send_HTML(F("<h1>设置成功! 退出APP或者继续其他设置.</h1>"));
     g_appController->send_to(SERVER_APP_NAME, "Heartbeat", APP_MESSAGE_SET_PARAM, (void *)"role",
-                            (void *)server.arg("role").c_str());
+                             (void *)server.arg("role").c_str());
     g_appController->send_to(SERVER_APP_NAME, "Heartbeat", APP_MESSAGE_SET_PARAM, (void *)"client_id",
-                            (void *)server.arg("mqtt_client_id").c_str());
+                             (void *)server.arg("mqtt_client_id").c_str());
     g_appController->send_to(SERVER_APP_NAME, "Heartbeat", APP_MESSAGE_SET_PARAM, (void *)"subtopic",
-                            (void *)server.arg("mqtt_subtopic").c_str());
+                             (void *)server.arg("mqtt_subtopic").c_str());
     g_appController->send_to(SERVER_APP_NAME, "Heartbeat", APP_MESSAGE_SET_PARAM, (void *)"mqtt_server",
-                            (void *)server.arg("mqtt_server").c_str());
+                             (void *)server.arg("mqtt_server").c_str());
     g_appController->send_to(SERVER_APP_NAME, "Heartbeat", APP_MESSAGE_SET_PARAM, (void *)"port",
-                            (void *)server.arg("mqtt_port").c_str());
+                             (void *)server.arg("mqtt_port").c_str());
     g_appController->send_to(SERVER_APP_NAME, "Heartbeat", APP_MESSAGE_SET_PARAM, (void *)"server_user",
-                            (void *)server.arg("mqtt_user").c_str());
+                             (void *)server.arg("mqtt_user").c_str());
     g_appController->send_to(SERVER_APP_NAME, "Heartbeat", APP_MESSAGE_SET_PARAM, (void *)"server_password",
-                            (void *)server.arg("mqtt_password").c_str());
+                             (void *)server.arg("mqtt_password").c_str());
     // 持久化数据
     g_appController->send_to(SERVER_APP_NAME, "Heartbeat", APP_MESSAGE_WRITE_CFG, NULL, NULL);
 }
@@ -476,13 +477,13 @@ void saveAnniversaryConf(void)
 {
     Send_HTML(F("<h1>设置成功! 退出APP或者继续其他设置.</h1>"));
     g_appController->send_to(SERVER_APP_NAME, "Anniversary", APP_MESSAGE_SET_PARAM, (void *)"event_name0",
-                            (void *)server.arg("event_name0").c_str());
+                             (void *)server.arg("event_name0").c_str());
     g_appController->send_to(SERVER_APP_NAME, "Anniversary", APP_MESSAGE_SET_PARAM, (void *)"target_date0",
-                            (void *)server.arg("target_date0").c_str());
+                             (void *)server.arg("target_date0").c_str());
     g_appController->send_to(SERVER_APP_NAME, "Anniversary", APP_MESSAGE_SET_PARAM, (void *)"event_name1",
-                            (void *)server.arg("event_name1").c_str());
+                             (void *)server.arg("event_name1").c_str());
     g_appController->send_to(SERVER_APP_NAME, "Anniversary", APP_MESSAGE_SET_PARAM, (void *)"target_date1",
-                            (void *)server.arg("target_date1").c_str());
+                             (void *)server.arg("target_date1").c_str());
     // 持久化数据
     g_appController->send_to(SERVER_APP_NAME, "Anniversary", APP_MESSAGE_WRITE_CFG, NULL, NULL);
 }
@@ -564,7 +565,8 @@ void handleFileUpload()
         Serial.print(F("Upload File Name: "));
         Serial.println(filename);
         g_tfCard.deleteFile(filename); // Remove a previous version, otherwise data is appended the file again
-        UploadFile = g_tfCard.open(filename, FILE_WRITE); // Open the file for writing in SPIFFS (create it, if doesn't exist)
+        UploadFile =
+            g_tfCard.open(filename, FILE_WRITE); // Open the file for writing in SPIFFS (create it, if doesn't exist)
     } else if (uploadFileStream.status == UPLOAD_FILE_WRITE) {
         if (UploadFile)
             UploadFile.write(uploadFileStream.buf,

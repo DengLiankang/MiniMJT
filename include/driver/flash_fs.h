@@ -1,5 +1,5 @@
 #include "FS.h"
-#include "FFat.h"
+#include "SPIFFS.h"
 #include <Arduino.h>
 
 class FlashFs

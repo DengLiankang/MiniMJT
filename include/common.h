@@ -9,7 +9,7 @@
 #include "network.h"
 #include <TFT_eSPI.h>
 
-#define MJT_VERSION "2.1.8"
+#define MJT_VERSION "2.1.9"
 #define GET_SYS_MILLIS xTaskGetTickCount // 获取系统毫秒数
 
 // SD_Card
@@ -55,7 +55,7 @@ struct SysUtilConfig {
 };
 
 extern IMU mpu; // 原则上只提供给主程序调用
-extern SdCard tf;
+extern SdCard g_tfCard;
 extern Network g_network; // 网络连接
 extern FlashFs g_flashFs; // flash中的文件系统（替代原先的Preferences）
 extern Display screen;    // 屏幕对象

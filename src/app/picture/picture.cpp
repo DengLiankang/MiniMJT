@@ -225,6 +225,6 @@ static void picture_message_handle(const char *from, const char *to, APP_MESSAGE
     }
 }
 
-APP_OBJ picture_app = {PICTURE_APP_NAME,      &app_picture,          "",
+APP_OBJ picture_app = {PICTURE_APP_NAME,      &PictureAppLogo,          "",
                        picture_init,          picture_process,       picture_background_task,
                        picture_exit_callback, picture_message_handle};

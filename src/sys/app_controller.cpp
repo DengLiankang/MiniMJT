@@ -176,11 +176,11 @@ void AppController::MainProcess(void)
         Serial.println(active_type_info[gImuActionData->active]);
     }
 
-    // // wifi自动关闭(在节能模式下)
-    // if (0 == m_sysCfg.power_mode && true == m_wifi_status &&
-    //     doDelayMillisTime(WIFI_LIFE_CYCLE, &m_preWifiReqMillis, false)) {
-    //     send_to(CTRL_NAME, CTRL_NAME, APP_MESSAGE_WIFI_DISCONN, 0, NULL);
-    // }
+    // wifi自动关闭(在节能模式下)
+    if (0 == m_sysCfg.powerMode && true == m_wifi_status &&
+        doDelayMillisTime(WIFI_LIFE_CYCLE, &m_preWifiReqMillis, false)) {
+        send_to(CTRL_NAME, CTRL_NAME, APP_MESSAGE_WIFI_DISCONN, 0, NULL);
+    }
 
     if (GetSystemState() == MJT_SYS_STATE::STATE_APP_MENU) {
         // lv_scr_load_anim_t anim = LV_SCR_LOAD_ANIM_NONE;
