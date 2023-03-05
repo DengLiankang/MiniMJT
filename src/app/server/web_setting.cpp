@@ -60,7 +60,7 @@ String file_size(int bytes)
     "<label class=\"input\"><span>功耗控制（0低发热 1性能优先）</span><input "                                  \
     "type=\"text\"name=\"power_mode\"value=\"%s\"></label>"                                                                  \
     "<label class=\"input\"><span>屏幕亮度 (值为1~100)</span><input "                                                  \
-    "type=\"text\"name=\"backLight\"value=\"%s\"></label>"                                                                   \
+    "type=\"text\"name=\"backlight\"value=\"%s\"></label>"                                                                   \
     "<label class=\"input\"><span>屏幕方向 (0~5可选)</span><input type=\"text\"name=\"rotation\"value=\"%s\"></label>" \
     "<label class=\"input\"><span>操作方向（0~15可选）</span><input "                                                \
     "type=\"text\"name=\"mpu_order\"value=\"%s\"></label>"                                                                   \
@@ -232,7 +232,7 @@ void sys_setting()
     char ssid_0[32];
     char password_0[32];
     char power_mode[32];
-    char backLight[32];
+    char backlight[32];
     char rotation[32];
     char mpu_order[32];
     char min_brightness[32];
@@ -245,7 +245,7 @@ void sys_setting()
     g_appController->send_to(SERVER_APP_NAME, "MJT_AppCtrl", APP_MESSAGE_GET_PARAM, (void *)"ssid_0", ssid_0);
     g_appController->send_to(SERVER_APP_NAME, "MJT_AppCtrl", APP_MESSAGE_GET_PARAM, (void *)"password_0", password_0);
     g_appController->send_to(SERVER_APP_NAME, "MJT_AppCtrl", APP_MESSAGE_GET_PARAM, (void *)"power_mode", power_mode);
-    g_appController->send_to(SERVER_APP_NAME, "MJT_AppCtrl", APP_MESSAGE_GET_PARAM, (void *)"backLight", backLight);
+    g_appController->send_to(SERVER_APP_NAME, "MJT_AppCtrl", APP_MESSAGE_GET_PARAM, (void *)"backlight", backlight);
     g_appController->send_to(SERVER_APP_NAME, "MJT_AppCtrl", APP_MESSAGE_GET_PARAM, (void *)"rotation", rotation);
     g_appController->send_to(SERVER_APP_NAME, "MJT_AppCtrl", APP_MESSAGE_GET_PARAM, (void *)"mpu_order", mpu_order);
     g_appController->send_to(SERVER_APP_NAME, "MJT_AppCtrl", APP_MESSAGE_GET_PARAM, (void *)"min_brightness",
@@ -259,11 +259,11 @@ void sys_setting()
                             auto_start_app);
     SysUtilConfig cfg = g_appController->m_sysCfg;
     // 主要为了处理启停MPU自动校准的单选框
-    if (0 == cfg.auto_calibration_mpu) {
-        sprintf(buf, SYS_SETTING, ssid_0, password_0, power_mode, backLight, rotation, mpu_order, "checked=\"checked\"",
+    if (0 == cfg.imuAutoCalibration) {
+        sprintf(buf, SYS_SETTING, ssid_0, password_0, power_mode, backlight, rotation, mpu_order, "checked=\"checked\"",
                 "", auto_start_app);
     } else {
-        sprintf(buf, SYS_SETTING, ssid_0, password_0, power_mode, backLight, rotation, mpu_order, "",
+        sprintf(buf, SYS_SETTING, ssid_0, password_0, power_mode, backlight, rotation, mpu_order, "",
                 "checked=\"checked\"", auto_start_app);
     }
     webpage = buf;
@@ -390,8 +390,8 @@ void saveSysConf(void)
                             (void *)server.arg("password_0").c_str());
     g_appController->send_to(SERVER_APP_NAME, "MJT_AppCtrl", APP_MESSAGE_SET_PARAM, (void *)"power_mode",
                             (void *)server.arg("power_mode").c_str());
-    g_appController->send_to(SERVER_APP_NAME, "MJT_AppCtrl", APP_MESSAGE_SET_PARAM, (void *)"backLight",
-                            (void *)server.arg("backLight").c_str());
+    g_appController->send_to(SERVER_APP_NAME, "MJT_AppCtrl", APP_MESSAGE_SET_PARAM, (void *)"backlight",
+                            (void *)server.arg("backlight").c_str());
     g_appController->send_to(SERVER_APP_NAME, "MJT_AppCtrl", APP_MESSAGE_SET_PARAM, (void *)"rotation",
                             (void *)server.arg("rotation").c_str());
     g_appController->send_to(SERVER_APP_NAME, "MJT_AppCtrl", APP_MESSAGE_SET_PARAM, (void *)"mpu_order",
@@ -499,14 +499,14 @@ void File_Delete()
 void delete_result(void)
 {
     String del_file = server.arg("delete_filepath");
-    boolean ret = tf.deleteFile(del_file);
+    boolean ret = g_tfCard.deleteFile(del_file);
     if (ret) {
         webpage = "<h3>Delete succ!</h3><a href='/delete'>[Back]</a>";
-        tf.listDir("/image", 250);
+        g_tfCard.listDir("/image", 250);
     } else {
         webpage = "<h3>Delete fail! Please check up file path.</h3><a href='/delete'>[Back]</a>";
     }
-    tf.listDir("/image", 250);
+    g_tfCard.listDir("/image", 250);
     Send_HTML(webpage);
 }
 
@@ -522,7 +522,7 @@ void File_Download()
 void sd_file_download(const String &filename)
 {
     if (sd_present) {
-        File download = tf.open("/" + filename);
+        File download = g_tfCard.open("/" + filename);
         if (download) {
             server.sendHeader("Content-Type", "text/text");
             server.sendHeader("Content-Disposition", "attachment; filename=" + filename);
@@ -537,7 +537,7 @@ void sd_file_download(const String &filename)
 
 void File_Upload()
 {
-    tf.listDir("/image", 250);
+    g_tfCard.listDir("/image", 250);
 
     webpage = webpage_header;
     webpage += "<h3>Select File to Upload</h3>"
@@ -563,8 +563,8 @@ void handleFileUpload()
         filename = "/image/" + filename;
         Serial.print(F("Upload File Name: "));
         Serial.println(filename);
-        tf.deleteFile(filename); // Remove a previous version, otherwise data is appended the file again
-        UploadFile = tf.open(filename, FILE_WRITE); // Open the file for writing in SPIFFS (create it, if doesn't exist)
+        g_tfCard.deleteFile(filename); // Remove a previous version, otherwise data is appended the file again
+        UploadFile = g_tfCard.open(filename, FILE_WRITE); // Open the file for writing in SPIFFS (create it, if doesn't exist)
     } else if (uploadFileStream.status == UPLOAD_FILE_WRITE) {
         if (UploadFile)
             UploadFile.write(uploadFileStream.buf,
@@ -583,7 +583,7 @@ void handleFileUpload()
             webpage += file_size(uploadFileStream.totalSize) + "</h2><br>";
             webpage += webpage_footer;
             server.send(200, "text/html", webpage);
-            tf.listDir("/image", 250);
+            g_tfCard.listDir("/image", 250);
         } else {
             ReportCouldNotCreateFile(String("upload"));
         }

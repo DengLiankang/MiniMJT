@@ -26,7 +26,7 @@ void minimjt_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *
     lv_disp_flush_ready(disp);
 }
 
-void Display::init(uint8_t rotation, uint8_t backLight)
+void Display::init(uint8_t rotation, uint8_t backlight)
 {
     ledcSetup(LCD_BL_PWM_CHANNEL, 5000, 8);
     ledcAttachPin(LCD_BL_PIN, LCD_BL_PWM_CHANNEL);
@@ -48,7 +48,7 @@ void Display::init(uint8_t rotation, uint8_t backLight)
     // 正常方向需要设置为0 如果加上分光棱镜需要镜像改为4 如果是侧显示的需要设置为5
     tft->setRotation(rotation); /* mirror 修改反转，如果加上分光棱镜需要改为4镜像*/
 
-    setBackLight(backLight / 100.0); // 设置亮度
+    setBackLight(backlight / 100.0); // 设置亮度
 
     lv_disp_draw_buf_init(&disp_buf, buf, NULL, SCREEN_HOR_RES * LV_HOR_RES_MAX_LEN);
 

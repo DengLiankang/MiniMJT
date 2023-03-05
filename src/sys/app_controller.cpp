@@ -41,37 +41,36 @@ void AppController::Init(void)
     // FlashFs init first
     g_flashFs.Init();
 
-    this->ReadConfig(&m_sysCfg);
-    this->ReadConfig(&m_imuCfg);
+    this->ReadConfigFromFlash(&m_sysCfg);
 
     // 设置CPU主频
-    if (1 == m_sysCfg.power_mode) {
+    if (1 == m_sysCfg.powerMode) {
         setCpuFrequencyMhz(240);
     } else {
         setCpuFrequencyMhz(80);
     }
     Serial.print(F("PowerMode: "));
-    Serial.print(m_sysCfg.power_mode);
+    Serial.print(m_sysCfg.powerMode);
     Serial.print(F(", CpuFrequencyMhz: "));
     Serial.println(getCpuFrequencyMhz());
 
+    /*** Init micro SD-Card ***/
+    g_tfCard.init();
+
     /*** Init screen ***/
     tft = new TFT_eSPI(SCREEN_HOR_RES, SCREEN_VER_RES);
-    screen.init(m_sysCfg.rotation, m_sysCfg.backLight);
+    screen.init(m_sysCfg.rotation, m_sysCfg.backlight);
+
+    InitLvglTaskSetup("LvglTask");
 
     MJT_LVGL_OPERATE_LOCK(AppCtrlLoadingGuiInit());
     MJT_LVGL_OPERATE_LOCK(AppCtrlLoadingDisplay(10, NULL, true));
-
-    /*** Init micro SD-Card ***/
-    tf.init();
-
-    lv_fs_fatfs_init();
 
     /*** Init IMU as input device ***/
     // lv_port_indev_init();
 
     MJT_LVGL_OPERATE_LOCK(AppCtrlLoadingDisplay(80, "init imu...", false));
-    mpu.init(m_sysCfg.mpu_order, m_sysCfg.auto_calibration_mpu, &m_imuCfg); // 初始化比较耗时
+    mpu.Init(m_sysCfg.imuOrder, m_sysCfg.imuAutoCalibration, &m_sysCfg.imuOffsets); // 初始化比较耗时
 
     MJT_LVGL_OPERATE_LOCK(AppCtrlLoadingDisplay(90, "install apps...", false));
 
@@ -135,7 +134,7 @@ int AppController::remove_backgroud_task(void)
 int AppController::AppAutoStart()
 {
     // APP自启动
-    int index = this->GetAppIndexByName(m_sysCfg.auto_start_app.c_str());
+    int index = this->GetAppIndexByName(m_sysCfg.autoStartAppName.c_str());
     if (index < 0) {
         // 没找到相关的APP
         return 0;
@@ -255,7 +254,7 @@ int AppController::send_to(const char *from, const char *to, APP_MESSAGE_TYPE ty
             }
         } else if (!strcmp(to, CTRL_NAME)) {
             Serial.print("[Massage]\tFrom " + String(fromApp->appName) + "\tTo " + CTRL_NAME + "\n");
-            deal_config(type, (const char *)message, (char *)ext_info);
+            MessageProcess(type, (const char *)message, (char *)ext_info);
         }
     }
     return 0;
@@ -311,7 +310,7 @@ bool AppController::wifi_event(APP_MESSAGE_TYPE type)
             // 更新请求
             // CONN_ERROR == g_network.end_conn_wifi() ||
             if (false == m_wifi_status) {
-                g_network.start_conn_wifi(m_sysCfg.ssid_0.c_str(), m_sysCfg.password_0.c_str());
+                g_network.start_conn_wifi(m_sysCfg.ssid0.c_str(), m_sysCfg.password0.c_str());
                 m_wifi_status = true;
             }
             m_preWifiReqMillis = GET_SYS_MILLIS();
@@ -379,7 +378,7 @@ void AppController::AppExit()
     }
 
     // 设置CPU主频
-    if (1 == this->m_sysCfg.power_mode) {
+    if (1 == this->m_sysCfg.powerMode) {
         setCpuFrequencyMhz(240);
     } else {
         setCpuFrequencyMhz(80);

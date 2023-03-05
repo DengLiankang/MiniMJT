@@ -99,7 +99,7 @@ static bool video_start(bool create_new)
     char file_name[FILENAME_MAX_LEN] = {0};
     snprintf(file_name, FILENAME_MAX_LEN, "%s/%s", run_data->movie_file->file_name, run_data->pfile->file_name);
 
-    run_data->file = tf.open(file_name);
+    run_data->file = g_tfCard.open(file_name);
     if (NULL != strstr(run_data->pfile->file_name, ".mjpeg") || NULL != strstr(run_data->pfile->file_name, ".MJPEG")) {
         // 直接解码mjpeg格式的视频
         run_data->player_docoder = new MjpegPlayDocoder(&run_data->file, true);
@@ -138,7 +138,7 @@ static int media_player_init(AppController *sys)
     run_data->pfile = NULL;      // 指向当前播放的文件节点
     run_data->preTriggerKeyMillis = GET_SYS_MILLIS();
 
-    run_data->movie_file = tf.listDir(MOVIE_PATH);
+    run_data->movie_file = g_tfCard.listDir(MOVIE_PATH);
     if (NULL != run_data->movie_file) {
         run_data->pfile = get_next_file(run_data->movie_file->next_node, 1);
     }

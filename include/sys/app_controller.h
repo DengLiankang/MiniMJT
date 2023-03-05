@@ -71,7 +71,7 @@ public:
     void AppExit(void); // 提供给app退出的系统调用
     // 消息发送
     int send_to(const char *from, const char *to, APP_MESSAGE_TYPE type, void *message, void *ext_info);
-    void deal_config(APP_MESSAGE_TYPE type, const char *key, char *value);
+    void MessageProcess(APP_MESSAGE_TYPE type, const char *key, char *value);
 
     // 事件处理
     int req_event_deal(void);
@@ -79,10 +79,8 @@ public:
     // wifi事件的处理
     bool wifi_event(APP_MESSAGE_TYPE type);
 
-    void ReadConfig(SysUtilConfig *cfg);
-    void WriteConfig(SysUtilConfig *cfg);
-    void ReadConfig(SysMpuConfig *cfg);
-    void WriteConfig(SysMpuConfig *cfg);
+    void ReadConfigFromFlash(SysUtilConfig *cfg);
+    void WriteConfigToFlash(SysUtilConfig *cfg);
 
 private:
     APP_OBJ *GetAppByName(const char *name);
@@ -104,7 +102,6 @@ private:
 
 public:
     SysUtilConfig m_sysCfg;
-    SysMpuConfig m_imuCfg;
 };
 
 extern AppController *g_appController;

@@ -32,14 +32,13 @@ enum MPU_DIR_TYPE {
     XY_DIR_TYPE = 0x08,
 };
 
-struct SysMpuConfig {
-    int16_t x_gyro_offset;
-    int16_t y_gyro_offset;
-    int16_t z_gyro_offset;
-
-    int16_t x_accel_offset;
-    int16_t y_accel_offset;
-    int16_t z_accel_offset;
+struct ImuOffsetConfig {
+    int16_t imuGyroOffsetX;
+    int16_t imuGyroOffsetY;
+    int16_t imuGyroOffsetZ;
+    int16_t imuAccelOffsetX;
+    int16_t imuAccelOffsetY;
+    int16_t imuAccelOffsetZ;
 };
 
 struct ImuAction {
@@ -71,7 +70,7 @@ public:
 
 public:
     IMU();
-    void init(uint8_t order, uint8_t auto_calibration, SysMpuConfig *mpu_cfg);
+    void Init(uint8_t order, uint8_t autoCalibration, struct ImuOffsetConfig *offsetCfg);
     void setOrder(uint8_t order); // 设置方向
     bool Encoder_GetIsPush(void); // 适配Peak的编码器中键 开关机使用
     ImuAction *update(int interval);

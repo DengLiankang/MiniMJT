@@ -17,7 +17,7 @@ IMU::IMU()
     this->order = 0; // 表示方位
 }
 
-void IMU::init(uint8_t order, uint8_t auto_calibration, SysMpuConfig *mpu_cfg)
+void IMU::Init(uint8_t order, uint8_t autoCalibration, ImuOffsetConfig *offsetCfg)
 {
     this->setOrder(order); // 设置方向
     Wire.begin(IMU_I2C_SDA, IMU_I2C_SCL);
@@ -37,14 +37,14 @@ void IMU::init(uint8_t order, uint8_t auto_calibration, SysMpuConfig *mpu_cfg)
     Serial.print(F("Initialization MPU6050 now, Please don't move.\n"));
     mpu.initialize();
 
-    if (auto_calibration == 0) {
+    if (autoCalibration == 0) {
         // supply your own gyro offsets here, scaled for min sensitivity
-        mpu.setXGyroOffset(mpu_cfg->x_gyro_offset);
-        mpu.setYGyroOffset(mpu_cfg->y_gyro_offset);
-        mpu.setZGyroOffset(mpu_cfg->z_gyro_offset);
-        mpu.setXAccelOffset(mpu_cfg->x_accel_offset);
-        mpu.setYAccelOffset(mpu_cfg->y_accel_offset);
-        mpu.setZAccelOffset(mpu_cfg->z_accel_offset); // 1688 factory default for my test chip
+        mpu.setXGyroOffset(offsetCfg->imuGyroOffsetX);
+        mpu.setYGyroOffset(offsetCfg->imuGyroOffsetY);
+        mpu.setZGyroOffset(offsetCfg->imuGyroOffsetZ);
+        mpu.setXAccelOffset(offsetCfg->imuAccelOffsetX);
+        mpu.setYAccelOffset(offsetCfg->imuAccelOffsetY);
+        mpu.setZAccelOffset(offsetCfg->imuAccelOffsetZ); // 1688 factory default for my test chip
     } else {
         // 启动自动校准
         // 7次循环自动校正
@@ -52,12 +52,12 @@ void IMU::init(uint8_t order, uint8_t auto_calibration, SysMpuConfig *mpu_cfg)
         mpu.CalibrateGyro(7);
         mpu.PrintActiveOffsets();
 
-        mpu_cfg->x_gyro_offset = mpu.getXGyroOffset();
-        mpu_cfg->y_gyro_offset = mpu.getYGyroOffset();
-        mpu_cfg->z_gyro_offset = mpu.getZGyroOffset();
-        mpu_cfg->x_accel_offset = mpu.getXAccelOffset();
-        mpu_cfg->y_accel_offset = mpu.getYAccelOffset();
-        mpu_cfg->z_accel_offset = mpu.getZAccelOffset();
+        offsetCfg->imuGyroOffsetX = mpu.getXGyroOffset();
+        offsetCfg->imuGyroOffsetY = mpu.getYGyroOffset();
+        offsetCfg->imuAccelOffsetZ = mpu.getZGyroOffset();
+        offsetCfg->imuAccelOffsetX = mpu.getXAccelOffset();
+        offsetCfg->imuAccelOffsetY = mpu.getYAccelOffset();
+        offsetCfg->imuAccelOffsetZ = mpu.getZAccelOffset();
     }
 
     Serial.print(F("Initialization MPU6050 success.\n"));

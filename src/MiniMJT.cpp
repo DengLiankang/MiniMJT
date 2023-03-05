@@ -22,8 +22,6 @@ void setup()
     Serial.print(F("ChipID(EfuseMac): "));
     Serial.println(ESP.getEfuseMac());
 
-    InitLvglTaskSetup("LvglTask");
-
     g_appController = new AppController(); // APP控制器
 
     g_appController->Init();

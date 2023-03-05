@@ -108,7 +108,7 @@ static int picture_init(AppController *sys)
     run_data->tftSwapStatus = tft->getSwapBytes();
     tft->setSwapBytes(true); // We need to swap the colour bytes (endianess)
 
-    run_data->image_file = tf.listDir(IMAGE_PATH);
+    run_data->image_file = g_tfCard.listDir(IMAGE_PATH);
     if (NULL != run_data->image_file) {
         run_data->pfile = get_next_file(run_data->image_file->next_node, 1);
     }
