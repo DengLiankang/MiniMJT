@@ -245,9 +245,9 @@ static void UpdateTime_RTC(long long timestamp)
     display_time(t, LV_SCR_LOAD_ANIM_NONE);
 }
 
-static int weather_init(AppController *sys)
+static int WeatherAppInit(AppController *sys)
 {
-    tft->setSwapBytes(true);
+    // tft->setSwapBytes(true);
     weather_gui_init();
     // 获取配置信息
     ReadConfig(&cfg_data);
@@ -280,49 +280,49 @@ static int weather_init(AppController *sys)
 
 static void weather_process(AppController *sys, const ImuAction *act_info)
 {
-    lv_scr_load_anim_t anim_type = LV_SCR_LOAD_ANIM_NONE;
+    // lv_scr_load_anim_t anim_type = LV_SCR_LOAD_ANIM_NONE;
 
-    if (RETURN == act_info->active) {
-        sys->AppExit();
-        return;
-    } else if (GO_FORWORD == act_info->active) {
-        // 间接强制更新
-        run_data->coactusUpdateFlag = 0x01;
-        delay(500); // 以防间接强制更新后，生产很多请求 使显示卡顿
-    } else if (TURN_RIGHT == act_info->active) {
-        anim_type = LV_SCR_LOAD_ANIM_MOVE_RIGHT;
-        run_data->clock_page = (run_data->clock_page + 1) % WEATHER_PAGE_SIZE;
-    } else if (TURN_LEFT == act_info->active) {
-        anim_type = LV_SCR_LOAD_ANIM_MOVE_LEFT;
-        // 以下等效与 clock_page = (clock_page + WEATHER_PAGE_SIZE - 1) % WEATHER_PAGE_SIZE;
-        // +3为了不让数据溢出成负数，而导致取模逻辑错误
-        run_data->clock_page = (run_data->clock_page + WEATHER_PAGE_SIZE - 1) % WEATHER_PAGE_SIZE;
-    }
+    // if (RETURN == act_info->active) {
+    //     sys->AppExit();
+    //     return;
+    // } else if (GO_FORWORD == act_info->active) {
+    //     // 间接强制更新
+    //     run_data->coactusUpdateFlag = 0x01;
+    //     delay(500); // 以防间接强制更新后，生产很多请求 使显示卡顿
+    // } else if (TURN_RIGHT == act_info->active) {
+    //     anim_type = LV_SCR_LOAD_ANIM_MOVE_RIGHT;
+    //     run_data->clock_page = (run_data->clock_page + 1) % WEATHER_PAGE_SIZE;
+    // } else if (TURN_LEFT == act_info->active) {
+    //     anim_type = LV_SCR_LOAD_ANIM_MOVE_LEFT;
+    //     // 以下等效与 clock_page = (clock_page + WEATHER_PAGE_SIZE - 1) % WEATHER_PAGE_SIZE;
+    //     // +3为了不让数据溢出成负数，而导致取模逻辑错误
+    //     run_data->clock_page = (run_data->clock_page + WEATHER_PAGE_SIZE - 1) % WEATHER_PAGE_SIZE;
+    // }
 
-    // 界面刷新
-    if (run_data->clock_page == 0) {
-        display_weather(run_data->wea, anim_type);
-        if (0x01 == run_data->coactusUpdateFlag ||
-            doDelayMillisTime(cfg_data.weatherUpdataInterval, &run_data->preWeatherMillis, false)) {
-            sys->send_to(WEATHER_APP_NAME, CTRL_NAME, APP_MESSAGE_WIFI_CONN, (void *)UPDATE_NOW, NULL);
-            sys->send_to(WEATHER_APP_NAME, CTRL_NAME, APP_MESSAGE_WIFI_CONN, (void *)UPDATE_DAILY, NULL);
-        }
+    // // 界面刷新
+    // if (run_data->clock_page == 0) {
+    //     display_weather(run_data->wea, anim_type);
+    //     if (0x01 == run_data->coactusUpdateFlag ||
+    //         doDelayMillisTime(cfg_data.weatherUpdataInterval, &run_data->preWeatherMillis, false)) {
+    //         sys->send_to(WEATHER_APP_NAME, CTRL_NAME, APP_MESSAGE_WIFI_CONN, (void *)UPDATE_NOW, NULL);
+    //         sys->send_to(WEATHER_APP_NAME, CTRL_NAME, APP_MESSAGE_WIFI_CONN, (void *)UPDATE_DAILY, NULL);
+    //     }
 
-        if (0x01 == run_data->coactusUpdateFlag ||
-            doDelayMillisTime(cfg_data.timeUpdataInterval, &run_data->preTimeMillis, false)) {
-            // 尝试同步网络上的时钟
-            sys->send_to(WEATHER_APP_NAME, CTRL_NAME, APP_MESSAGE_WIFI_CONN, (void *)UPDATE_NTP, NULL);
-        } else if (GET_SYS_MILLIS() - run_data->preLocalTimestamp > 400) {
-            UpdateTime_RTC(get_timestamp());
-        }
-        run_data->coactusUpdateFlag = 0x00; // 取消强制更新标志
-        display_space();
-        delay(30);
-    } else if (run_data->clock_page == 1) {
-        // 仅在切换界面时获取一次未来天气
-        display_curve(run_data->wea.daily_max, run_data->wea.daily_min, anim_type);
-        delay(300);
-    }
+    //     if (0x01 == run_data->coactusUpdateFlag ||
+    //         doDelayMillisTime(cfg_data.timeUpdataInterval, &run_data->preTimeMillis, false)) {
+    //         // 尝试同步网络上的时钟
+    //         sys->send_to(WEATHER_APP_NAME, CTRL_NAME, APP_MESSAGE_WIFI_CONN, (void *)UPDATE_NTP, NULL);
+    //     } else if (GET_SYS_MILLIS() - run_data->preLocalTimestamp > 400) {
+    //         UpdateTime_RTC(get_timestamp());
+    //     }
+    //     run_data->coactusUpdateFlag = 0x00; // 取消强制更新标志
+    //     display_space();
+    //     delay(30);
+    // } else if (run_data->clock_page == 1) {
+    //     // 仅在切换界面时获取一次未来天气
+    //     display_curve(run_data->wea.daily_max, run_data->wea.daily_min, anim_type);
+    //     delay(300);
+    // }
 }
 
 static void weather_background_task(AppController *sys, const ImuAction *act_info)
@@ -466,5 +466,5 @@ static void weather_message_handle(const char *from, const char *to, APP_MESSAGE
 }
 
 APP_OBJ weather_app = {WEATHER_APP_NAME,      &WeatherAppLogo,          "",
-                       weather_init,          weather_process,       weather_background_task,
+                       WeatherAppInit,          weather_process,       weather_background_task,
                        weather_exit_callback, weather_message_handle};

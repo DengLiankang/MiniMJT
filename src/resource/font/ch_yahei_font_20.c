@@ -1,10 +1,10 @@
 /*
 *---------------------------------------------------------------
-*                        Lvgl Font Tool                         
-*                                                               
-* 注:使用unicode编码                                              
-* 注:本字体文件由Lvgl Font Tool V0.4 生成                          
-* 作者:阿里(qq:617622104)                                         
+*                        Lvgl Font Tool
+*
+* 注:使用unicode编码
+* 注:本字体文件由Lvgl Font Tool V0.4 生成
+* 作者:阿里(qq:617622104)
 *---------------------------------------------------------------
 */
 
@@ -16,7 +16,7 @@
 
 
 static const uint8_t glyph_bitmap[] = {
-/* 
+/*
  */
 0xff,0xff,0xff,0xff,0xff,0xf0,  //@@@@@@@@@@@
 0xff,0x88,0x88,0x88,0x8f,0xf0,  //@@%%%%%%%@@
@@ -16339,7 +16339,7 @@ static bool __user_font_get_glyph_dsc(const lv_font_t * font, lv_font_glyph_dsc_
 //字模高度：26
 //内部字体
 //使用排序和二分查表
-lv_font_t ch_font20 = {
+lv_font_t ch_yahei_font_20 = {
     .dsc = &font_dsc,
     .get_glyph_bitmap = __user_font_get_bitmap,
     .get_glyph_dsc = __user_font_get_glyph_dsc,
