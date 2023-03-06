@@ -97,7 +97,7 @@ enum wea_event_Id { UPDATE_NOW, UPDATE_NTP, UPDATE_DAILY };
 std::map<String, int> weatherMap = {{"qing", 0}, {"yin", 1},     {"yu", 2},  {"yun", 3}, {"bingbao", 4},
                                     {"wu", 5},   {"shachen", 6}, {"lei", 7}, {"xue", 8}};
 
-static void task_update(void *parameter); // 异步更新任务
+// static void task_update(void *parameter); // 异步更新任务
 
 static int windLevelAnalyse(String str)
 {

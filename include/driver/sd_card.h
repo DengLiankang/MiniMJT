@@ -1,9 +1,8 @@
-#ifndef SD_CARD_H
-#define SD_CARD_H
+#ifndef _SD_CARD_H_
+#define _SD_CARD_H_
 
-#include "FS.h"
+#include "driver/minimjt_fs.h"
 #include "SD.h"
-#include "SPI.h"
 
 #define DIR_FILE_NUM 10
 #define DIR_FILE_NAME_MAX_LEN 20
@@ -31,43 +30,18 @@ void join_path(char *dst_path, const char *pre_path, const char *rear_path);
 
 // static const char *get_file_basename(const char *path);
 
-class SdCard
+class SdCard : public MiniMjtFs
 {
-private:
-    char buf[128];
-
 public:
-    void init();
+    SdCard();
 
-    void listDir(const char *dirname, uint8_t levels);
+    ~SdCard();
 
-    File_Info *listDir(const char *dirname);
+    void Init(void);
 
-    void createDir(const char *path);
+    File open(const String &path, const char *mode);
 
-    void removeDir(const char *path);
-
-    void ReadFile(const char *path);
-
-    String ReadFileLine(const char *path, int num);
-
-    void WriteFile(const char *path, const char *message1);
-
-    File open(const String &path, const char *mode = FILE_READ);
-
-    void appendFile(const char *path, const char *message);
-
-    void renameFile(const char *path1, const char *path2);
-
-    boolean deleteFile(const char *path);
-
-    boolean deleteFile(const String &path);
-
-    void readBinFromSd(const char *path, uint8_t *buf);
-
-    void writeBinToSd(const char *path, uint8_t *buf);
-
-    void fileIO(const char *path);
+    File_Info *ListDir(const char *dirName);
 };
 
 #endif

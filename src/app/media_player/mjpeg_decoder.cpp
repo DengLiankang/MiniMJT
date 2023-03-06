@@ -162,7 +162,7 @@ bool MjpegPlayDocoder::video_start()
 bool MjpegPlayDocoder::video_play_screen(void)
 {
     // Read video
-    uint32_t l = 0;
+    // uint32_t l = 0;
 
     if (m_isUseDMA) {
         // 一帧数据大概3000B 240M主频时花费50ms  80M时需要150ms

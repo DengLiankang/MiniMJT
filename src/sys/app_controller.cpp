@@ -55,7 +55,7 @@ void AppController::Init(void)
     Serial.println(getCpuFrequencyMhz());
 
     /*** Init micro SD-Card ***/
-    g_tfCard.init();
+    g_tfCard.Init();
 
     /*** Init screen ***/
     tft = new TFT_eSPI(SCREEN_HOR_RES, SCREEN_VER_RES);

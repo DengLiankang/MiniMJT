@@ -103,7 +103,7 @@ static int server_init(AppController *sys)
 
 static void server_process(AppController *sys, const ImuAction *action)
 {
-    lv_scr_load_anim_t anim_type = LV_SCR_LOAD_ANIM_NONE;
+    // lv_scr_load_anim_t anim_type = LV_SCR_LOAD_ANIM_NONE;
 
     if (RETURN == action->active) {
         stop_web_config();

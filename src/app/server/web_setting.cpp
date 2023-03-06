@@ -500,14 +500,14 @@ void File_Delete()
 void delete_result(void)
 {
     String del_file = server.arg("delete_filepath");
-    boolean ret = g_tfCard.deleteFile(del_file);
-    if (ret) {
+    int8_t ret = g_tfCard.DeleteFile(del_file.c_str());
+    if (ret == 0) {
         webpage = "<h3>Delete succ!</h3><a href='/delete'>[Back]</a>";
-        g_tfCard.listDir("/image", 250);
+        g_tfCard.MiniMjtFs::ListDir("/image", 250);
     } else {
         webpage = "<h3>Delete fail! Please check up file path.</h3><a href='/delete'>[Back]</a>";
     }
-    g_tfCard.listDir("/image", 250);
+    g_tfCard.MiniMjtFs::ListDir("/image", 250);
     Send_HTML(webpage);
 }
 
@@ -523,7 +523,7 @@ void File_Download()
 void sd_file_download(const String &filename)
 {
     if (sd_present) {
-        File download = g_tfCard.open("/" + filename);
+        File download = g_tfCard.m_fs->open("/" + filename);
         if (download) {
             server.sendHeader("Content-Type", "text/text");
             server.sendHeader("Content-Disposition", "attachment; filename=" + filename);
@@ -538,7 +538,7 @@ void sd_file_download(const String &filename)
 
 void File_Upload()
 {
-    g_tfCard.listDir("/image", 250);
+    g_tfCard.MiniMjtFs::ListDir("/image", 250);
 
     webpage = webpage_header;
     webpage += "<h3>Select File to Upload</h3>"
@@ -564,9 +564,9 @@ void handleFileUpload()
         filename = "/image/" + filename;
         Serial.print(F("Upload File Name: "));
         Serial.println(filename);
-        g_tfCard.deleteFile(filename); // Remove a previous version, otherwise data is appended the file again
+        g_tfCard.DeleteFile(filename.c_str()); // Remove a previous version, otherwise data is appended the file again
         UploadFile =
-            g_tfCard.open(filename, FILE_WRITE); // Open the file for writing in SPIFFS (create it, if doesn't exist)
+            g_tfCard.m_fs->open(filename, FILE_WRITE); // Open the file for writing in SPIFFS (create it, if doesn't exist)
     } else if (uploadFileStream.status == UPLOAD_FILE_WRITE) {
         if (UploadFile)
             UploadFile.write(uploadFileStream.buf,
@@ -585,7 +585,7 @@ void handleFileUpload()
             webpage += file_size(uploadFileStream.totalSize) + "</h2><br>";
             webpage += webpage_footer;
             server.send(200, "text/html", webpage);
-            g_tfCard.listDir("/image", 250);
+            g_tfCard.MiniMjtFs::ListDir("/image", 250);
         } else {
             ReportCouldNotCreateFile(String("upload"));
         }

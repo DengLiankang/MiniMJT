@@ -190,7 +190,7 @@ static void stop_share_config()
 
 static void screen_share_process(AppController *sys, const ImuAction *action)
 {
-    lv_scr_load_anim_t anim_type = LV_SCR_LOAD_ANIM_NONE;
+    // lv_scr_load_anim_t anim_type = LV_SCR_LOAD_ANIM_NONE;
 
     if (RETURN == action->active) {
         sys->AppExit();
@@ -229,7 +229,7 @@ static void screen_share_process(AppController *sys, const ImuAction *action)
                     tft->startWrite(); // 必须先使用startWrite，以便TFT芯片选择保持低的DMA和SPI通道设置保持配置
                     uint32_t frame_size = run_data->mjpeg_end - run_data->mjpeg_start + 1;
                     // 在左上角的0,0处绘制图像——在这个草图中，DMA请求在回调tft_output()中处理
-                    JRESULT jpg_ret = TJpgDec.drawJpg(0, 0, run_data->mjpeg_start, frame_size);
+                    TJpgDec.drawJpg(0, 0, run_data->mjpeg_start, frame_size);
                     tft->endWrite(); // 必须使用endWrite来释放TFT芯片选择和释放SPI通道吗
                     // 剩余帧大小
                     uint32_t left_frame_size = &run_data->recvBuf[run_data->bufSaveTail] - run_data->mjpeg_end;

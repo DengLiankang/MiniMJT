@@ -196,11 +196,11 @@ static void settings_message_handle(const char *from, const char *to, APP_MESSAG
             // wifi心跳维持的响应 可以不做任何处理
         } break;
         case APP_MESSAGE_GET_PARAM: {
-            char *param_key = (char *)message;
+            // char *param_key = (char *)message;
         } break;
         case APP_MESSAGE_SET_PARAM: {
-            char *param_key = (char *)message;
-            char *param_val = (char *)ext_info;
+            // char *param_key = (char *)message;
+            // char *param_val = (char *)ext_info;
         } break;
         default:
             break;

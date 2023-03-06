@@ -1,8 +1,8 @@
-#include "FS.h"
+#include "driver/minimjt_fs.h"
 #include "SPIFFS.h"
 #include <Arduino.h>
 
-class FlashFs
+class FlashFs : public MiniMjtFs
 {
 public:
     FlashFs();
@@ -10,16 +10,4 @@ public:
     ~FlashFs();
 
     void Init(void);
-
-    void ListDir(const char *dirname, uint8_t levels);
-
-    uint16_t ReadFile(const char *path, uint8_t *info);
-
-    void WriteFile(const char *path, const char *message);
-
-    void AppendFile(const char *path, const char *message);
-
-    void RenameFile(const char *src, const char *dst);
-
-    void DeleteFile(const char *path);
 };

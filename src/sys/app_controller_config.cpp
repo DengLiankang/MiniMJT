@@ -1,16 +1,16 @@
 #include "Arduino.h"
 #include "sys/app_controller.h"
 
-#define SYS_CONFIG_PATH "/minimjt_sys.cfg"
+// 文件名称限制在32个字符内
+#define SYS_CONFIG_PATH "/mjt_sys.cfg"
 
 void AppController::ReadConfigFromFlash(SysUtilConfig *cfg)
 {
     // 如果有需要持久化配置文件 可以调用此函数将数据存在flash中
     // 配置文件名最好以APP名为开头 以".cfg"结尾，以免多个APP读取混乱
     char cfgInfo[MAX_CFG_INFO_LENGTH];
-    uint16_t size = g_flashFs.ReadFile(SYS_CONFIG_PATH, (uint8_t *)cfgInfo);
-    cfgInfo[size] = 0;
-    if (size == 0) {
+    int16_t size = g_flashFs.ReadFile(SYS_CONFIG_PATH, (uint8_t *)cfgInfo);
+    if (size <= 0) {
         // 默认值
         cfg->ssid0 = "Mate 50 Pro";
         cfg->password0 = "12345678";
@@ -22,6 +22,7 @@ void AppController::ReadConfigFromFlash(SysUtilConfig *cfg)
         cfg->autoStartAppName = "None"; // 无指定开机自启APP
         this->WriteConfigToFlash(cfg);
     } else {
+        cfgInfo[size] = 0;
         // 解析数据
         char *param[18] = {0};
         ParseParam(cfgInfo, 18, param);
