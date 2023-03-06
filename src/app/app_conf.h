@@ -53,12 +53,6 @@
 #include "app/picture/picture.h"
 #endif
 
-// 屏幕分享/投屏APP
-#define APP_SCREEN_SHARE_USE 1
-#if APP_SCREEN_SHARE_USE
-#include "app/screen_share/screen_share.h"
-#endif
-
 // 网页配置服务APP
 // 此项用于配置小电视，为必选项，此处仅为了说明有这个app，此宏无作用
 #define APP_WEB_SERVER_USE 1

@@ -99,12 +99,6 @@ String file_size(int bytes)
     "type=\"text\"name=\"powerFlag\"value=\"%s\"></label>"                                                             \
     "</label><input class=\"btn\" type=\"submit\" name=\"submit\" value=\"保存\"></form>"
 
-#define SCREEN_SETTING                                                                                                 \
-    "<form method=\"GET\" action=\"saveScreenConf\">"                                                                  \
-    "<label class=\"input\"><span>功耗控制（0低发热 1性能优先）</span><input "                            \
-    "type=\"text\"name=\"powerFlag\"value=\"%s\"></label>"                                                             \
-    "</label><input class=\"btn\" type=\"submit\" name=\"submit\" value=\"保存\"></form>"
-
 #define HEARTBEAT_SETTING                                                                                                 \
     "<form method=\"GET\" action=\"saveHeartbeatConf\">"                                                                  \
     "<label class=\"input\"><span>Role(0:heart,1:beat)</span><input type=\"text\"name=\"role\"value=\"%s\"></label>"      \
@@ -198,9 +192,6 @@ void init_page_header()
 #endif
 #if APP_MEDIA_PLAYER_USE
     webpage_header += F("<li><a href='/media_setting'>媒体播放器</a></li>");
-#endif
-#if APP_SCREEN_SHARE_USE
-    webpage_header += F("<li><a href='/screen_setting'>屏幕分享</a></li>");
 #endif
 #if APP_HEARTBEAT_USE
     webpage_header += F("<li><a href='/heartbeat_setting'>心跳</a></li>");
@@ -322,18 +313,6 @@ void media_setting()
     Send_HTML(webpage);
 }
 
-void screen_setting()
-{
-    char buf[2048];
-    char powerFlag[32];
-    // 读取数据
-    g_appController->send_to(SERVER_APP_NAME, "Screen share", APP_MESSAGE_READ_CFG, NULL, NULL);
-    g_appController->send_to(SERVER_APP_NAME, "Screen share", APP_MESSAGE_GET_PARAM, (void *)"powerFlag", powerFlag);
-    sprintf(buf, SCREEN_SETTING, powerFlag);
-    webpage = buf;
-    Send_HTML(webpage);
-}
-
 void heartbeat_setting()
 {
     char buf[2048];
@@ -441,15 +420,6 @@ void saveMediaConf(void)
                              (void *)server.arg("powerFlag").c_str());
     // 持久化数据
     g_appController->send_to(SERVER_APP_NAME, "Media", APP_MESSAGE_WRITE_CFG, NULL, NULL);
-}
-
-void saveScreenConf(void)
-{
-    Send_HTML(F("<h1>设置成功! 退出APP或者继续其他设置.</h1>"));
-    g_appController->send_to(SERVER_APP_NAME, "Screen share", APP_MESSAGE_SET_PARAM, (void *)"powerFlag",
-                             (void *)server.arg("powerFlag").c_str());
-    // 持久化数据
-    g_appController->send_to(SERVER_APP_NAME, "Screen share", APP_MESSAGE_WRITE_CFG, NULL, NULL);
 }
 
 void saveHeartbeatConf(void)

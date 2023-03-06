@@ -4,12 +4,7 @@
 #include "driver/minimjt_fs.h"
 #include "SD.h"
 
-#define DIR_FILE_NUM 10
-#define DIR_FILE_NAME_MAX_LEN 20
 #define FILENAME_MAX_LEN 100
-
-extern int photo_file_num;
-extern char file_name_list[DIR_FILE_NUM][DIR_FILE_NAME_MAX_LEN];
 
 enum FILE_TYPE : unsigned char {
     FILE_TYPE_UNKNOW = 0,
@@ -38,8 +33,6 @@ public:
     ~SdCard();
 
     void Init(void);
-
-    File open(const String &path, const char *mode);
 
     File_Info *ListDir(const char *dirName);
 };

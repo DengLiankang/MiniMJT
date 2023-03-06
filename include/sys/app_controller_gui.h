@@ -1,6 +1,8 @@
 #ifndef APP_CONTROLLER_GUI_H
 #define APP_CONTROLLER_GUI_H
 
+#include <Arduino.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif

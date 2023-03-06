@@ -34,9 +34,6 @@ void setup()
 #if APP_MEDIA_PLAYER_USE
     g_appController->AppInstall(&media_app);
 #endif
-#if APP_SCREEN_SHARE_USE
-    g_appController->AppInstall(&screen_share_app);
-#endif
 #if APP_FILE_MANAGER_USE
     g_appController->AppInstall(&file_manager_app);
 #endif
