@@ -136,7 +136,7 @@ static int media_player_init(AppController *sys)
     run_data->movie_pos_increate = 1;
     run_data->movie_file = NULL; // movie文件夹下的文件指针头
     run_data->pfile = NULL;      // 指向当前播放的文件节点
-    run_data->preTriggerKeyMillis = GET_SYS_MILLIS();
+    run_data->preTriggerKeyMillis = millis();
     // TODO 实现文件获取
     // run_data->movie_file = g_tfCard.listDir(MOVIE_PATH);
     if (NULL != run_data->movie_file) {
@@ -158,7 +158,7 @@ static void media_player_process(AppController *sys, const ImuAction *act_info)
         return;
     } else if (UNKNOWN != act_info->active) {
         // 记录下操作的时间点
-        run_data->preTriggerKeyMillis = GET_SYS_MILLIS();
+        run_data->preTriggerKeyMillis = millis();
         // 设置CPU主频
         setCpuFrequencyMhz(240);
     }
@@ -194,11 +194,11 @@ static void media_player_process(AppController *sys, const ImuAction *act_info)
     // 主频控制 为了降低发热量
     if (getCpuFrequencyMhz() > 80 && 0 == cfg_data.powerFlag) {
         if (getCpuFrequencyMhz() > 160 &&
-            GET_SYS_MILLIS() - run_data->preTriggerKeyMillis >= NO_TRIGGER_ENTER_FREQ_160M) {
+            millis() - run_data->preTriggerKeyMillis >= NO_TRIGGER_ENTER_FREQ_160M) {
             // 设置CPU主频
             setCpuFrequencyMhz(160);
         } else if (getCpuFrequencyMhz() > 80 &&
-                   GET_SYS_MILLIS() - run_data->preTriggerKeyMillis >= NO_TRIGGER_ENTER_FREQ_80M) {
+                   millis() - run_data->preTriggerKeyMillis >= NO_TRIGGER_ENTER_FREQ_80M) {
             setCpuFrequencyMhz(80);
         }
     }

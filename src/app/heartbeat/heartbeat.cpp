@@ -204,11 +204,11 @@ static int heartbeat_init(AppController *sys)
     run_data->send_cnt = 0;
     run_data->recv_cnt = 0;
     run_data->timeUpdataInterval = 5000; // 日期时钟更新的时间间隔30000(30s)
-    // run_data->preUpdataMillis = GET_SYS_MILLIS() - run_data->timeUpdataInterval;
-    run_data->preUpdataMillis = GET_SYS_MILLIS();
+    // run_data->preUpdataMillis = millis() - run_data->timeUpdataInterval;
+    run_data->preUpdataMillis = millis();
     run_data->heartContinueMillis = 10000; // 心跳的持续时间10s
     // 上次心跳的更新时间
-    run_data->lastHeartUpdataTime = GET_SYS_MILLIS() - run_data->heartContinueMillis;
+    run_data->lastHeartUpdataTime = millis() - run_data->heartContinueMillis;
 
     // 初始化MQTT
     char info[128] = {0};
@@ -258,7 +258,7 @@ static void heartbeat_process(AppController *sys, const ImuAction *act_info)
         }
     }
 
-    if (GET_SYS_MILLIS() - run_data->lastHeartUpdataTime >= run_data->heartContinueMillis) {
+    if (millis() - run_data->lastHeartUpdataTime >= run_data->heartContinueMillis) {
         // 用于停止heart
         heartbeat_set_sr_type(SEND);
     }
@@ -383,7 +383,7 @@ static void heartbeat_message_handle(const char *from, const char *to, APP_MESSA
             //     heartbeat_set_sr_type(RECV);
             // }
             heartbeat_set_sr_type(HEART);
-            run_data->lastHeartUpdataTime = GET_SYS_MILLIS();
+            run_data->lastHeartUpdataTime = millis();
             run_data->recv_cnt++;
             Serial.println("received heartbeat");
         } break;

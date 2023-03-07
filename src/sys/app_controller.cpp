@@ -28,7 +28,7 @@ AppController::AppController(const char *name)
     m_currentAppItem = 0;
     // m_appList = new APP_OBJ[APP_MAX_NUM];
     m_wifi_status = false;
-    m_preWifiReqMillis = GET_SYS_MILLIS();
+    m_preWifiReqMillis = millis();
     m_appCtrlState = MJT_SYS_STATE::STATE_SYS_LOADING;
     // 定义一个定时器
     m_appCtrlTimer = xTimerCreate("AppCtrlTimer", 200 / portTICK_PERIOD_MS, pdTRUE, (void *)0, TimerAppCtrlHandle);
@@ -142,7 +142,7 @@ int AppController::AppAutoStart()
     // 进入自启动的APP
     SetSystemState(MJT_SYS_STATE::STATE_APP_RUNNING);
     m_currentAppItem = index;
-    (*(m_appList[m_currentAppItem]->appInit))(this); // 执行APP初始化
+    (*(m_appList[m_currentAppItem]->AppInit))(this); // 执行APP初始化
     return 0;
 }
 
@@ -194,8 +194,8 @@ void AppController::MainProcess(void)
             AppCtrlMenuDisplay(m_appList[m_currentAppItem]->appLogo, m_appList[m_currentAppItem]->appName, LV_SCR_LOAD_ANIM_MOVE_RIGHT, false);
             Serial.println(String("Current App: ") + m_appList[m_currentAppItem]->appName);
         } else if (gImuActionData->active == ACTIVE_TYPE::GO_FORWORD) {
-            if (m_appList[m_currentAppItem]->appInit != NULL) {
-                (*(m_appList[m_currentAppItem]->appInit))(this); // 执行APP初始化
+            if (m_appList[m_currentAppItem]->AppInit != NULL) {
+                (*(m_appList[m_currentAppItem]->AppInit))(this); // 执行APP初始化
                 SetSystemState(MJT_SYS_STATE::STATE_APP_RUNNING);
             }
         }
@@ -249,8 +249,8 @@ int AppController::send_to(const char *from, const char *to, APP_MESSAGE_TYPE ty
         // 各个APP之间通信的消息
         if (NULL != toApp) {
             Serial.print("[Massage]\tFrom " + String(fromApp->appName) + "\tTo " + String(toApp->appName) + "\n");
-            if (NULL != toApp->messageHandle) {
-                toApp->messageHandle(from, to, type, message, ext_info);
+            if (NULL != toApp->MessageHandle) {
+                toApp->MessageHandle(from, to, type, message, ext_info);
             }
         } else if (!strcmp(to, CTRL_NAME)) {
             Serial.print("[Massage]\tFrom " + String(fromApp->appName) + "\tTo " + CTRL_NAME + "\n");
@@ -264,7 +264,7 @@ int AppController::req_event_deal(void)
 {
     // 请求事件的处理
     for (std::list<EVENT_OBJ>::iterator event = eventList.begin(); event != eventList.end();) {
-        if ((*event).nextRunTime > GET_SYS_MILLIS()) {
+        if ((*event).nextRunTime > millis()) {
             ++event;
             continue;
         }
@@ -281,15 +281,15 @@ int AppController::req_event_deal(void)
                 Serial.println(eventList.size());
             } else {
                 // 下次重试
-                (*event).nextRunTime = GET_SYS_MILLIS() + 4000;
+                (*event).nextRunTime = millis() + 4000;
                 ++event;
             }
             continue;
         }
 
         // 事件回调
-        if (NULL != (*event).from && NULL != (*event).from->messageHandle) {
-            (*((*event).from->messageHandle))(CTRL_NAME, (*event).from->appName, (*event).type, (*event).info, NULL);
+        if (NULL != (*event).from && NULL != (*event).from->MessageHandle) {
+            (*((*event).from->MessageHandle))(CTRL_NAME, (*event).from->appName, (*event).type, (*event).info, NULL);
         }
         Serial.print("[EVENT]\tDelete -> " + String(app_event_type_info[(*event).type]));
         event = eventList.erase(event); // 删除该响应完成的事件
@@ -313,7 +313,7 @@ bool AppController::wifi_event(APP_MESSAGE_TYPE type)
                 g_network.start_conn_wifi(m_sysCfg.ssid0.c_str(), m_sysCfg.password0.c_str());
                 m_wifi_status = true;
             }
-            m_preWifiReqMillis = GET_SYS_MILLIS();
+            m_preWifiReqMillis = millis();
             if ((WiFi.getMode() & WIFI_MODE_STA) == WIFI_MODE_STA && CONN_SUCC != g_network.end_conn_wifi()) {
                 // 在STA模式下 并且还没连接上wifi
                 return false;
@@ -323,18 +323,18 @@ bool AppController::wifi_event(APP_MESSAGE_TYPE type)
             // 更新请求
             g_network.open_ap(AP_SSID);
             m_wifi_status = true;
-            m_preWifiReqMillis = GET_SYS_MILLIS();
+            m_preWifiReqMillis = millis();
         } break;
         case APP_MESSAGE_WIFI_ALIVE: {
             // wifi开关的心跳 持续收到心跳 wifi才不会被关闭
             m_wifi_status = true;
             // 更新请求
-            m_preWifiReqMillis = GET_SYS_MILLIS();
+            m_preWifiReqMillis = millis();
         } break;
         case APP_MESSAGE_WIFI_DISCONN: {
             g_network.close_wifi();
             m_wifi_status = false; // 标志位
-            // m_preWifiReqMillis = GET_SYS_MILLIS() - WIFI_LIFE_CYCLE;
+            // m_preWifiReqMillis = millis() - WIFI_LIFE_CYCLE;
         } break;
         case APP_MESSAGE_UPDATE_TIME: {
         } break;
@@ -348,7 +348,7 @@ bool AppController::wifi_event(APP_MESSAGE_TYPE type)
             // if (app_exit_flag == 0) {
             //     app_exit_flag = 1; // 进入app, 如果已经在
             //     m_currentAppItem = GetAppIndexByName("Heartbeat");
-            //     (*(GetAppByName("Heartbeat")->appInit))(this); // 执行APP初始化
+            //     (*(GetAppByName("Heartbeat")->AppInit))(this); // 执行APP初始化
             // }
         } break;
         default:

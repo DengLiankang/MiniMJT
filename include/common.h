@@ -10,7 +10,6 @@
 #include <TFT_eSPI.h>
 
 #define MJT_VERSION "2.1.11"
-#define GET_SYS_MILLIS xTaskGetTickCount // 获取系统毫秒数
 
 // SD_Card
 #define SD_SCK 14
@@ -74,6 +73,6 @@ extern SemaphoreHandle_t lvgl_mutex; // lvgl 操作的锁
 void InitLvglTaskSetup(const char *name);
 void DeleteLvglTask(void);
 boolean doDelayMillisTime(unsigned long interval, unsigned long *previousMillis, boolean state);
-void ParseParam(char *info, int argc, char **argv);
+void ParseParam(char *src, int argc, char **dst);
 
 #endif

@@ -146,7 +146,7 @@ static void picture_process(AppController *sys, const ImuAction *act_info)
 
     // 自动切换的时间检测
     if (0 != run_data->image_pos_increate && 0 != cfg_data.switchInterval &&
-        GET_SYS_MILLIS() - run_data->pic_perMillis >= cfg_data.switchInterval) {
+        millis() - run_data->pic_perMillis >= cfg_data.switchInterval) {
         run_data->refreshFlag = true;
     }
 
@@ -168,7 +168,7 @@ static void picture_process(AppController *sys, const ImuAction *act_info)
         }
         run_data->refreshFlag = false;
         // 重置更新的时间标记
-        run_data->pic_perMillis = GET_SYS_MILLIS();
+        run_data->pic_perMillis = millis();
     }
     delay(300);
 }

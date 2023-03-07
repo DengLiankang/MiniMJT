@@ -37,19 +37,19 @@ struct APP_OBJ {
     const char *appDesc;
 
     // APP的初始化函数 也可以为空或什么都不做（作用等效于arduino setup()函数）
-    int (*appInit)(AppController *sys);
+    int (*AppInit)(AppController *sys);
 
     // APP的主程序函数入口指针
     void (*MainProcess)(AppController *sys, const ImuAction *act_info);
 
     // APP的任务的入口指针（一般一分钟内会调用一次）
-    void (*backgroudTask)(AppController *sys, const ImuAction *act_info);
+    void (*BackgroundTask)(AppController *sys, const ImuAction *act_info);
 
     // 退出之前需要处理的回调函数 可为空
     int (*AppExit)(void *param);
 
     // 消息处理机制
-    void (*messageHandle)(const char *from, const char *to, APP_MESSAGE_TYPE type, void *message, void *ext_info);
+    void (*MessageHandle)(const char *from, const char *to, APP_MESSAGE_TYPE type, void *message, void *ext_info);
 };
 
 #endif

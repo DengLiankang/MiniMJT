@@ -166,15 +166,15 @@ bool MjpegPlayDocoder::video_play_screen(void)
 
     if (m_isUseDMA) {
         // 一帧数据大概3000B 240M主频时花费50ms  80M时需要150ms
-        // unsigned long Millis_1 = GET_SYS_MILLIS(); // 更新的时间
+        // unsigned long Millis_1 = millis(); // 更新的时间
         uint32_t jpg_size = readJpegFromFile(m_pFile);
         // Serial.println(jpg_size);
-        // Serial.print(GET_SYS_MILLIS() - Millis_1);
+        // Serial.print(millis() - Millis_1);
         // Serial.print(" ");
-        // Millis_1 = GET_SYS_MILLIS();
+        // Millis_1 = millis();
         // Draw the image, top left at 0,0 - DMA request is handled in the call-back tft_output() in this sketch
         TJpgDec.drawJpg(0, 0, m_jpegBuf, jpg_size);
-        // Serial.println(GET_SYS_MILLIS() - Millis_1);
+        // Serial.println(millis() - Millis_1);
     } else {
     }
     return true;

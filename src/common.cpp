@@ -35,7 +35,7 @@ void DeleteLvglTask(void)
 
 boolean doDelayMillisTime(unsigned long interval, unsigned long *previousMillis, boolean state)
 {
-    unsigned long currentMillis = GET_SYS_MILLIS();
+    unsigned long currentMillis = millis();
     if (currentMillis - *previousMillis >= interval) {
         *previousMillis = currentMillis;
         state = !state;
@@ -43,15 +43,19 @@ boolean doDelayMillisTime(unsigned long interval, unsigned long *previousMillis,
     return state;
 }
 
-void ParseParam(char *info, int argc, char **argv)
+/// @brief 通过换行符解析每一行的参数，使用本函数一定要小心内存溢出
+/// @param src 参数来源
+/// @param argc 总共要解析的参数数量
+/// @param dst 存放参数的数据结构
+void ParseParam(char *src, int argc, char **dst)
 {
     // cnt记录解析到第几个参数
     for (int cnt = 0; cnt < argc; ++cnt) {
-        argv[cnt] = info;
-        while (*info != '\n') {
-            ++info;
+        dst[cnt] = src;
+        while (*src != '\n') {
+            ++src;
         }
-        *info = 0;
-        ++info;
+        *src = 0;
+        ++src;
     }
 }

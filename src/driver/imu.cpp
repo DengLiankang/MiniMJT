@@ -23,7 +23,7 @@ void IMU::Init(uint8_t order, uint8_t autoCalibration, ImuOffsetConfig *offsetCf
     Wire.begin(IMU_I2C_SDA, IMU_I2C_SCL);
     Wire.setClock(400000);
     unsigned long timeout = 5000;
-    unsigned long preMillis = GET_SYS_MILLIS();
+    unsigned long preMillis = millis();
     // mpu = MPU6050(0x68, &Wire);
     mpu = MPU6050(0x68);
     while (!mpu.testConnection() && !doDelayMillisTime(timeout, &preMillis, false))
@@ -74,7 +74,7 @@ ImuAction *IMU::update(int interval)
 {
     getVirtureMotion6(&action_info);
     // 原先判断的只是加速度，现在要加上陀螺仪
-    if (GET_SYS_MILLIS() - last_update_time > interval) {
+    if (millis() - last_update_time > interval) {
         if (!action_info.isValid) {
             if (action_info.v_ay > 4000) {
                 encoder_diff--;
@@ -124,7 +124,7 @@ ImuAction *IMU::update(int interval)
             }
         }
 
-        last_update_time = GET_SYS_MILLIS();
+        last_update_time = millis();
     }
     return &action_info;
 }
