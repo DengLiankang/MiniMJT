@@ -197,7 +197,7 @@ void weatherAppGuiInit(struct WEATHER_STRUCT weatherInfo, struct tm timeInfo)
     lv_weatherChartLabel = lv_label_create(lv_weatherAppScr2);
     lv_obj_add_style(lv_weatherChartLabel, &lv_chFontStyle, LV_STATE_DEFAULT);
     lv_label_set_recolor(lv_weatherChartLabel, true);
-    lv_label_set_text(lv_weatherChartLabel, "近7日天气");
+    lv_label_set_text(lv_weatherChartLabel, "查看7日天气");
 
     // 天气表格
     lv_weatherChart = lv_chart_create(lv_weatherAppScr2);
@@ -255,9 +255,9 @@ void DisplaySpaceMan(void)
 {
     static unsigned long lastUpdateTime = 0;
     unsigned long curTime = millis();
-    if (curTime - lastUpdateTime >= 30000) {
+    if (curTime - lastUpdateTime >= 30) {
         if (NULL != lv_spaceManImg) {
-            lv_img_set_src(lv_spaceManImg, SpaceManImgMap[++g_spaceIndex]);
+            lv_img_set_src(lv_spaceManImg, SpaceManImgMap[g_spaceIndex++]);
             g_spaceIndex = g_spaceIndex == 10 ? 0 : g_spaceIndex;
         }
         lastUpdateTime = curTime;
@@ -275,7 +275,7 @@ void WeatherAppGuiPageFlip(lv_scr_load_anim_t anim)
 {
     if (lv_weatherAppScr1 == NULL || lv_weatherAppScr2 == NULL)
         return;
-    
+
     if (lv_scr_act() == lv_weatherAppScr1) {
         lv_scr_load_anim(lv_weatherAppScr2, anim, 500, 500, false);
     } else {
@@ -288,7 +288,7 @@ enum WEATHER_APP_PAGE GetWeatherAppGuiPage(void)
 {
     if (lv_weatherAppScr1 == NULL || lv_weatherAppScr2 == NULL)
         return WEATHER_APP_PAGE::OTHER_PAGE;
-    
+
     if (lv_scr_act() == lv_weatherAppScr1) {
         return WEATHER_APP_PAGE::CLOCK_PAGE;
     } else if (lv_scr_act() == lv_weatherAppScr2) {

@@ -297,6 +297,7 @@ static void WeatherAppMainProcess(AppController *sys, const ImuAction *act_info)
             DisplaySpaceMan();
         }
         lv_scr_load_anim_t anim = TURN_RIGHT == act_info->active ? LV_SCR_LOAD_ANIM_MOVE_RIGHT : LV_SCR_LOAD_ANIM_MOVE_LEFT;
+        lv_anim_del_all();
         WeatherAppGuiPageFlip(anim);
     }
 
