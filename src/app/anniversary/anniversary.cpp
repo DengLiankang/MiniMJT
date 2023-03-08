@@ -238,12 +238,12 @@ static void anniversary_process(AppController *sys, const ImuAction *act_info)
         anim_type = LV_SCR_LOAD_ANIM_MOVE_LEFT;
         run_data->cur_anniversary = (run_data->cur_anniversary + MAX_ANNIVERSARY_CNT - 1) % MAX_ANNIVERSARY_CNT;
     }
-    if (0x01 == run_data->coactusUpdateFlag || doDelayMillisTime(900000, &run_data->preTimeMillis, false)) {
+    if (0x01 == run_data->coactusUpdateFlag || DoDelayMillisTime(900000, &run_data->preTimeMillis)) {
         // 启动时先用持久化配置中的日期
         run_data->anniversary_day_count =
             dateDiff(&(cfg_data.current_date), &(cfg_data.target_date[run_data->cur_anniversary]));
         // 尝试同步网络上的时钟
-        sys->send_to(ANNIVERSARY_APP_NAME, CTRL_NAME, APP_MESSAGE_WIFI_CONN, NULL, NULL);
+        sys->SendRequestEvent(ANNIVERSARY_APP_NAME, CTRL_NAME, APP_MESSAGE_WIFI_CONNECT, NULL, NULL);
         run_data->coactusUpdateFlag = 0x00;
         WriteConfig(&cfg_data);
     } else {
@@ -261,7 +261,7 @@ static void anniversary_process(AppController *sys, const ImuAction *act_info)
     anniversary_gui_display_date(&(cfg_data.target_date[run_data->cur_anniversary]), run_data->anniversary_day_count,
                                  cfg_data.event_name[run_data->cur_anniversary].c_str());
     // 发送请求。如果是wifi相关的消息，当请求完成后自动会调用 anniversary_message_handle 函数
-    // sys->send_to(ANNIVERSARY_APP_NAME, CTRL_NAME,
+    // sys->SendRequestEvent(ANNIVERSARY_APP_NAME, CTRL_NAME,
     //              APP_MESSAGE_WIFI_CONN, (void *)run_data->val1, NULL);
 
     // 程序需要时可以适当加延时
@@ -292,16 +292,16 @@ static void anniversary_message_handle(const char *from, const char *to, APP_MES
 {
     // 目前主要是wifi开关类事件（用于功耗控制）
     switch (type) {
-        case APP_MESSAGE_WIFI_CONN: {
+        case APP_MESSAGE_WIFI_CONNECT: {
             // todo
             Serial.print(F("ntp update.\n"));
 
             // long long timestamp = get_timestamp(TIME_API); // nowapi时间API
         } break;
-        case APP_MESSAGE_WIFI_AP: {
+        case APP_MESSAGE_WIFI_AP_START: {
             // todo
         } break;
-        case APP_MESSAGE_WIFI_ALIVE: {
+        case APP_MESSAGE_WIFI_KEEP_ALIVE: {
             // wifi心跳维持的响应 可以不做任何处理
         } break;
         case APP_MESSAGE_READ_CFG: {

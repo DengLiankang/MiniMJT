@@ -3,7 +3,7 @@
 #include "common.h"
 #include "file_manager_gui.h"
 #include "message.h"
-#include "network.h"
+#include "driver/network.h"
 #include "sys/app_controller.h"
 
 #define FILE_MANAGER_APP_NAME "File Manager"
@@ -54,12 +54,12 @@ static void file_maneger_process(AppController *sys, const ImuAction *action)
         display_file_manager("File Manager", WiFi.softAPIP().toString().c_str(), "21", "Wait connect ....",
                              LV_SCR_LOAD_ANIM_NONE);
         // 如果web服务没有开启 且 ap开启的请求没有发送 event_id这边没有作用（填0）
-        sys->send_to(FILE_MANAGER_APP_NAME, CTRL_NAME, APP_MESSAGE_WIFI_CONN, NULL, NULL);
+        sys->SendRequestEvent(FILE_MANAGER_APP_NAME, CTRL_NAME, APP_MESSAGE_WIFI_CONNECT, NULL, NULL);
         run_data->req_sent = 1; // 标志为 ap开启请求已发送
     } else if (1 == run_data->tcp_start) {
-        if (doDelayMillisTime(SHARE_WIFI_ALIVE, &run_data->apAlivePreMillis, false)) {
+        if (DoDelayMillisTime(SHARE_WIFI_ALIVE, &run_data->apAlivePreMillis)) {
             // 发送wifi维持的心跳
-            sys->send_to(FILE_MANAGER_APP_NAME, CTRL_NAME, APP_MESSAGE_WIFI_ALIVE, NULL, NULL);
+            sys->SendRequestEvent(FILE_MANAGER_APP_NAME, CTRL_NAME, APP_MESSAGE_WIFI_KEEP_ALIVE, NULL, NULL);
         }
         ftpSrv.handleFTP(); // make sure in loop you call handleFTP()!!
     }
@@ -97,20 +97,20 @@ static void file_maneger_message_handle(const char *from, const char *to, APP_ME
                                         void *ext_info)
 {
     switch (type) {
-        case APP_MESSAGE_WIFI_CONN: {
+        case APP_MESSAGE_WIFI_CONNECT: {
             Serial.print(F("APP_MESSAGE_WIFI_AP enable\n"));
             display_file_manager("File Manager", WiFi.localIP().toString().c_str(), "21", "Connect succ",
                                  LV_SCR_LOAD_ANIM_NONE);
             run_data->tcp_start = 1;
             ftpSrv.begin("holocubic", "aio");
         } break;
-        case APP_MESSAGE_WIFI_AP: {
+        case APP_MESSAGE_WIFI_AP_START: {
             Serial.print(F("APP_MESSAGE_WIFI_AP enable\n"));
             display_file_manager("File Manager", WiFi.localIP().toString().c_str(), "21", "Connect succ",
                                  LV_SCR_LOAD_ANIM_NONE);
             run_data->tcp_start = 1;
         } break;
-        case APP_MESSAGE_WIFI_ALIVE: {
+        case APP_MESSAGE_WIFI_KEEP_ALIVE: {
             // wifi心跳维持的响应 可以不做任何处理
         } break;
         default:

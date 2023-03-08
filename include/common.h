@@ -6,7 +6,7 @@
 #include "driver/flash_fs.h"
 #include "driver/imu.h"
 #include "driver/sd_card.h"
-#include "network.h"
+#include "driver/network.h"
 #include <TFT_eSPI.h>
 
 #define MJT_VERSION "2.1.11"
@@ -37,12 +37,8 @@
 #define MAX_CFG_INFO_LENGTH 128
 
 struct SysUtilConfig {
-    String ssid0;
-    String password0;
-    String ssid1;
-    String password1;
-    String ssid2;
-    String password2;
+    String ssid[3];
+    String password[3];
     String autoStartAppName; // 开机自启的APP名字
     uint8_t powerMode;       // 功耗模式（0为节能模式 1为性能模式）
     uint8_t backlight;       // 屏幕亮度（1-100）
@@ -53,6 +49,9 @@ struct SysUtilConfig {
     struct ImuOffsetConfig imuOffsets;
 };
 
+extern SdCard g_tfCard;
+extern FlashFs g_flashFs; // flash中的文件系统
+extern TFT_eSPI *tft;
 extern SemaphoreHandle_t lvgl_mutex; // lvgl 操作的锁
 
 // LVGL操作的安全宏（避免脏数据）
@@ -66,7 +65,7 @@ extern SemaphoreHandle_t lvgl_mutex; // lvgl 操作的锁
 
 void InitLvglTaskSetup(const char *name);
 void DeleteLvglTask(void);
-boolean doDelayMillisTime(unsigned long interval, unsigned long *previousMillis, boolean state);
+boolean DoDelayMillisTime(unsigned long interval, unsigned long *previousMillis);
 void ParseParam(char *src, int argc, char **dst);
 
 #endif

@@ -1,5 +1,8 @@
 #include "common.h"
 
+FlashFs g_flashFs; // flash中的文件系统
+SdCard g_tfCard;
+TFT_eSPI *tft;
 TaskHandle_t gTaskLvglHandle;
 
 // lvgl handle的锁
@@ -26,14 +29,14 @@ void DeleteLvglTask(void)
     vTaskDelete(gTaskLvglHandle);
 }
 
-boolean doDelayMillisTime(unsigned long interval, unsigned long *previousMillis, boolean state)
+boolean DoDelayMillisTime(unsigned long interval, unsigned long *previousMillis)
 {
     unsigned long currentMillis = millis();
     if (currentMillis - *previousMillis >= interval) {
         *previousMillis = currentMillis;
-        state = !state;
+        return true;
     }
-    return state;
+    return false;
 }
 
 /// @brief 通过换行符解析每一行的参数，使用本函数一定要小心内存溢出

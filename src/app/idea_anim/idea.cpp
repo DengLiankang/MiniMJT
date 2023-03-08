@@ -1,6 +1,5 @@
 #include "idea.h"
 #include "common.h"
-#include "network.h"
 #include "sys/app_controller.h"
 #include "ui_animation.h"
 #include <stdint.h>

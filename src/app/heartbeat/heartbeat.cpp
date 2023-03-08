@@ -1,7 +1,7 @@
 #include "heartbeat.h"
 #include "common.h"
 #include "heartbeat_gui.h"
-#include "network.h"
+#include "driver/network.h"
 #include "sys/app_controller.h"
 #include <PubSubClient.h>
 
@@ -41,7 +41,7 @@ void HeartbeatAppForeverData::callback(char *topic, byte *payload, unsigned int 
     }
     Serial.println();
 
-    g_appController->send_to(HEARTBEAT_APP_NAME, CTRL_NAME, APP_MESSAGE_MQTT_DATA, NULL, NULL);
+    g_appController->SendRequestEvent(HEARTBEAT_APP_NAME, CTRL_NAME, APP_MESSAGE_MQTT_DATA, NULL, NULL);
 }
 
 HeartbeatAppForeverData hb_cfg;
@@ -223,7 +223,7 @@ static int heartbeat_init(AppController *sys)
             // hb_cfg.espClient);
         }
         // 连接wifi，并开启mqtt客户端
-        sys->send_to(HEARTBEAT_APP_NAME, CTRL_NAME, APP_MESSAGE_WIFI_CONN, NULL, NULL);
+        sys->SendRequestEvent(HEARTBEAT_APP_NAME, CTRL_NAME, APP_MESSAGE_WIFI_CONNECT, NULL, NULL);
     }
     return 0;
 }
@@ -265,10 +265,10 @@ static void heartbeat_process(AppController *sys, const ImuAction *act_info)
 
     if (NULL != hb_cfg.mqtt_client) {
         // 以下减少网络请求的压力
-        if (doDelayMillisTime(run_data->timeUpdataInterval, &run_data->preUpdataMillis, false)) {
+        if (DoDelayMillisTime(run_data->timeUpdataInterval, &run_data->preUpdataMillis)) {
             // 发送请求。如果是wifi相关的消息，
             // 当请求完成后自动会调用 heartbeat_message_handle 函数
-            sys->send_to(HEARTBEAT_APP_NAME, CTRL_NAME, APP_MESSAGE_WIFI_ALIVE, NULL, NULL);
+            sys->SendRequestEvent(HEARTBEAT_APP_NAME, CTRL_NAME, APP_MESSAGE_WIFI_KEEP_ALIVE, NULL, NULL);
         }
     }
 
@@ -303,7 +303,7 @@ static void heartbeat_message_handle(const char *from, const char *to, APP_MESSA
 {
     // 目前主要是wifi开关类事件（用于功耗控制）
     switch (type) {
-        case APP_MESSAGE_WIFI_CONN: {
+        case APP_MESSAGE_WIFI_CONNECT: {
             Serial.println(F("MQTT keep alive"));
             if (!hb_cfg.mqtt_client->connected()) {
                 hb_cfg.mqtt_reconnect();
@@ -311,10 +311,10 @@ static void heartbeat_message_handle(const char *from, const char *to, APP_MESSA
                 hb_cfg.mqtt_client->loop(); // 开启mqtt客户端
             }
         } break;
-        case APP_MESSAGE_WIFI_AP: {
+        case APP_MESSAGE_WIFI_AP_START: {
             // todo
         } break;
-        case APP_MESSAGE_WIFI_ALIVE: {
+        case APP_MESSAGE_WIFI_KEEP_ALIVE: {
             Serial.println(F("MQTT keep alive(APP_MESSAGE_WIFI_ALIVE)"));
             if (!hb_cfg.mqtt_client->connected()) {
                 hb_cfg.mqtt_reconnect();

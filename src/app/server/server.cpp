@@ -1,7 +1,7 @@
 #include "server.h"
 #include "app/app_conf.h"
 #include "common.h"
-#include "network.h"
+#include "driver/network.h"
 #include "server_gui.h"
 #include "sys/app_controller.h"
 #include "web_setting.h"
@@ -117,14 +117,14 @@ static void server_process(AppController *sys, const ImuAction *action)
                         // "", "",
                         LV_SCR_LOAD_ANIM_NONE);
         // 如果web服务没有开启 且 ap开启的请求没有发送 message这边没有作用（填0）
-        sys->send_to(SERVER_APP_NAME, CTRL_NAME, APP_MESSAGE_WIFI_AP, NULL, NULL);
+        sys->SendRequestEvent(SERVER_APP_NAME, CTRL_NAME, APP_MESSAGE_WIFI_AP_START, NULL, NULL);
         run_data->req_sent = 1; // 标志为 ap开启请求已发送
     } else if (1 == run_data->web_start) {
         server.handleClient(); // 一定需要放在循环里扫描
         // dnsServer.processNextRequest();
-        if (doDelayMillisTime(SERVER_REFLUSH_INTERVAL, &run_data->serverReflushPreMillis, false) == true) {
+        if (DoDelayMillisTime(SERVER_REFLUSH_INTERVAL, &run_data->serverReflushPreMillis) == true) {
             // 发送wifi维持的心跳
-            sys->send_to(SERVER_APP_NAME, CTRL_NAME, APP_MESSAGE_WIFI_ALIVE, NULL, NULL);
+            sys->SendRequestEvent(SERVER_APP_NAME, CTRL_NAME, APP_MESSAGE_WIFI_KEEP_ALIVE, NULL, NULL);
 
             display_setting("WebServer Start", "Domain: holocubic", WiFi.localIP().toString().c_str(),
                             WiFi.softAPIP().toString().c_str(), LV_SCR_LOAD_ANIM_NONE);
@@ -154,14 +154,14 @@ static void server_message_handle(const char *from, const char *to, APP_MESSAGE_
                                   void *ext_info)
 {
     switch (type) {
-        case APP_MESSAGE_WIFI_AP: {
+        case APP_MESSAGE_WIFI_AP_START: {
             Serial.print(F("APP_MESSAGE_WIFI_AP enable\n"));
             display_setting("WebServer Start", "Domain: holocubic", WiFi.localIP().toString().c_str(),
                             WiFi.softAPIP().toString().c_str(), LV_SCR_LOAD_ANIM_NONE);
             start_web_config();
             run_data->web_start = 1;
         } break;
-        case APP_MESSAGE_WIFI_ALIVE: {
+        case APP_MESSAGE_WIFI_KEEP_ALIVE: {
             // wifi心跳维持的响应 可以不做任何处理
         } break;
         default:

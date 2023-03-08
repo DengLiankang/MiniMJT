@@ -157,25 +157,6 @@ static int game_2048_exit_callback(void *param)
     return 0;
 }
 
-static void game_2048_message_handle(const char *from, const char *to, APP_MESSAGE_TYPE type, void *message,
-                                     void *ext_info)
-{
-    // 目前事件主要是wifi开关类事件（用于功耗控制）
-    switch (type) {
-        case APP_MESSAGE_WIFI_CONN: {
-            // todo
-        } break;
-        case APP_MESSAGE_WIFI_AP: {
-            // todo
-        } break;
-        case APP_MESSAGE_WIFI_ALIVE: {
-            // wifi心跳维持的响应 可以不做任何处理
-        } break;
-        default:
-            break;
-    }
-}
-
 APP_OBJ game_2048_app = {G2048_APP_NAME,          &app_game_2048,          "",
                          game_2048_init,          game_2048_process,       game_2048_background_task,
-                         game_2048_exit_callback, game_2048_message_handle};
+                         game_2048_exit_callback, NULL};

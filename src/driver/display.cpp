@@ -2,7 +2,6 @@
 #include "common.h"
 #include "driver/lv_demo_encoder.h"
 #include "driver/lv_port_indev.h"
-#include "network.h"
 
 #define LV_HOR_RES_MAX_LEN 80 // 24
 

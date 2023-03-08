@@ -6,28 +6,6 @@ const char *AppMessageEventStr[] = {"APP_MESSAGE_WIFI_CONN",    "APP_MESSAGE_WIF
                                      "APP_MESSAGE_GET_PARAM",    "APP_MESSAGE_SET_PARAM",   "APP_MESSAGE_READ_CFG",
                                      "APP_MESSAGE_WRITE_CFG",    "APP_MESSAGE_NONE"};
 
-
-// fs interface
-int8_t AppController::WriteFile(enum RW_FILE_SRC type, const char *path, void *cfgData)
-{
-    if (type == RW_FILE_SRC::RW_FILE_FROM_FLASH) {
-        return m_flashFs.WriteFile(path, (const char *)cfgData);
-    } else if (type == RW_FILE_SRC::RW_FILE_FROM_SDCARD) {
-        return m_tfCard.WriteFile(path, (const char *)cfgData);
-    }
-    return -1;
-}
-
-int16_t AppController::ReadFile(enum RW_FILE_SRC type, const char *path, void *cfgData)
-{
-    if (type == RW_FILE_SRC::RW_FILE_FROM_FLASH) {
-        return m_flashFs.ReadFile(path, (uint8_t *)cfgData);
-    } else if (type == RW_FILE_SRC::RW_FILE_FROM_SDCARD) {
-        return m_tfCard.ReadFile(path, (uint8_t *)cfgData);
-    }
-    return -1;
-}
-
 // request interface
 int AppController::SendRequestEvent(const char *from, const char *to, APP_MESSAGE_TYPE type, void *data, void *extData)
 {
@@ -50,7 +28,9 @@ int AppController::SendRequestEvent(const char *from, const char *to, APP_MESSAG
         }
     } else {
         Serial.printf("[Massage]%s To %s: %s\n", fromApp->appName, toApp->appName, AppMessageEventStr[type]);
-        if (toApp->MessageHandle != NULL) {
+        if (strcmp(to, CTRL_NAME) == 0) {
+            RequestProcess(type, data, extData);
+        } else if (toApp->MessageHandle != NULL) {
             toApp->MessageHandle(from, to, type, data, extData);
         }
     }

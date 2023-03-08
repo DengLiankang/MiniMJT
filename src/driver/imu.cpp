@@ -26,7 +26,7 @@ void IMU::Init(uint8_t order, uint8_t autoCalibration, ImuOffsetConfig *offsetCf
     unsigned long preMillis = millis();
     // mpu = MPU6050(0x68, &Wire);
     mpu = MPU6050(0x68);
-    while (!mpu.testConnection() && !doDelayMillisTime(timeout, &preMillis, false))
+    while (!mpu.testConnection() && !DoDelayMillisTime(timeout, &preMillis))
         ;
 
     if (!mpu.testConnection()) {

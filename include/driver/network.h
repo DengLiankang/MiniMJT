@@ -12,6 +12,9 @@
 #define AP_DISABLE 0
 #define AP_ENABLE 1
 
+#define AP_SSID "MiniMJT"
+#define HOST_NAME "MiniMJT"
+
 // Set your server's logical name here e.g. if 'myserver' then address is http://myserver.local/
 #define SERVER_NAME "fileserver"
 
@@ -44,8 +47,6 @@ extern IPAddress gateway;  // Set your network Gateway usually your Router base 
 extern IPAddress subnet;   // Set your network sub-network mask here
 extern IPAddress dns;      // Set your network DNS usually your Router base address
 
-extern const char *AP_SSID; // 热点名称
-
 void restCallback(TimerHandle_t xTimer);
 
 class Network
@@ -55,11 +56,11 @@ private:
 
 public:
     Network();
-    void search_wifi(void);
-    boolean start_conn_wifi(const char *ssid, const char *password);
+    void SearchWifi(void);
+    boolean ConnectWifi(const char *ssid, const char *password);
     boolean end_conn_wifi(void);
-    boolean close_wifi(void);
-    boolean open_ap(const char *ap_ssid = AP_SSID, const char *ap_password = NULL);
+    boolean DisconnectWifi(void);
+    boolean OpenAp(const char *ap_ssid = AP_SSID, const char *ap_password = NULL);
 };
 
 #endif

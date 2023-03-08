@@ -259,7 +259,7 @@ void WeatherApp::WeatherAppDataInit(void)
     ValidateConfig(&g_weatherAppCfg, &defaultConfig);
     m_timeInfo = m_rtcTime.getTimeStruct();
     memcpy(&m_weatherInfo, &defaultWeather, sizeof(struct WEATHER_STRUCT));
-    m_weatherInfo.cityName = m_weatherAppCfg.weatherApiCityAddr;
+    m_weatherInfo.cityName = g_weatherAppCfg.weatherApiCityAddr;
     preNetTimestamp = 1577808000000; // 上一次的网络时间戳 初始化为2020-01-01 00:00:00
     errorNetTimestamp = 2;
     preLocalTimestamp = millis(); // 上一次的本地机器时间戳
@@ -307,15 +307,15 @@ static void WeatherAppMainProcess(AppController *sys, const ImuAction *act_info)
     if (curPage == WEATHER_APP_PAGE::CLOCK_PAGE) {
         DisplayWeather(g_weatherApp->m_weatherInfo);
         if (0x01 == g_weatherApp->coactusUpdateFlag ||
-            doDelayMillisTime(g_weatherAppCfg.weatherUpdataInterval, &g_weatherApp->preWeatherMillis, false)) {
-            sys->send_to(WEATHER_APP_NAME, CTRL_NAME, APP_MESSAGE_WIFI_CONN, (void *)UPDATE_NOW, NULL);
-            sys->send_to(WEATHER_APP_NAME, CTRL_NAME, APP_MESSAGE_WIFI_CONN, (void *)UPDATE_DAILY, NULL);
+            DoDelayMillisTime(g_weatherAppCfg.weatherUpdataInterval, &g_weatherApp->preWeatherMillis)) {
+            sys->SendRequestEvent(WEATHER_APP_NAME, CTRL_NAME, APP_MESSAGE_WIFI_CONNECT, (void *)UPDATE_NOW, NULL);
+            sys->SendRequestEvent(WEATHER_APP_NAME, CTRL_NAME, APP_MESSAGE_WIFI_CONNECT, (void *)UPDATE_DAILY, NULL);
         }
 
         if (0x01 == g_weatherApp->coactusUpdateFlag ||
-            doDelayMillisTime(g_weatherAppCfg.timeUpdataInterval, &g_weatherApp->preTimeMillis, false)) {
+            DoDelayMillisTime(g_weatherAppCfg.timeUpdataInterval, &g_weatherApp->preTimeMillis)) {
             // 尝试同步网络上的时钟
-            sys->send_to(WEATHER_APP_NAME, CTRL_NAME, APP_MESSAGE_WIFI_CONN, (void *)UPDATE_NTP, NULL);
+            sys->SendRequestEvent(WEATHER_APP_NAME, CTRL_NAME, APP_MESSAGE_WIFI_CONNECT, (void *)UPDATE_NTP, NULL);
         } else if (millis() - g_weatherApp->preLocalTimestamp > 400) {
             UpdateTime_RTC(get_timestamp());
         }
@@ -339,7 +339,7 @@ static void WeatherAppMessageHandle(const char *from, const char *to, APP_MESSAG
                                    void *ext_info)
 {
     switch (type) {
-        case APP_MESSAGE_WIFI_CONN: {
+        case APP_MESSAGE_WIFI_CONNECT: {
             Serial.println(F("----->weather_event_notification"));
             int event_id = (int)message;
             switch (event_id) {
