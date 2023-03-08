@@ -1,12 +1,5 @@
 #include "common.h"
 
-IMU mpu;
-SdCard g_tfCard;
-Network g_network; // 网络连接
-FlashFs g_flashFs; // flash中的文件系统
-Display screen;    // 屏幕对象
-TFT_eSPI *tft;
-
 TaskHandle_t gTaskLvglHandle;
 
 // lvgl handle的锁

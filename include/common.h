@@ -53,12 +53,6 @@ struct SysUtilConfig {
     struct ImuOffsetConfig imuOffsets;
 };
 
-extern IMU mpu; // 原则上只提供给主程序调用
-extern SdCard g_tfCard;
-extern Network g_network; // 网络连接
-extern FlashFs g_flashFs; // flash中的文件系统（替代原先的Preferences）
-extern Display screen;    // 屏幕对象
-extern TFT_eSPI *tft;
 extern SemaphoreHandle_t lvgl_mutex; // lvgl 操作的锁
 
 // LVGL操作的安全宏（避免脏数据）

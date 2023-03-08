@@ -4,32 +4,218 @@
 #include "sys/app_controller_gui.h"
 #include "sys/interface.h"
 
-const char *app_event_type_info[] = {"APP_MESSAGE_WIFI_CONN",    "APP_MESSAGE_WIFI_AP",     "APP_MESSAGE_WIFI_ALIVE",
-                                     "APP_MESSAGE_WIFI_DISCONN", "APP_MESSAGE_UPDATE_TIME", "APP_MESSAGE_MQTT_DATA",
-                                     "APP_MESSAGE_GET_PARAM",    "APP_MESSAGE_SET_PARAM",   "APP_MESSAGE_READ_CFG",
-                                     "APP_MESSAGE_WRITE_CFG",    "APP_MESSAGE_NONE"};
+// 文件名称限制在32个字符内
+#define SYS_CONFIG_PATH "/mjt_sys.cfg"
 
 // global
 AppController *g_appController = NULL;         // APP控制器
-volatile static bool gIsRunEventDeal = false; // 事件处理标志
-volatile static bool gIsCheckAction = false;  // imu数据更新标志
-ImuAction *gImuActionData = NULL;             // 存放mpu6050数据
+volatile static bool g_isCheckAction = false;  // imu数据更新标志
 
 void TimerAppCtrlHandle(TimerHandle_t xTimer)
 {
-    gIsRunEventDeal = true;
-    gIsCheckAction = true;
+    g_isCheckAction = true;
+}
+
+void AppController::ReadConfigFromFlash(SysUtilConfig *cfg)
+{
+    // 如果有需要持久化配置文件 可以调用此函数将数据存在flash中
+    // 配置文件名最好以APP名为开头 以".cfg"结尾，以免多个APP读取混乱
+    char cfgInfo[MAX_CFG_INFO_LENGTH];
+    int16_t size = ReadFile(RW_FILE_SRC::RW_FILE_FROM_FLASH, SYS_CONFIG_PATH, (uint8_t *)cfgInfo);
+    if (size <= 0) {
+        // 默认值
+        cfg->ssid0 = "Mate 50 Pro";
+        cfg->password0 = "12345678";
+        cfg->powerMode = 0;             // 功耗模式（0为节能模式 1为性能模式）
+        cfg->backlight = 80;            // 屏幕亮度（1-100）
+        cfg->rotation = 4;              // 屏幕旋转方向
+        cfg->imuAutoCalibration = 1;    // 是否自动校准陀螺仪 0关闭自动校准 1打开自动校准
+        cfg->imuOrder = 0;              // 操作方向
+        cfg->autoStartAppName = "None"; // 无指定开机自启APP
+        this->WriteConfigToFlash(cfg);
+    } else {
+        cfgInfo[size] = 0;
+        // 解析数据
+        char *param[18] = {0};
+        ParseParam(cfgInfo, 18, param);
+        cfg->ssid0 = param[0];
+        cfg->password0 = param[1];
+        cfg->ssid1 = param[2];
+        cfg->password1 = param[3];
+        cfg->ssid2 = param[4];
+        cfg->password2 = param[5];
+        cfg->autoStartAppName = param[6]; // 开机自启APP的name
+        cfg->powerMode = atol(param[7]);
+        cfg->backlight = atol(param[8]);
+        cfg->rotation = atol(param[9]);
+        cfg->imuAutoCalibration = atol(param[10]);
+        cfg->imuOrder = atol(param[11]);
+        cfg->imuOffsets.imuGyroOffsetX = atol(param[12]);
+        cfg->imuOffsets.imuGyroOffsetY = atol(param[13]);
+        cfg->imuOffsets.imuGyroOffsetZ = atol(param[14]);
+        cfg->imuOffsets.imuAccelOffsetX = atol(param[15]);
+        cfg->imuOffsets.imuAccelOffsetY = atol(param[16]);
+        cfg->imuOffsets.imuAccelOffsetZ = atol(param[17]);
+    }
+}
+
+void AppController::WriteConfigToFlash(SysUtilConfig *cfg)
+{
+    char tmp[25];
+    // 将配置数据保存在文件中（持久化）
+    String wData;
+    wData += cfg->ssid0 + "\n";
+    wData += cfg->password0 + "\n";
+    wData += cfg->ssid1 + "\n";
+    wData += cfg->password1 + "\n";
+    wData += cfg->ssid2 + "\n";
+    wData += cfg->password2 + "\n";
+    wData += cfg->autoStartAppName + "\n";
+    memset(tmp, 0, 25);
+    snprintf(tmp, 25, "%u\n", cfg->powerMode);
+    wData += tmp;
+
+    memset(tmp, 0, 25);
+    snprintf(tmp, 25, "%u\n", cfg->backlight);
+    wData += tmp;
+
+    memset(tmp, 0, 25);
+    snprintf(tmp, 25, "%u\n", cfg->rotation);
+    wData += tmp;
+
+    memset(tmp, 0, 25);
+    snprintf(tmp, 25, "%u\n", cfg->imuAutoCalibration);
+    wData += tmp;
+
+    memset(tmp, 0, 25);
+    snprintf(tmp, 25, "%u\n", cfg->imuOrder);
+    wData += tmp;
+
+    memset(tmp, 0, 25);
+    snprintf(tmp, 25, "%u\n", cfg->imuOffsets.imuGyroOffsetX);
+    wData += tmp;
+
+    memset(tmp, 0, 25);
+    snprintf(tmp, 25, "%u\n", cfg->imuOffsets.imuGyroOffsetY);
+    wData += tmp;
+
+    memset(tmp, 0, 25);
+    snprintf(tmp, 25, "%u\n", cfg->imuOffsets.imuGyroOffsetZ);
+    wData += tmp;
+
+    memset(tmp, 0, 25);
+    snprintf(tmp, 25, "%u\n", cfg->imuOffsets.imuAccelOffsetX);
+    wData += tmp;
+
+    memset(tmp, 0, 25);
+    snprintf(tmp, 25, "%u\n", cfg->imuOffsets.imuAccelOffsetY);
+    wData += tmp;
+
+    memset(tmp, 0, 25);
+    snprintf(tmp, 25, "%u\n", cfg->imuOffsets.imuAccelOffsetZ);
+    wData += tmp;
+
+    WriteFile(RW_FILE_SRC::RW_FILE_FROM_FLASH, SYS_CONFIG_PATH, (void *)wData.c_str());
+
+    // 立即生效相关配置
+    // screen.setBackLight(cfg->backlight / 100.0);
+    // tft->setRotation(cfg->rotation);
+    // mpu.setOrder(cfg->imuOrder);
+}
+
+void AppController::WifiConnectRequestDeal(void)
+{
+    if (false == m_wifi_status) {
+        m_network.start_conn_wifi(m_sysCfg.ssid0.c_str(), m_sysCfg.password0.c_str());
+        m_wifi_status = true;
+    }
+    m_preWifiReqMillis = millis();
+    if ((WiFi.getMode() & WIFI_MODE_STA) == WIFI_MODE_STA && CONN_SUCC != g_network.end_conn_wifi()) {
+        // 在STA模式下 并且还没连接上wifi
+        return false;
+    }
+}
+
+void AppController::RequestProcess(APP_MESSAGE_TYPE type, const char *key, char *value)
+{
+    switch (type) {
+        case APP_MESSAGE_WIFI_CONNECT:
+            WifiConnectRequestDeal();
+        case APP_MESSAGE_GET_PARAM:
+            if (!strcmp(key, "ssid0")) {
+                snprintf(value, 32, "%s", m_sysCfg.ssid0.c_str());
+            } else if (!strcmp(key, "password0")) {
+                snprintf(value, 32, "%s", m_sysCfg.password0.c_str());
+            } else if (!strcmp(key, "ssid1")) {
+                snprintf(value, 32, "%s", m_sysCfg.ssid1.c_str());
+            } else if (!strcmp(key, "password1")) {
+                snprintf(value, 32, "%s", m_sysCfg.password1.c_str());
+            } else if (!strcmp(key, "ssid2")) {
+                snprintf(value, 32, "%s", m_sysCfg.ssid2.c_str());
+            } else if (!strcmp(key, "password2")) {
+                snprintf(value, 32, "%s", m_sysCfg.password2.c_str());
+            } else if (!strcmp(key, "autoStartAppName")) {
+                snprintf(value, 32, "%s", m_sysCfg.autoStartAppName.c_str());
+            } else if (!strcmp(key, "powerMode")) {
+                snprintf(value, 32, "%u", m_sysCfg.powerMode);
+            } else if (!strcmp(key, "backlight")) {
+                snprintf(value, 32, "%u", m_sysCfg.backlight);
+            } else if (!strcmp(key, "rotation")) {
+                snprintf(value, 32, "%u", m_sysCfg.rotation);
+            } else if (!strcmp(key, "imuAutoCalibration")) {
+                snprintf(value, 32, "%u", m_sysCfg.imuAutoCalibration);
+            } else if (!strcmp(key, "imuOrder")) {
+                snprintf(value, 32, "%u", m_sysCfg.imuOrder);
+            }
+            break;
+        case APP_MESSAGE_SET_PARAM:
+            if (!strcmp(key, "ssid0")) {
+                m_sysCfg.ssid0 = value;
+            } else if (!strcmp(key, "password0")) {
+                m_sysCfg.password0 = value;
+            } else if (!strcmp(key, "ssid1")) {
+                m_sysCfg.ssid1 = value;
+            } else if (!strcmp(key, "password1")) {
+                m_sysCfg.password1 = value;
+            } else if (!strcmp(key, "ssid2")) {
+                m_sysCfg.ssid2 = value;
+            } else if (!strcmp(key, "password2")) {
+                m_sysCfg.password2 = value;
+            } else if (!strcmp(key, "imuAutoCalibration")) {
+                m_sysCfg.imuAutoCalibration = atol(value);
+            } else if (!strcmp(key, "powerMode")) {
+                m_sysCfg.powerMode = atol(value);
+            } else if (!strcmp(key, "backlight")) {
+                m_sysCfg.backlight = atol(value);
+            } else if (!strcmp(key, "rotation")) {
+                m_sysCfg.rotation = atol(value);
+            } else if (!strcmp(key, "imuOrder")) {
+                m_sysCfg.imuOrder = atol(value);
+            } else if (!strcmp(key, "autoStartAppName")) {
+                m_sysCfg.autoStartAppName = value;
+            }
+            break;
+        case APP_MESSAGE_READ_CFG:
+            ReadConfigFromFlash(&m_sysCfg);
+            break;
+        case APP_MESSAGE_WRITE_CFG:
+            WriteConfigToFlash(&m_sysCfg);
+            break;
+        default:
+            break;
+    }
 }
 
 AppController::AppController(const char *name)
 {
-    strncpy(this->m_name, name, APP_CONTROLLER_NAME_LEN);
+    m_name = name;
     m_appNum = 0;
     m_currentAppItem = 0;
     // m_appList = new APP_OBJ[APP_MAX_NUM];
     m_wifi_status = false;
     m_preWifiReqMillis = millis();
     m_appCtrlState = MJT_SYS_STATE::STATE_SYS_LOADING;
+    m_imuActionData = NULL;
     // 定义一个定时器
     m_appCtrlTimer = xTimerCreate("AppCtrlTimer", 200 / portTICK_PERIOD_MS, pdTRUE, (void *)0, TimerAppCtrlHandle);
 }
@@ -39,7 +225,7 @@ AppController::~AppController() {}
 void AppController::Init(void)
 {
     // FlashFs init first
-    g_flashFs.Init();
+    m_flashFs.Init();
 
     this->ReadConfigFromFlash(&m_sysCfg);
 
@@ -55,7 +241,7 @@ void AppController::Init(void)
     Serial.println(getCpuFrequencyMhz());
 
     /*** Init micro SD-Card ***/
-    g_tfCard.Init();
+    m_tfCard.Init();
 
     /*** Init screen ***/
     tft = new TFT_eSPI(SCREEN_HOR_RES, SCREEN_VER_RES);
@@ -119,8 +305,7 @@ int AppController::AppInstall(APP_OBJ *app, APP_TYPE appType)
         return ret;
     }
 
-    m_appList[m_appNum] = app;
-    m_appTypeList[m_appNum] = appType;
+    m_appList.push_back(app);
     ++m_appNum;
     return 0; // 安装成功
 }
@@ -131,7 +316,7 @@ int AppController::remove_backgroud_task(void)
     return 0; // 安装成功
 }
 
-int AppController::AppAutoStart()
+int AppController::AppAutoStart(void)
 {
     // APP自启动
     int index = this->GetAppIndexByName(m_sysCfg.autoStartAppName.c_str());
@@ -155,56 +340,45 @@ void AppController::MainProcess(void)
         return;
     }
 
-    // 有动画刷新时不进行处理
-    // if (lv_anim_count_running()) {
-    //     delay(1);
-    //     return;
-    // }
-
-    if (gIsCheckAction) {
-        gIsCheckAction = false;
-        gImuActionData = mpu.getAction();
+    if (g_isCheckAction) {
+        g_isCheckAction = false;
+        m_imuActionData = mpu.getAction();
     }
 
-    if (gIsRunEventDeal) {
-        gIsRunEventDeal = false;
-        this->req_event_deal();
-    }
-
-    if (ACTIVE_TYPE::UNKNOWN != gImuActionData->active) {
+    if (ACTIVE_TYPE::UNKNOWN != m_imuActionData->active) {
         Serial.print("[Operate] ");
-        Serial.println(active_type_info[gImuActionData->active]);
+        Serial.println(active_type_info[m_imuActionData->active]);
     }
 
     // wifi自动关闭(在节能模式下)
     if (0 == m_sysCfg.powerMode && true == m_wifi_status &&
         doDelayMillisTime(WIFI_LIFE_CYCLE, &m_preWifiReqMillis, false)) {
-        send_to(CTRL_NAME, CTRL_NAME, APP_MESSAGE_WIFI_DISCONN, 0, NULL);
+        SendRequest(CTRL_NAME, CTRL_NAME, APP_MESSAGE_WIFI_DISCONN, 0, NULL);
     }
 
     if (GetSystemState() == MJT_SYS_STATE::STATE_APP_MENU) {
         // lv_scr_load_anim_t anim = LV_SCR_LOAD_ANIM_NONE;
 
-        if (gImuActionData->active == ACTIVE_TYPE::TURN_LEFT) {
+        if (m_imuActionData->active == ACTIVE_TYPE::TURN_LEFT) {
             m_currentAppItem = (m_currentAppItem + 1) % m_appNum;
             AppCtrlMenuDisplay(m_appList[m_currentAppItem]->appLogo, m_appList[m_currentAppItem]->appName, LV_SCR_LOAD_ANIM_MOVE_LEFT, false);
             Serial.println(String("Current App: ") + m_appList[m_currentAppItem]->appName);
-        } else if (gImuActionData->active == ACTIVE_TYPE::TURN_RIGHT) {
+        } else if (m_imuActionData->active == ACTIVE_TYPE::TURN_RIGHT) {
             m_currentAppItem = (m_currentAppItem + m_appNum - 1) % m_appNum;
             AppCtrlMenuDisplay(m_appList[m_currentAppItem]->appLogo, m_appList[m_currentAppItem]->appName, LV_SCR_LOAD_ANIM_MOVE_RIGHT, false);
             Serial.println(String("Current App: ") + m_appList[m_currentAppItem]->appName);
-        } else if (gImuActionData->active == ACTIVE_TYPE::GO_FORWORD) {
+        } else if (m_imuActionData->active == ACTIVE_TYPE::GO_FORWORD) {
             if (m_appList[m_currentAppItem]->AppInit != NULL) {
                 (*(m_appList[m_currentAppItem]->AppInit))(this); // 执行APP初始化
                 SetSystemState(MJT_SYS_STATE::STATE_APP_RUNNING);
             }
         }
     } else if (GetSystemState() == MJT_SYS_STATE::STATE_APP_RUNNING) {
-        (*(m_appList[m_currentAppItem]->MainProcess))(this, gImuActionData);
+        (*(m_appList[m_currentAppItem]->MainProcess))(this, m_imuActionData);
     }
 
-    gImuActionData->active = ACTIVE_TYPE::UNKNOWN;
-    gImuActionData->isValid = 0;
+    m_imuActionData->active = ACTIVE_TYPE::UNKNOWN;
+    m_imuActionData->isValid = 0;
 }
 
 APP_OBJ *AppController::GetAppByName(const char *name)
@@ -229,76 +403,6 @@ int AppController::GetAppIndexByName(const char *name)
     return -1;
 }
 
-// 通信中心（消息转发）
-int AppController::send_to(const char *from, const char *to, APP_MESSAGE_TYPE type, void *message, void *ext_info)
-{
-    APP_OBJ *fromApp = GetAppByName(from); // 来自谁 有可能为空
-    APP_OBJ *toApp = GetAppByName(to);     // 发送给谁 有可能为空
-    if (type <= APP_MESSAGE_MQTT_DATA) {
-        // 更新事件的请求者
-        if (eventList.size() > EVENT_LIST_MAX_LENGTH) {
-            return 1;
-        }
-        // 发给控制器的消息(目前都是wifi事件)
-        EVENT_OBJ new_event = {fromApp, type, message, 3, 0, 0};
-        eventList.push_back(new_event);
-        Serial.print("[EVENT]\tAdd -> " + String(app_event_type_info[type]));
-        Serial.print(F("\tEventList Size: "));
-        Serial.println(eventList.size());
-    } else {
-        // 各个APP之间通信的消息
-        if (NULL != toApp) {
-            Serial.print("[Massage]\tFrom " + String(fromApp->appName) + "\tTo " + String(toApp->appName) + "\n");
-            if (NULL != toApp->MessageHandle) {
-                toApp->MessageHandle(from, to, type, message, ext_info);
-            }
-        } else if (!strcmp(to, CTRL_NAME)) {
-            Serial.print("[Massage]\tFrom " + String(fromApp->appName) + "\tTo " + CTRL_NAME + "\n");
-            MessageProcess(type, (const char *)message, (char *)ext_info);
-        }
-    }
-    return 0;
-}
-
-int AppController::req_event_deal(void)
-{
-    // 请求事件的处理
-    for (std::list<EVENT_OBJ>::iterator event = eventList.begin(); event != eventList.end();) {
-        if ((*event).nextRunTime > millis()) {
-            ++event;
-            continue;
-        }
-        // 后期可以拓展其他事件的处理
-        bool ret = wifi_event((*event).type);
-        if (false == ret) {
-            // 本事件没处理完成
-            (*event).retryCount += 1;
-            if ((*event).retryCount >= (*event).retryMaxNum) {
-                // 多次重试失败
-                Serial.print("[EVENT]\tDelete -> " + String(app_event_type_info[(*event).type]));
-                event = eventList.erase(event); // 删除该响应事件
-                Serial.print(F("\tEventList Size: "));
-                Serial.println(eventList.size());
-            } else {
-                // 下次重试
-                (*event).nextRunTime = millis() + 4000;
-                ++event;
-            }
-            continue;
-        }
-
-        // 事件回调
-        if (NULL != (*event).from && NULL != (*event).from->MessageHandle) {
-            (*((*event).from->MessageHandle))(CTRL_NAME, (*event).from->appName, (*event).type, (*event).info, NULL);
-        }
-        Serial.print("[EVENT]\tDelete -> " + String(app_event_type_info[(*event).type]));
-        event = eventList.erase(event); // 删除该响应完成的事件
-        Serial.print(F("\tEventList Size: "));
-        Serial.println(eventList.size());
-    }
-    return 0;
-}
-
 /**
  *  wifi事件的处理
  *  事件处理成功返回true 否则false
@@ -306,7 +410,7 @@ int AppController::req_event_deal(void)
 bool AppController::wifi_event(APP_MESSAGE_TYPE type)
 {
     switch (type) {
-        case APP_MESSAGE_WIFI_CONN: {
+        case APP_MESSAGE_WIFI_CONNECT: {
             // 更新请求
             // CONN_ERROR == g_network.end_conn_wifi() ||
             if (false == m_wifi_status) {
@@ -319,19 +423,19 @@ bool AppController::wifi_event(APP_MESSAGE_TYPE type)
                 return false;
             }
         } break;
-        case APP_MESSAGE_WIFI_AP: {
+        case APP_MESSAGE_WIFI_AP_START: {
             // 更新请求
             g_network.open_ap(AP_SSID);
             m_wifi_status = true;
             m_preWifiReqMillis = millis();
         } break;
-        case APP_MESSAGE_WIFI_ALIVE: {
+        case APP_MESSAGE_WIFI_KEEP_ALIVE: {
             // wifi开关的心跳 持续收到心跳 wifi才不会被关闭
             m_wifi_status = true;
             // 更新请求
             m_preWifiReqMillis = millis();
         } break;
-        case APP_MESSAGE_WIFI_DISCONN: {
+        case APP_MESSAGE_WIFI_DISCONNECT: {
             g_network.close_wifi();
             m_wifi_status = false; // 标志位
             // m_preWifiReqMillis = millis() - WIFI_LIFE_CYCLE;
@@ -358,7 +462,7 @@ bool AppController::wifi_event(APP_MESSAGE_TYPE type)
     return true;
 }
 
-void AppController::AppExit()
+void AppController::AppExit(void)
 {
     lv_anim_del_all();
     AppCtrlMenuDisplay(m_appList[m_currentAppItem]->appLogo, m_appList[m_currentAppItem]->appName, LV_SCR_LOAD_ANIM_FADE_IN, false);

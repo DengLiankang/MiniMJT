@@ -2,13 +2,13 @@
 #include "HardwareSerial.h"
 #include "common.h"
 
+#define AP_SSID "MiniMJT"
+#define HOST_NAME "MiniMJT"
+
 IPAddress local_ip(192, 168, 4, 2); // Set your server's fixed IP address here
 IPAddress gateway(192, 168, 4, 2);  // Set your network Gateway usually your Router base address
 IPAddress subnet(255, 255, 255, 0); // Set your network sub-network mask here
 IPAddress dns(192, 168, 4, 1);      // Set your network DNS usually your Router base address
-
-const char *AP_SSID = "MiniMJT"; // 热点名称
-const char *HOST_NAME = "MiniMJT";   // 主机名
 
 uint16_t ap_timeout = 0; // ap无连接的超时时间
 

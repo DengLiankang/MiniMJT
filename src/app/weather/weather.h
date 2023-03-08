@@ -27,7 +27,7 @@ public:
 
     struct tm m_timeInfo;
     struct WEATHER_STRUCT m_weatherInfo;     // 保存天气状况
-    struct WEATHER_APP_CONFIG m_weatherAppCfg; // 保存app配置
+    AppController *m_appCtrl;
 public:
     WeatherApp();
 
