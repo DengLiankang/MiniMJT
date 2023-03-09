@@ -21,13 +21,13 @@ public:
     long long preNetTimestamp;      // 上一次的网络时间戳
     long long errorNetTimestamp;    // 网络到显示过程中的时间误差
     long long preLocalTimestamp;    // 上一次的本地机器时间戳
-    unsigned int coactusUpdateFlag; // 强制更新标志
+    uint8_t m_wifiStatus; // wifi标志
     int clock_page;
     unsigned int update_type; // 更新类型的标志位
+    APP_STATUS m_appStatus;
 
     struct tm m_timeInfo;
     struct WEATHER_STRUCT m_weatherInfo;     // 保存天气状况
-    AppController *m_appCtrl;
 public:
     WeatherApp();
 

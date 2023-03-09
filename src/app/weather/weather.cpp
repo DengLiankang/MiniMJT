@@ -266,7 +266,7 @@ void WeatherApp::WeatherAppDataInit(void)
     clock_page = 0;
     preWeatherMillis = 0;
     preTimeMillis = 0;
-    coactusUpdateFlag = 0x01; // 强制更新
+    m_wifiStatus = WIFI_STATUS::WIFI_DISCONNECTED;
     update_type = 0x00; // 表示什么也不需要更新
 
 }
@@ -277,6 +277,8 @@ static int WeatherAppInit(AppController *sys)
     g_weatherApp->ReadConfigFromFlash(&g_weatherAppCfg);
     g_weatherApp->WeatherAppDataInit();
     weatherAppGuiInit(g_weatherApp->m_weatherInfo, g_weatherApp->m_timeInfo);
+
+    sys->SendRequestEvent(WEATHER_APP_NAME, CTRL_NAME, APP_MESSAGE_WIFI_CONNECT, NULL, NULL);
 
     return 0;
 }
@@ -306,20 +308,17 @@ static void WeatherAppMainProcess(AppController *sys, const ImuAction *act_info)
     uint8_t curPage = GetWeatherAppGuiPage();
     if (curPage == WEATHER_APP_PAGE::CLOCK_PAGE) {
         DisplayWeather(g_weatherApp->m_weatherInfo);
-        if (0x01 == g_weatherApp->coactusUpdateFlag ||
-            DoDelayMillisTime(g_weatherAppCfg.weatherUpdataInterval, &g_weatherApp->preWeatherMillis)) {
+        if (DoDelayMillisTime(g_weatherAppCfg.weatherUpdataInterval, &g_weatherApp->preWeatherMillis)) {
             sys->SendRequestEvent(WEATHER_APP_NAME, CTRL_NAME, APP_MESSAGE_WIFI_CONNECT, (void *)UPDATE_NOW, NULL);
             sys->SendRequestEvent(WEATHER_APP_NAME, CTRL_NAME, APP_MESSAGE_WIFI_CONNECT, (void *)UPDATE_DAILY, NULL);
         }
 
-        if (0x01 == g_weatherApp->coactusUpdateFlag ||
-            DoDelayMillisTime(g_weatherAppCfg.timeUpdataInterval, &g_weatherApp->preTimeMillis)) {
+        if (DoDelayMillisTime(g_weatherAppCfg.timeUpdataInterval, &g_weatherApp->preTimeMillis)) {
             // 尝试同步网络上的时钟
             sys->SendRequestEvent(WEATHER_APP_NAME, CTRL_NAME, APP_MESSAGE_WIFI_CONNECT, (void *)UPDATE_NTP, NULL);
         } else if (millis() - g_weatherApp->preLocalTimestamp > 400) {
             UpdateTime_RTC(get_timestamp());
         }
-        g_weatherApp->coactusUpdateFlag = 0x00; // 取消强制更新标志
         DisplaySpaceMan();
     } else if (curPage == WEATHER_APP_PAGE::CURVE_PAGE) {
         DisplayCurve(g_weatherApp->m_weatherInfo.dailyHighTemp, g_weatherApp->m_weatherInfo.dailyLowTemp);

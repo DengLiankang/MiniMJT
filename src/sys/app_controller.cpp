@@ -125,49 +125,71 @@ void AppController::WriteConfigToFlash(SysUtilConfig *cfg)
 
 void AppController::WifiRequestDeal(APP_MESSAGE_TYPE type)
 {
-    if (type == APP_MESSAGE_WIFI_CONNECT) {
-        if (0 == m_wifiStatus) {
+    switch (type)
+    {
+    case APP_MESSAGE_WIFI_CONNECT:
+        if (m_wifiStatus == WIFI_STATUS::WIFI_CONNECTED && (WiFi.getMode() & WIFI_MODE_AP)) {
+            m_network.DisconnectWifi();
+            m_wifiStatus = WIFI_STATUS::WIFI_DISCONNECTED;
+        }
+        if (m_wifiStatus == WIFI_STATUS::WIFI_DISCONNECTED) {
             m_wifiSsidItem = 0;
             m_network.ConnectWifi(m_sysCfg.ssid[m_wifiSsidItem].c_str(), m_sysCfg.password[m_wifiSsidItem].c_str());
-            m_wifiStatus = 2;
-        } else if (2 == m_wifiStatus) {
+            m_wifiStatus = WIFI_STATUS::WIFI_CONNECTING;
+        } else if (m_wifiStatus == WIFI_STATUS::WIFI_CONNECTING) {
             m_network.ConnectWifi(m_sysCfg.ssid[m_wifiSsidItem].c_str(), m_sysCfg.password[m_wifiSsidItem].c_str());
         }
         m_preWifiReqMillis = millis();
-    } else if (type == APP_MESSAGE_WIFI_AP_START) {
-        if (0 == m_wifiStatus && m_network.OpenAp(AP_SSID)) {
-            m_wifiStatus = 1;
-        }
-        m_preWifiReqMillis = millis();
-    } else if (type == APP_MESSAGE_WIFI_DISCONNECT) {
-        if (m_wifiStatus > 0) {
+        break;
+    case APP_MESSAGE_WIFI_AP_START:
+        if (m_wifiStatus == WIFI_STATUS::WIFI_CONNECTED && (WiFi.getMode() & WIFI_MODE_STA)) {
             m_network.DisconnectWifi();
-            m_wifiStatus = 0;
+            m_wifiStatus = WIFI_STATUS::WIFI_DISCONNECTED;
         }
-    } else if (type == APP_MESSAGE_WIFI_KEEP_ALIVE) {
+        if (m_wifiStatus == WIFI_STATUS::WIFI_DISCONNECTED && m_network.OpenAp(AP_SSID)) {
+            m_wifiStatus = WIFI_STATUS::WIFI_CONNECTED;
+        }
         m_preWifiReqMillis = millis();
+        break;
+    case APP_MESSAGE_WIFI_DISCONNECT:
+        if (m_wifiStatus != WIFI_STATUS::WIFI_DISCONNECTED) {
+            m_network.DisconnectWifi();
+            m_wifiStatus = WIFI_STATUS::WIFI_DISCONNECTED;
+        }
+        break;
+    case APP_MESSAGE_WIFI_KEEP_ALIVE:
+        if (m_wifiStatus != WIFI_STATUS::WIFI_DISCONNECTED) {
+            m_preWifiReqMillis = millis();
+        }
+    default:
+        break;
     }
 }
 
-void AppController::CheckWifiStatus(void)
+void AppController::UpdateWifiStatus(void)
 {
-    if (m_wifiStatus == 0)
+    if (m_wifiStatus == WIFI_STATUS::WIFI_DISCONNECTED)
         return;
-    // 连接失败或者连接中断
-    if (m_wifiStatus == 2 && (WiFi.getMode() & WIFI_MODE_STA) && WiFi.status() != WL_CONNECTED && millis() - m_preWifiReqMillis >= 10000) {
+    // 连接失败
+    if (m_wifiStatus == WIFI_STATUS::WIFI_CONNECTING && (WiFi.getMode() & WIFI_MODE_STA) && WiFi.status() != WL_CONNECTED && millis() - m_preWifiReqMillis >= 10000) {
         if (++m_wifiSsidItem < 3) {
             SendRequestEvent(CTRL_NAME, CTRL_NAME, APP_MESSAGE_WIFI_CONNECT, NULL, NULL);
             return;
         }
-        m_wifiStatus = 0;
+        m_wifiStatus = WIFI_STATUS::WIFI_DISCONNECTED;
         return;
     }
-    if ((WiFi.getMode() & WIFI_MODE_STA) && WiFi.status() != WL_CONNECTED) {
+    if (m_wifiStatus == WIFI_STATUS::WIFI_CONNECTED && (WiFi.getMode() & WIFI_MODE_STA) && WiFi.status() != WL_CONNECTED) {
         SendRequestEvent(CTRL_NAME, NULL, APP_MESSAGE_WIFI_DISCONNECT, NULL, NULL);
         return;
     }
-    if ((WiFi.getMode() & WIFI_MODE_STA) && WiFi.status() == WL_CONNECTED) {
+    if (m_wifiStatus == WIFI_STATUS::WIFI_CONNECTING && (WiFi.getMode() & WIFI_MODE_STA) && WiFi.status() == WL_CONNECTED) {
         SendRequestEvent(CTRL_NAME, NULL, APP_MESSAGE_WIFI_CONNECTED, NULL, NULL);
+        return;
+    }
+    if (m_wifiStatus != WIFI_STATUS::WIFI_DISCONNECTED && DoDelayMillisTime(WIFI_LIFE_CYCLE, &m_preWifiReqMillis)) {
+        Serial.println("\nwifi not in use, auto disconnect...");
+        SendRequestEvent(CTRL_NAME, CTRL_NAME, APP_MESSAGE_WIFI_DISCONNECT, NULL, NULL);
         return;
     }
 }
@@ -262,7 +284,7 @@ AppController::AppController(const char *name)
     m_appNum = 0;
     m_currentAppItem = 0;
     m_wifiSsidItem = 0;
-    m_wifiStatus = 0;
+    m_wifiStatus = WIFI_STATUS::WIFI_DISCONNECTED;
     m_preWifiReqMillis = millis();
     m_appCtrlState = MJT_SYS_STATE::STATE_SYS_LOADING;
     m_imuActionData = NULL;
@@ -387,7 +409,7 @@ void AppController::MainProcess(void)
     if (g_timerHandleFlag) {
         g_timerHandleFlag = false;
         m_imuActionData = m_imu.getAction();
-        CheckWifiStatus();
+        UpdateWifiStatus();
     }
 
     if (ACTIVE_TYPE::UNKNOWN != m_imuActionData->active) {
