@@ -8,13 +8,10 @@
 #define SYS_CONFIG_PATH "/mjt_sys.cfg"
 
 // global
-AppController *g_appController = NULL;         // APP控制器
-volatile static bool g_timerHandleFlag = false;  // imu数据更新标志
+AppController *g_appController = NULL;          // APP控制器
+volatile static bool g_timerHandleFlag = false; // imu数据更新标志
 
-void TimerAppCtrlHandle(TimerHandle_t xTimer)
-{
-    g_timerHandleFlag = true;
-}
+void TimerAppCtrlHandle(TimerHandle_t xTimer) { g_timerHandleFlag = true; }
 
 void AppController::ReadConfigFromFlash(SysUtilConfig *cfg)
 {
@@ -125,44 +122,45 @@ void AppController::WriteConfigToFlash(SysUtilConfig *cfg)
 
 void AppController::WifiRequestDeal(APP_MESSAGE_TYPE type)
 {
-    switch (type)
-    {
-    case APP_MESSAGE_WIFI_CONNECT:
-        if (m_wifiStatus == WIFI_STATUS::WIFI_CONNECTED && (WiFi.getMode() & WIFI_MODE_AP)) {
-            m_network.DisconnectWifi();
-            m_wifiStatus = WIFI_STATUS::WIFI_DISCONNECTED;
-        }
-        if (m_wifiStatus == WIFI_STATUS::WIFI_DISCONNECTED) {
-            m_wifiSsidItem = 0;
-            m_network.ConnectWifi(m_sysCfg.ssid[m_wifiSsidItem].c_str(), m_sysCfg.password[m_wifiSsidItem].c_str());
-            m_wifiStatus = WIFI_STATUS::WIFI_CONNECTING;
-        } else if (m_wifiStatus == WIFI_STATUS::WIFI_CONNECTING) {
-            m_network.ConnectWifi(m_sysCfg.ssid[m_wifiSsidItem].c_str(), m_sysCfg.password[m_wifiSsidItem].c_str());
-        }
-        m_preWifiReqMillis = millis();
-        break;
-    case APP_MESSAGE_WIFI_AP_START:
-        if (m_wifiStatus == WIFI_STATUS::WIFI_CONNECTED && (WiFi.getMode() & WIFI_MODE_STA)) {
-            m_network.DisconnectWifi();
-            m_wifiStatus = WIFI_STATUS::WIFI_DISCONNECTED;
-        }
-        if (m_wifiStatus == WIFI_STATUS::WIFI_DISCONNECTED && m_network.OpenAp(AP_SSID)) {
-            m_wifiStatus = WIFI_STATUS::WIFI_CONNECTED;
-        }
-        m_preWifiReqMillis = millis();
-        break;
-    case APP_MESSAGE_WIFI_DISCONNECT:
-        if (m_wifiStatus != WIFI_STATUS::WIFI_DISCONNECTED) {
-            m_network.DisconnectWifi();
-            m_wifiStatus = WIFI_STATUS::WIFI_DISCONNECTED;
-        }
-        break;
-    case APP_MESSAGE_WIFI_KEEP_ALIVE:
-        if (m_wifiStatus != WIFI_STATUS::WIFI_DISCONNECTED) {
+    switch (type) {
+        case APP_MESSAGE_WIFI_CONNECT:
+            Serial.println("logtest 333333");
+            if (m_wifiStatus == WIFI_STATUS::WIFI_CONNECTED && (WiFi.getMode() & WIFI_MODE_AP)) {
+                m_network.DisconnectWifi();
+                m_wifiStatus = WIFI_STATUS::WIFI_DISCONNECTED;
+            }
+            Serial.println("logtest 4444444");
+            if (m_wifiStatus == WIFI_STATUS::WIFI_DISCONNECTED) {
+                m_wifiSsidItem = 0;
+                m_network.ConnectWifi(m_sysCfg.ssid[m_wifiSsidItem].c_str(), m_sysCfg.password[m_wifiSsidItem].c_str());
+                m_wifiStatus = WIFI_STATUS::WIFI_CONNECTING;
+            } else if (m_wifiStatus == WIFI_STATUS::WIFI_CONNECTING) {
+                m_network.ConnectWifi(m_sysCfg.ssid[m_wifiSsidItem].c_str(), m_sysCfg.password[m_wifiSsidItem].c_str());
+            }
             m_preWifiReqMillis = millis();
-        }
-    default:
-        break;
+            break;
+        case APP_MESSAGE_WIFI_AP_START:
+            if (m_wifiStatus == WIFI_STATUS::WIFI_CONNECTED && (WiFi.getMode() & WIFI_MODE_STA)) {
+                m_network.DisconnectWifi();
+                m_wifiStatus = WIFI_STATUS::WIFI_DISCONNECTED;
+            }
+            if (m_wifiStatus == WIFI_STATUS::WIFI_DISCONNECTED && m_network.OpenAp(AP_SSID)) {
+                m_wifiStatus = WIFI_STATUS::WIFI_CONNECTED;
+            }
+            m_preWifiReqMillis = millis();
+            break;
+        case APP_MESSAGE_WIFI_DISCONNECT:
+            if (m_wifiStatus != WIFI_STATUS::WIFI_DISCONNECTED) {
+                m_network.DisconnectWifi();
+                m_wifiStatus = WIFI_STATUS::WIFI_DISCONNECTED;
+            }
+            break;
+        case APP_MESSAGE_WIFI_KEEP_ALIVE:
+            if (m_wifiStatus != WIFI_STATUS::WIFI_DISCONNECTED) {
+                m_preWifiReqMillis = millis();
+            }
+        default:
+            break;
     }
 }
 
@@ -171,7 +169,8 @@ void AppController::UpdateWifiStatus(void)
     if (m_wifiStatus == WIFI_STATUS::WIFI_DISCONNECTED)
         return;
     // 连接失败
-    if (m_wifiStatus == WIFI_STATUS::WIFI_CONNECTING && (WiFi.getMode() & WIFI_MODE_STA) && WiFi.status() != WL_CONNECTED && millis() - m_preWifiReqMillis >= 10000) {
+    if (m_wifiStatus == WIFI_STATUS::WIFI_CONNECTING && (WiFi.getMode() & WIFI_MODE_STA) &&
+        WiFi.status() != WL_CONNECTED && millis() - m_preWifiReqMillis >= 10000) {
         if (++m_wifiSsidItem < 3) {
             SendRequestEvent(CTRL_NAME, CTRL_NAME, APP_MESSAGE_WIFI_CONNECT, NULL, NULL);
             return;
@@ -179,11 +178,13 @@ void AppController::UpdateWifiStatus(void)
         m_wifiStatus = WIFI_STATUS::WIFI_DISCONNECTED;
         return;
     }
-    if (m_wifiStatus == WIFI_STATUS::WIFI_CONNECTED && (WiFi.getMode() & WIFI_MODE_STA) && WiFi.status() != WL_CONNECTED) {
+    if (m_wifiStatus == WIFI_STATUS::WIFI_CONNECTED && (WiFi.getMode() & WIFI_MODE_STA) &&
+        WiFi.status() != WL_CONNECTED) {
         SendRequestEvent(CTRL_NAME, NULL, APP_MESSAGE_WIFI_DISCONNECT, NULL, NULL);
         return;
     }
-    if (m_wifiStatus == WIFI_STATUS::WIFI_CONNECTING && (WiFi.getMode() & WIFI_MODE_STA) && WiFi.status() == WL_CONNECTED) {
+    if (m_wifiStatus == WIFI_STATUS::WIFI_CONNECTING && (WiFi.getMode() & WIFI_MODE_STA) &&
+        WiFi.status() == WL_CONNECTED) {
         SendRequestEvent(CTRL_NAME, NULL, APP_MESSAGE_WIFI_CONNECTED, NULL, NULL);
         return;
     }
@@ -345,7 +346,8 @@ void AppController::ExitLoadingGui(void)
     MJT_LVGL_OPERATE_LOCK(AppCtrlLoadingDisplay(100, "finished.", true));
     DeleteLvglTask();
     MJT_LVGL_OPERATE_LOCK(AppCtrlMenuGuiInit());
-    MJT_LVGL_OPERATE_LOCK(AppCtrlMenuDisplay(m_appList[m_currentAppItem]->appLogo, m_appList[m_currentAppItem]->appName, LV_SCR_LOAD_ANIM_FADE_IN, true));
+    MJT_LVGL_OPERATE_LOCK(AppCtrlMenuDisplay(m_appList[m_currentAppItem]->appLogo, m_appList[m_currentAppItem]->appName,
+                                             LV_SCR_LOAD_ANIM_FADE_IN, true));
 
     SetSystemState(STATE_APP_MENU);
 }
@@ -422,11 +424,13 @@ void AppController::MainProcess(void)
 
         if (m_imuActionData->active == ACTIVE_TYPE::TURN_LEFT) {
             m_currentAppItem = (m_currentAppItem + 1) % m_appNum;
-            AppCtrlMenuDisplay(m_appList[m_currentAppItem]->appLogo, m_appList[m_currentAppItem]->appName, LV_SCR_LOAD_ANIM_MOVE_LEFT, false);
+            AppCtrlMenuDisplay(m_appList[m_currentAppItem]->appLogo, m_appList[m_currentAppItem]->appName,
+                               LV_SCR_LOAD_ANIM_MOVE_LEFT, false);
             Serial.println(String("Current App: ") + m_appList[m_currentAppItem]->appName);
         } else if (m_imuActionData->active == ACTIVE_TYPE::TURN_RIGHT) {
             m_currentAppItem = (m_currentAppItem + m_appNum - 1) % m_appNum;
-            AppCtrlMenuDisplay(m_appList[m_currentAppItem]->appLogo, m_appList[m_currentAppItem]->appName, LV_SCR_LOAD_ANIM_MOVE_RIGHT, false);
+            AppCtrlMenuDisplay(m_appList[m_currentAppItem]->appLogo, m_appList[m_currentAppItem]->appName,
+                               LV_SCR_LOAD_ANIM_MOVE_RIGHT, false);
             Serial.println(String("Current App: ") + m_appList[m_currentAppItem]->appName);
         } else if (m_imuActionData->active == ACTIVE_TYPE::GO_FORWORD) {
             if (m_appList[m_currentAppItem]->AppInit != NULL) {
@@ -444,12 +448,11 @@ void AppController::MainProcess(void)
 
 APP_OBJ *AppController::GetAppByName(const char *name)
 {
-    for (int pos = 0; pos < m_appNum; ++pos) {
-        if (!strcmp(name, m_appList[pos]->appName)) {
-            return m_appList[pos];
+    for (APP_OBJ *app : m_appList) {
+        if (!strcmp(name, app->appName)) {
+            return app;
         }
     }
-
     return NULL;
 }
 
@@ -467,7 +470,8 @@ int AppController::GetAppIndexByName(const char *name)
 void AppController::AppExit(void)
 {
     lv_anim_del_all();
-    AppCtrlMenuDisplay(m_appList[m_currentAppItem]->appLogo, m_appList[m_currentAppItem]->appName, LV_SCR_LOAD_ANIM_FADE_IN, false);
+    AppCtrlMenuDisplay(m_appList[m_currentAppItem]->appLogo, m_appList[m_currentAppItem]->appName,
+                       LV_SCR_LOAD_ANIM_FADE_IN, false);
 
     if (NULL != m_appList[m_currentAppItem]->AppExit) {
         // 执行APP退出回调

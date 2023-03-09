@@ -263,13 +263,9 @@ void WeatherAppGuiRelease(void)
 void DisplaySpaceMan(void)
 {
     static unsigned long lastUpdateTime = 0;
-    unsigned long curTime = millis();
-    if (curTime - lastUpdateTime >= 50) {
-        if (NULL != lv_spaceManImg && NULL != SpaceManImgMap) {
-            lv_img_set_src(lv_spaceManImg, SpaceManImgMap[g_spaceIndex++]);
-            g_spaceIndex = g_spaceIndex == sizeof(SpaceManImgMap) / sizeof(SpaceManImgMap[0]) ? 0 : g_spaceIndex;
-        }
-        lastUpdateTime = curTime;
+    if (DoDelayMillisTime(50, &lastUpdateTime) && NULL != lv_spaceManImg && NULL != SpaceManImgMap) {
+        lv_img_set_src(lv_spaceManImg, SpaceManImgMap[g_spaceIndex++]);
+        g_spaceIndex = g_spaceIndex == sizeof(SpaceManImgMap) / sizeof(SpaceManImgMap[0]) ? 0 : g_spaceIndex;
     }
 }
 

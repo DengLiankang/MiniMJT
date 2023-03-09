@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include "lvgl.h"
+#include "common.h"
 
 #define ANIEND_WAIT                     \
     do {                                \

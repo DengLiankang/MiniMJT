@@ -22,9 +22,7 @@ public:
     long long errorNetTimestamp;    // 网络到显示过程中的时间误差
     long long preLocalTimestamp;    // 上一次的本地机器时间戳
     uint8_t m_wifiStatus; // wifi标志
-    int clock_page;
-    unsigned int update_type; // 更新类型的标志位
-    APP_STATUS m_appStatus;
+    boolean m_updateFlag;
 
     struct tm m_timeInfo;
     struct WEATHER_STRUCT m_weatherInfo;     // 保存天气状况
@@ -33,14 +31,10 @@ public:
 
     ~WeatherApp();
 
-    int16_t ReadConfigFromFlash(WEATHER_APP_CONFIG *cfg);
-
-    int8_t WriteConfigToFlash(WEATHER_APP_CONFIG *cfg);
-
     void WeatherAppDataInit(void);
 
 private:
-    
+
     void ValidateConfig(struct WEATHER_APP_CONFIG *cfg, const struct WEATHER_APP_CONFIG *defaultConfig);
 };
 
