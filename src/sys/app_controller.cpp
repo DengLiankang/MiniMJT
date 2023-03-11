@@ -124,12 +124,10 @@ void AppController::WifiRequestDeal(APP_MESSAGE_TYPE type)
 {
     switch (type) {
         case APP_MESSAGE_WIFI_CONNECT:
-            Serial.println("logtest 333333");
             if (m_wifiStatus == WIFI_STATUS::WIFI_CONNECTED && (WiFi.getMode() & WIFI_MODE_AP)) {
                 m_network.DisconnectWifi();
                 m_wifiStatus = WIFI_STATUS::WIFI_DISCONNECTED;
             }
-            Serial.println("logtest 4444444");
             if (m_wifiStatus == WIFI_STATUS::WIFI_DISCONNECTED) {
                 m_wifiSsidItem = 0;
                 m_network.ConnectWifi(m_sysCfg.ssid[m_wifiSsidItem].c_str(), m_sysCfg.password[m_wifiSsidItem].c_str());
@@ -180,12 +178,14 @@ void AppController::UpdateWifiStatus(void)
     }
     if (m_wifiStatus == WIFI_STATUS::WIFI_CONNECTED && (WiFi.getMode() & WIFI_MODE_STA) &&
         WiFi.status() != WL_CONNECTED) {
-        SendRequestEvent(CTRL_NAME, NULL, APP_MESSAGE_WIFI_DISCONNECT, NULL, NULL);
+        SendRequestEvent(CTRL_NAME, m_requestFrom, APP_MESSAGE_WIFI_DISCONNECT, NULL, NULL);
+        m_wifiStatus = WIFI_STATUS::WIFI_DISCONNECTED;
         return;
     }
     if (m_wifiStatus == WIFI_STATUS::WIFI_CONNECTING && (WiFi.getMode() & WIFI_MODE_STA) &&
         WiFi.status() == WL_CONNECTED) {
-        SendRequestEvent(CTRL_NAME, NULL, APP_MESSAGE_WIFI_CONNECTED, NULL, NULL);
+        SendRequestEvent(CTRL_NAME, m_requestFrom, APP_MESSAGE_WIFI_CONNECTED, NULL, NULL);
+        m_wifiStatus = WIFI_STATUS::WIFI_CONNECTED;
         return;
     }
     if (m_wifiStatus != WIFI_STATUS::WIFI_DISCONNECTED && DoDelayMillisTime(WIFI_LIFE_CYCLE, &m_preWifiReqMillis)) {
@@ -289,6 +289,7 @@ AppController::AppController(const char *name)
     m_preWifiReqMillis = millis();
     m_appCtrlState = MJT_SYS_STATE::STATE_SYS_LOADING;
     m_imuActionData = NULL;
+    m_requestFrom = NULL;
     // 定义一个定时器
     m_appCtrlTimer = xTimerCreate("AppCtrlTimer", 200 / portTICK_PERIOD_MS, pdTRUE, (void *)0, TimerAppCtrlHandle);
 }
@@ -414,7 +415,7 @@ void AppController::MainProcess(void)
         UpdateWifiStatus();
     }
 
-    if (ACTIVE_TYPE::UNKNOWN != m_imuActionData->active) {
+    if (ACTIVE_TYPE::UNKNOWN != m_imuActionData->active && ACTIVE_TYPE::SHAKE != m_imuActionData->active) {
         Serial.print("[Operate] ");
         Serial.println(active_type_info[m_imuActionData->active]);
     }

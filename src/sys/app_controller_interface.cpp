@@ -19,34 +19,15 @@ int AppController::SendRequestEvent(const char *from, const char *to, APP_MESSAG
     APP_OBJ *fromApp = GetAppByName(from); // 来自谁 有可能为空
     APP_OBJ *toApp = GetAppByName(to);     // 发送给谁 有可能为空
 
-    Serial.println("logtest 000000");
-
-    if (strcmp(from, CTRL_NAME) && fromApp == NULL)
+    if ((strcmp(from, CTRL_NAME) && fromApp == NULL) || ((strcmp(to, CTRL_NAME) && toApp == NULL)))
         return -1;
 
-    Serial.println("logtest 111111");
-
-    if (strcmp(from, CTRL_NAME) && strcmp(to, CTRL_NAME) && toApp == NULL)
-        return -1;
-
-    Serial.println("logtest 222222");
-
-    // broadcast
-    if (strcmp(from, CTRL_NAME) == 0 && (to == NULL || toApp == NULL)) {
-        Serial.printf("[Massage][Broadcast]%s\n", AppMessageEventStr[type]);
-        for (APP_OBJ *app : m_appList) {
-            if (app->MessageHandle != NULL) {
-                app->MessageHandle(from, app->appName, type, data, extData);
-            }
-        }
+    Serial.printf("[Massage]%s To %s: %s\n", from, to, AppMessageEventStr[type]);
+    if (strcmp(to, CTRL_NAME) == 0) {
+        m_requestFrom = from;
         RequestProcess(type, data, extData);
-    } else {
-        Serial.printf("[Massage]%s To %s: %s\n", from, to, AppMessageEventStr[type]);
-        if (strcmp(to, CTRL_NAME) == 0) {
-            RequestProcess(type, data, extData);
-        } else if (toApp->MessageHandle != NULL) {
-            toApp->MessageHandle(from, to, type, data, extData);
-        }
+    } else if (toApp->MessageHandle != NULL) {
+        toApp->MessageHandle(from, to, type, data, extData);
     }
 
     return 0;

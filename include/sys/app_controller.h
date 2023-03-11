@@ -70,6 +70,7 @@ private:
     uint8_t m_wifiSsidItem;
     unsigned int m_appNum;
     int m_currentAppItem;     // 当前运行的APP下标
+    const char *m_requestFrom;
     MJT_SYS_STATE m_appCtrlState;
     TimerHandle_t m_appCtrlTimer; // 事件处理定时器
     ImuAction *m_imuActionData;             // 存放mpu6050数据

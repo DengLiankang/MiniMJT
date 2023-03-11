@@ -19,10 +19,13 @@ public:
     unsigned long preWeatherMillis; // 上一回更新天气时的毫秒数
     unsigned long preTimeMillis;    // 更新时间计数器
     long long preNetTimestamp;      // 上一次的网络时间戳
-    long long errorNetTimestamp;    // 网络到显示过程中的时间误差
-    long long preLocalTimestamp;    // 上一次的本地机器时间戳
+    unsigned long errorNetTimestamp;    // 网络到显示过程中的时间误差
+    unsigned long preLocalTimestamp;    // 上一次的本地机器时间戳
     uint8_t m_wifiStatus; // wifi标志
-    boolean m_updateFlag;
+    boolean m_weatherUpdateFlag;
+    boolean m_timeUpdateFlag;
+    boolean m_forceUpdate;
+    unsigned long m_lastKeepWifiMillis;
 
     struct tm m_timeInfo;
     struct WEATHER_STRUCT m_weatherInfo;     // 保存天气状况
