@@ -273,7 +273,7 @@ void DisplayTime(struct tm timeInfo)
 {
     lv_label_set_text_fmt(lv_clockLabel, "%02d#ffa500 %02d#", timeInfo.tm_hour, timeInfo.tm_min);
     lv_label_set_text_fmt(lv_secondLabel, "%02d", timeInfo.tm_sec);
-    lv_label_set_text_fmt(lv_dateLabel, "%2d月%2d日   周%s", timeInfo.tm_mon, timeInfo.tm_mday, WeekDayCh[timeInfo.tm_wday]);
+    lv_label_set_text_fmt(lv_dateLabel, "%2d月%2d日   周%s", timeInfo.tm_mon + 1, timeInfo.tm_mday, WeekDayCh[timeInfo.tm_wday]);
 }
 
 void WeatherAppGuiPageFlip(lv_scr_load_anim_t anim)

@@ -81,10 +81,10 @@ struct AnniversaryAppRunData {
     int cur_anniversary; // 当前显示第几个纪念日
     int anniversary_day_count;
     unsigned long preWeatherMillis; // 上一回更新天气时的毫秒数
-    unsigned long preTimeMillis;    // 更新时间计数器
+    unsigned long m_lastUpdateTimeMillis;    // 更新时间计数器
     long long preNetTimestamp;      // 上一次的网络时间戳
     long long errorNetTimestamp;    // 网络到显示过程中的时间误差
-    long long preLocalTimestamp;    // 上一次的本地机器时间戳
+    long long m_lastUpdateLocalTimeMillis;    // 上一次的本地机器时间戳
     unsigned int coactusUpdateFlag; // 强制更新标志
 };
 
@@ -194,13 +194,13 @@ static void get_date_diff()
 //             time = payload.substring(time_index, payload.length() - 3);
 //             // 以网络时间戳为准
 //             run_data->preNetTimestamp = atoll(time.c_str()) + run_data->errorNetTimestamp + TIMEZERO_OFFSIZE;
-//             run_data->preLocalTimestamp = millis();
+//             run_data->m_lastUpdateLocalTimeMillis = millis();
 //         }
 //     } else {
 //         Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
 //         // 得不到网络时间戳时
-//         run_data->preNetTimestamp = run_data->preNetTimestamp + (millis() - run_data->preLocalTimestamp);
-//         run_data->preLocalTimestamp = millis();
+//         run_data->preNetTimestamp = run_data->preNetTimestamp + (millis() - run_data->m_lastUpdateLocalTimeMillis);
+//         run_data->m_lastUpdateLocalTimeMillis = millis();
 //     }
 //     http.end();
 
@@ -217,9 +217,9 @@ static int anniversary_init(AppController *sys)
     run_data->cur_anniversary = 0;
     run_data->preNetTimestamp = 1577808000000; // 上一次的网络时间戳 初始化为2020-01-01 00:00:00
     run_data->errorNetTimestamp = 2;
-    run_data->preLocalTimestamp = millis(); // 上一次的本地机器时间戳
+    run_data->m_lastUpdateLocalTimeMillis = millis(); // 上一次的本地机器时间戳
     run_data->preWeatherMillis = 0;
-    run_data->preTimeMillis = 0;
+    run_data->m_lastUpdateTimeMillis = 0;
     run_data->coactusUpdateFlag = 0x01;
     Serial.printf("anniversary init successful\n");
     return 0;
@@ -238,7 +238,7 @@ static void anniversary_process(AppController *sys, const ImuAction *act_info)
         anim_type = LV_SCR_LOAD_ANIM_MOVE_LEFT;
         run_data->cur_anniversary = (run_data->cur_anniversary + MAX_ANNIVERSARY_CNT - 1) % MAX_ANNIVERSARY_CNT;
     }
-    if (0x01 == run_data->coactusUpdateFlag || DoDelayMillisTime(900000, &run_data->preTimeMillis)) {
+    if (0x01 == run_data->coactusUpdateFlag || DoDelayMillisTime(900000, &run_data->m_lastUpdateTimeMillis)) {
         // 启动时先用持久化配置中的日期
         run_data->anniversary_day_count =
             dateDiff(&(cfg_data.current_date), &(cfg_data.target_date[run_data->cur_anniversary]));

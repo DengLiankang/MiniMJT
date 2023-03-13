@@ -165,44 +165,32 @@ static void get_weather(void)
     http.end();
 }
 
-// static long long get_timestamp()
-// {
-//     // 使用本地的机器时钟
-//     g_weatherApp->preNetTimestamp = g_weatherApp->preNetTimestamp + (millis() - g_weatherApp->preLocalTimestamp);
-//     g_weatherApp->preLocalTimestamp = millis();
-//     return g_weatherApp->preNetTimestamp;
-// }
-
-static long long get_timestamp(String url)
+unsigned long WeatherApp::GetNetworkTime(void)
 {
-    if (WL_CONNECTED != WiFi.status())
-        return 0;
-
-    String time = "";
     HTTPClient http;
-    http.setTimeout(1000);
-    http.begin(url);
+    http.setTimeout(500);
+    http.begin(TIME_API);
+    unsigned long ret;
 
     int httpCode = http.GET();
-    if (httpCode > 0) {
-        if (httpCode == HTTP_CODE_OK) {
-            String payload = http.getString();
-            Serial.println(payload);
-            int time_index = (payload.indexOf("data")) + 12;
-            time = payload.substring(time_index, payload.length() - 3);
-            // 以网络时间戳为准
-            g_weatherApp->preNetTimestamp = atoll(time.c_str()) + g_weatherApp->errorNetTimestamp + TIMEZERO_OFFSIZE;
-            g_weatherApp->preLocalTimestamp = millis();
-        }
+    if (httpCode == HTTP_CODE_OK) {
+        String payload = http.getString();
+        Serial.println(payload);
+        DynamicJsonDocument doc(256);
+        deserializeJson(doc, payload);
+        JsonObject timeObj = doc.as<JsonObject>();
+        long long timestamp = timeObj["data"]["t"];
+        timestamp += TIMEZERO_OFFSIZE;
+        ret = (unsigned long)(timestamp / 1000);
     } else {
         Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
         // 得不到网络时间戳时
-        g_weatherApp->preNetTimestamp = g_weatherApp->preNetTimestamp + (millis() - g_weatherApp->preLocalTimestamp);
-        g_weatherApp->preLocalTimestamp = millis();
+        ret = m_rtcTime.getMillis();
+
     }
     http.end();
 
-    return g_weatherApp->preNetTimestamp;
+    return ret;
 }
 
 static void get_daliyWeather(short maxT[], short minT[])
@@ -258,10 +246,15 @@ void WeatherApp::ValidateConfig(struct WEATHER_APP_CONFIG *cfg, const struct WEA
     }
 }
 
-static void UpdateTime_RTC(long long timestamp)
+void WeatherApp::UpdateTimeInfo(unsigned long timestamp)
 {
-    g_weatherApp->m_rtcTime.setTime(timestamp / 1000);
-    g_weatherApp->m_timeInfo = g_weatherApp->m_rtcTime.getTimeStruct();
+    m_rtcTime.setTime(timestamp);
+    m_timeInfo = m_rtcTime.getTimeStruct();
+}
+
+void WeatherApp::UpdateTimeInfo()
+{
+    m_timeInfo = m_rtcTime.getTimeStruct();
 }
 
 void WeatherApp::WeatherAppDataInit(void)
@@ -291,12 +284,10 @@ void WeatherApp::WeatherAppDataInit(void)
     m_timeInfo = m_rtcTime.getTimeStruct();
     memcpy(&m_weatherInfo, &defaultWeather, sizeof(struct WEATHER_STRUCT));
     m_weatherInfo.cityName = g_weatherAppCfg.weatherApiCityAddr;
-    preNetTimestamp = 1577808000000; // 上一次的网络时间戳 初始化为2020-01-01 00:00:00
-    errorNetTimestamp = 2;
-    preLocalTimestamp = millis(); // 上一次的本地机器时间戳
-    m_lastKeepWifiMillis = millis();
+    m_lastUpdateLocalTimeMillis = millis(); // 上一次的本地机器时间戳
+    m_lastKeepWifiMillis = 0;
     preWeatherMillis = 0;
-    preTimeMillis = 0;
+    m_lastUpdateTimeMillis = 0;
     m_wifiStatus = WIFI_STATUS::WIFI_DISCONNECTED;
     m_weatherUpdateFlag = false;
     m_timeUpdateFlag = false;
@@ -309,8 +300,6 @@ static int WeatherAppInit(AppController *sys)
     ReadConfigFromFlash(&g_weatherAppCfg);
     g_weatherApp->WeatherAppDataInit();
     weatherAppGuiInit(g_weatherApp->m_weatherInfo, g_weatherApp->m_timeInfo);
-
-    sys->SendRequestEvent(WEATHER_APP_NAME, CTRL_NAME, APP_MESSAGE_WIFI_CONNECT, NULL, NULL);
 
     return 0;
 }
@@ -349,8 +338,8 @@ static void WeatherAppMainProcess(AppController *sys, const ImuAction *act_info)
             DisplayWeather(g_weatherApp->m_weatherInfo);
             g_weatherApp->m_weatherUpdateFlag = false;
         }
-        if (g_weatherApp->m_timeUpdateFlag || DoDelayMillisTime(400, &g_weatherApp->preLocalTimestamp)) {
-            // UpdateTime_RTC(get_timestamp());
+        if (g_weatherApp->m_timeUpdateFlag || DoDelayMillisTime(400, &g_weatherApp->m_lastUpdateLocalTimeMillis)) {
+            g_weatherApp->UpdateTimeInfo();
             DisplayTime(g_weatherApp->m_timeInfo);
             g_weatherApp->m_timeUpdateFlag = false;
         }
@@ -370,10 +359,10 @@ static void WeatherAppMainProcess(AppController *sys, const ImuAction *act_info)
             g_weatherApp->m_weatherUpdateFlag = true;
         }
         if (g_weatherApp->m_forceUpdate == true ||
-            DoDelayMillisTime(g_weatherAppCfg.timeUpdataInterval, &g_weatherApp->preTimeMillis)) {
+            DoDelayMillisTime(g_weatherAppCfg.timeUpdataInterval, &g_weatherApp->m_lastUpdateTimeMillis)) {
             // 尝试同步网络上的时钟
-            long long timestamp = get_timestamp(TIME_API); // nowapi时间API
-            UpdateTime_RTC(timestamp);
+            g_weatherApp->UpdateTimeInfo(g_weatherApp->GetNetworkTime());
+            g_weatherApp->m_lastUpdateLocalTimeMillis = millis();
             g_weatherApp->m_timeUpdateFlag = true;
         }
         g_weatherApp->m_forceUpdate = false;
@@ -411,42 +400,6 @@ static void WeatherAppMessageHandle(const char *from, const char *to, APP_MESSAG
                 g_weatherApp->m_wifiStatus = WIFI_STATUS::WIFI_DISCONNECTED;
             }
             break;
-        // case APP_MESSAGE_WIFI_CONNECT: {
-        //     Serial.println(F("----->weather_event_notification"));
-        //     int event_id = (int)message;
-        //     switch (event_id) {
-        //         case UPDATE_NOW: {
-        //             Serial.print(F("weather update.\n"));
-        //             g_weatherApp->update_type |= UPDATE_WEATHER;
-
-        //             get_weather();
-        //             if (g_weatherApp->clock_page == 0) {
-        //                 DisplayWeather(g_weatherApp->m_weatherInfo);
-        //             }
-        //         }; break;
-        //         case UPDATE_NTP: {
-        //             Serial.print(F("ntp update.\n"));
-        //             g_weatherApp->update_type |= UPDATE_TIME;
-
-        //             long long timestamp = get_timestamp(TIME_API); // nowapi时间API
-        //             if (g_weatherApp->clock_page == 0) {
-        //                 UpdateTime_RTC(timestamp);
-        //             }
-        //         }; break;
-        //         case UPDATE_DAILY: {
-        //             Serial.print(F("daliy update.\n"));
-        //             g_weatherApp->update_type |= UPDATE_DALIY_WEATHER;
-
-        //             get_daliyWeather(g_weatherApp->m_weatherInfo.dailyHighTemp,
-        //             g_weatherApp->m_weatherInfo.dailyLowTemp); if (g_weatherApp->clock_page == 1) {
-        //                 DisplayCurve(g_weatherApp->m_weatherInfo.dailyHighTemp,
-        //                 g_weatherApp->m_weatherInfo.dailyLowTemp);
-        //             }
-        //         }; break;
-        //         default:
-        //             break;
-        //     }
-        // } break;
         case APP_MESSAGE_GET_PARAM:
             GetParam((const char *)data, (char *)extData);
             break;

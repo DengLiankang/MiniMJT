@@ -15,12 +15,10 @@ struct WEATHER_APP_CONFIG {
 
 class WeatherApp{
 public:
-    ESP32Time m_rtcTime; // 用于时间解码
+    ESP32Time m_rtcTime;
     unsigned long preWeatherMillis; // 上一回更新天气时的毫秒数
-    unsigned long preTimeMillis;    // 更新时间计数器
-    long long preNetTimestamp;      // 上一次的网络时间戳
-    unsigned long errorNetTimestamp;    // 网络到显示过程中的时间误差
-    unsigned long preLocalTimestamp;    // 上一次的本地机器时间戳
+    unsigned long m_lastUpdateTimeMillis;    // 更新时间计数器
+    unsigned long m_lastUpdateLocalTimeMillis;    // 上一次的本地机器时间戳
     uint8_t m_wifiStatus; // wifi标志
     boolean m_weatherUpdateFlag;
     boolean m_timeUpdateFlag;
@@ -35,6 +33,9 @@ public:
     ~WeatherApp();
 
     void WeatherAppDataInit(void);
+    void UpdateTimeInfo(void);
+    void UpdateTimeInfo(unsigned long timestamp);
+    unsigned long GetNetworkTime(void);
 
 private:
 
