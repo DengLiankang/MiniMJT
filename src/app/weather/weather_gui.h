@@ -12,14 +12,14 @@
     } while (lv_anim_count_running())
 
 struct WEATHER_STRUCT {
-    int weatherCode; // 天气现象代码
+    String weatherCode; // 天气现象代码
     int temperature;  // 温度
     int humidity;     // 湿度
     int maxTemp;      // 最高气温
     int minTemp;      // 最低气温
     String windDir;
+    String windSpeed;
     String cityName; // 城市名
-    int windLevel;
     int airQulity;
 
     short dailyHighTemp[7];
@@ -32,7 +32,7 @@ enum WEATHER_APP_PAGE {
     OTHER_PAGE,
 };
 
-void weatherAppGuiInit(struct WEATHER_STRUCT weatherInfo, struct tm timeInfo);
+void WeatherAppGuiInit(struct WEATHER_STRUCT weatherInfo, struct tm timeInfo);
 enum WEATHER_APP_PAGE GetWeatherAppGuiPage(void);
 void WeatherAppGuiPageFlip(lv_scr_load_anim_t anim);
 void DisplayTime(struct tm timeInfo);

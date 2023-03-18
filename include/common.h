@@ -9,7 +9,7 @@
 #include "driver/network.h"
 #include <TFT_eSPI.h>
 
-#define MJT_VERSION "2.1.11"
+#define MJT_VERSION "2.1.12"
 
 // SD_Card
 #define SD_SCK 14

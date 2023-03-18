@@ -24,35 +24,47 @@ LV_IMG_DECLARE(spaceman_8);
 LV_IMG_DECLARE(tempIcon);
 LV_IMG_DECLARE(humiIcon);
 
-static lv_obj_t* lv_weatherAppScr1 = NULL;
-static lv_obj_t* lv_weatherAppScr2 = NULL;
-static lv_obj_t* lv_weatherChart = NULL;
-static lv_obj_t* lv_weatherChartLabel = NULL;
-static lv_obj_t* lv_weatherChartSumLabel = NULL;
+static lv_obj_t *lv_weatherAppScr1 = NULL;
+static lv_obj_t *lv_weatherAppScr2 = NULL;
+static lv_obj_t *lv_weatherChart = NULL;
+static lv_obj_t *lv_weatherChartLabel = NULL;
+static lv_obj_t *lv_weatherChartSumLabel = NULL;
 
-static lv_obj_t* lv_weatherIconImg = NULL;
-static lv_obj_t* lv_cityLabel = NULL;
-static lv_obj_t* lv_airQualityBtn = NULL;
-static lv_obj_t* lv_airQualityBtnLabel = NULL;
-static lv_obj_t* lv_weatherTextLabel = NULL;
-static lv_obj_t* lv_clockLabel = NULL, * lv_secondLabel = NULL;
-static lv_obj_t* lv_dateLabel = NULL;
-static lv_obj_t* lv_tempImg = NULL, * lv_tempBar = NULL, * lv_tempLabel = NULL;
-static lv_obj_t* lv_humiImg = NULL, * lv_humiBar = NULL, * lv_humiLabel = NULL;
-static lv_obj_t* lv_spaceManImg = NULL;
+static lv_obj_t *lv_weatherIconImg = NULL;
+static lv_obj_t *lv_cityLabel = NULL;
+static lv_obj_t *lv_airQualityBtn = NULL;
+static lv_obj_t *lv_airQualityBtnLabel = NULL;
+static lv_obj_t *lv_weatherTextLabel = NULL;
+static lv_obj_t *lv_clockLabel = NULL, *lv_secondLabel = NULL;
+static lv_obj_t *lv_dateLabel = NULL;
+static lv_obj_t *lv_tempImg = NULL, *lv_tempBar = NULL, *lv_tempLabel = NULL;
+static lv_obj_t *lv_humiImg = NULL, *lv_humiBar = NULL, *lv_humiLabel = NULL;
+static lv_obj_t *lv_spaceManImg = NULL;
 
-static lv_chart_series_t* lv_tempHighSeries, * lv_tempLowSeries;
+static lv_chart_series_t *lv_tempHighSeries, *lv_tempLowSeries;
 
-// 天气图标路径的映射关系
-const void* WeatherIconMap[] = { &weather_0,  &weather_9,  &weather_14, &weather_5, &weather_25,
-                                &weather_30, &weather_26, &weather_11, &weather_23 };
 // 太空人图标路径的映射关系
-const void* SpaceManImgMap[] = { &spaceman_0, &spaceman_1, &spaceman_2, &spaceman_3, &spaceman_4, &spaceman_5, &spaceman_6, &spaceman_7, &spaceman_8 };
+const void *SpaceManImgMap[] = {&spaceman_0, &spaceman_1, &spaceman_2, &spaceman_3, &spaceman_4,
+                                &spaceman_5, &spaceman_6, &spaceman_7, &spaceman_8};
 static uint8_t g_spaceIndex = 0;
-static const char* WeekDayCh[] = { "日", "一", "二", "三", "四", "五", "六" };
-static const char* AirQualityCh[] = { "优", "良", "轻度", "中度", "重度", "严重" };
+static const char *WeekDayCh[] = {"日", "一", "二", "三", "四", "五", "六"};
+static const char *AirQualityCh[] = {"优", "良", "轻度", "中度", "重度", "严重"};
 
-void weatherAppGuiInit(struct WEATHER_STRUCT weatherInfo, struct tm timeInfo)
+static const void *GetWeatherIcon(const char *code)
+{
+    // 天气图标路径的映射关系
+    const void *WeatherIconMap[] = {&weather_0,  &weather_9,  &weather_14, &weather_5, &weather_25,
+                                    &weather_30, &weather_26, &weather_11, &weather_23};
+    const char *WeatherCodeMap[] = {"qing", "yin", "yu", "yun", "bingbao", "wu", "shachen", "lei", "xue"};
+    for (int i = 0; i < 9; i++) {
+        if (!strcmp(code, WeatherCodeMap[i])) {
+            return WeatherIconMap[i];
+        }
+    }
+    return WeatherIconMap[0];
+}
+
+void WeatherAppGuiInit(struct WEATHER_STRUCT weatherInfo, struct tm timeInfo)
 {
     static lv_style_t lv_chFontStyle;
     static lv_style_t lv_secondNumStyle;
@@ -92,7 +104,7 @@ void weatherAppGuiInit(struct WEATHER_STRUCT weatherInfo, struct tm timeInfo)
 
     // 天气图标
     lv_weatherIconImg = lv_img_create(lv_weatherAppScr1);
-    lv_img_set_src(lv_weatherIconImg, WeatherIconMap[weatherInfo.weatherCode]);
+    lv_img_set_src(lv_weatherIconImg, GetWeatherIcon(weatherInfo.weatherCode.c_str()));
 
     // 城市
     lv_cityLabel = lv_label_create(lv_weatherAppScr1);
@@ -118,7 +130,8 @@ void weatherAppGuiInit(struct WEATHER_STRUCT weatherInfo, struct tm timeInfo)
     lv_obj_add_style(lv_weatherTextLabel, &lv_chFontStyle, LV_STATE_DEFAULT);
     lv_obj_set_size(lv_weatherTextLabel, 120, 30);
     lv_label_set_long_mode(lv_weatherTextLabel, LV_LABEL_LONG_SCROLL_CIRCULAR);
-    lv_label_set_text_fmt(lv_weatherTextLabel, "最低气温%d°C , 最高气温%d°C , %s%d级   ", weatherInfo.minTemp, weatherInfo.maxTemp, weatherInfo.windDir.c_str(), weatherInfo.windLevel);
+    lv_label_set_text_fmt(lv_weatherTextLabel, "最低气温%d°C , 最高气温%d°C , %s%s   ", weatherInfo.minTemp,
+                          weatherInfo.maxTemp, weatherInfo.windDir.c_str(), weatherInfo.windSpeed.c_str());
 
     // 时间 时分
     lv_clockLabel = lv_label_create(lv_weatherAppScr1);
@@ -135,7 +148,8 @@ void weatherAppGuiInit(struct WEATHER_STRUCT weatherInfo, struct tm timeInfo)
     // 日历
     lv_dateLabel = lv_label_create(lv_weatherAppScr1);
     lv_obj_add_style(lv_dateLabel, &lv_chFontStyle, LV_STATE_DEFAULT);
-    lv_label_set_text_fmt(lv_dateLabel, "%2d月%2d日   周%s", 11, 23, WeekDayCh[timeInfo.tm_wday]);
+    lv_label_set_text_fmt(lv_dateLabel, "%2d月%2d日   周%s", timeInfo.tm_mon + 1, timeInfo.tm_mday,
+                          WeekDayCh[timeInfo.tm_wday]);
 
     // 温度图标
     lv_tempImg = lv_img_create(lv_weatherAppScr1);
@@ -214,11 +228,8 @@ void weatherAppGuiInit(struct WEATHER_STRUCT weatherInfo, struct tm timeInfo)
     lv_obj_set_style_text_color(lv_weatherChartSumLabel, lv_palette_main(LV_PALETTE_GREY), LV_STATE_DEFAULT);
     lv_label_set_text_fmt(lv_weatherChartSumLabel, "最低%d°C , 最高%d°C", weatherInfo.minTemp, weatherInfo.maxTemp);
 
-
-    lv_tempHighSeries =
-        lv_chart_add_series(lv_weatherChart, lv_palette_main(LV_PALETTE_RED), LV_CHART_AXIS_PRIMARY_Y);
-    lv_tempLowSeries =
-        lv_chart_add_series(lv_weatherChart, lv_palette_main(LV_PALETTE_BLUE), LV_CHART_AXIS_PRIMARY_Y);
+    lv_tempHighSeries = lv_chart_add_series(lv_weatherChart, lv_palette_main(LV_PALETTE_RED), LV_CHART_AXIS_PRIMARY_Y);
+    lv_tempLowSeries = lv_chart_add_series(lv_weatherChart, lv_palette_main(LV_PALETTE_BLUE), LV_CHART_AXIS_PRIMARY_Y);
 
     lv_obj_align(lv_weatherChartLabel, LV_ALIGN_TOP_MID, 0, 0);
     lv_obj_align(lv_weatherChart, LV_ALIGN_CENTER, 0, 3);
@@ -273,7 +284,8 @@ void DisplayTime(struct tm timeInfo)
 {
     lv_label_set_text_fmt(lv_clockLabel, "%02d#ffa500 %02d#", timeInfo.tm_hour, timeInfo.tm_min);
     lv_label_set_text_fmt(lv_secondLabel, "%02d", timeInfo.tm_sec);
-    lv_label_set_text_fmt(lv_dateLabel, "%2d月%2d日   周%s", timeInfo.tm_mon + 1, timeInfo.tm_mday, WeekDayCh[timeInfo.tm_wday]);
+    lv_label_set_text_fmt(lv_dateLabel, "%2d月%2d日   周%s", timeInfo.tm_mon + 1, timeInfo.tm_mday,
+                          WeekDayCh[timeInfo.tm_wday]);
 }
 
 void WeatherAppGuiPageFlip(lv_scr_load_anim_t anim)
@@ -322,8 +334,9 @@ void DisplayWeather(struct WEATHER_STRUCT weatherInfo)
 
     lv_label_set_text(lv_cityLabel, weatherInfo.cityName.c_str());
     lv_label_set_text(lv_airQualityBtnLabel, AirQualityCh[weatherInfo.airQulity]);
-    lv_img_set_src(lv_weatherIconImg, WeatherIconMap[weatherInfo.weatherCode]);
-    lv_label_set_text_fmt(lv_weatherTextLabel, "最低气温%d°C, 最高气温%d°C, %s%d级.   ", weatherInfo.minTemp, weatherInfo.maxTemp, weatherInfo.windDir.c_str(), weatherInfo.windLevel);
+    lv_img_set_src(lv_weatherIconImg, GetWeatherIcon(weatherInfo.weatherCode.c_str()));
+    lv_label_set_text_fmt(lv_weatherTextLabel, "最低气温%d°C , 最高气温%d°C , %s%s   ", weatherInfo.minTemp,
+                          weatherInfo.maxTemp, weatherInfo.windDir.c_str(), weatherInfo.windSpeed.c_str());
 
     lv_bar_set_value(lv_tempBar, weatherInfo.temperature, LV_ANIM_ON);
     lv_label_set_text_fmt(lv_tempLabel, "%2d°C", weatherInfo.temperature);

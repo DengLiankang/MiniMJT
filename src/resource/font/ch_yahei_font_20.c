@@ -16268,9 +16268,9 @@ static lv_font_fmt_txt_dsc_t font_dsc = {
 
 
 static int binsearch(const uint16_t *sortedSeq, int seqLength, uint16_t keyData) {
-    int low = 0, mid, high = seqLength - 1;
+    int low = 0, high = seqLength - 1;
     while (low <= high) {
-        mid = (low + high)>>1;//右移1位等于是/2，奇数，无论奇偶，有个值就行
+        int mid = (low + high)>>1;//右移1位等于是/2，奇数，无论奇偶，有个值就行
         if (keyData < sortedSeq[mid]) {
             high = mid - 1;//是mid-1，因为mid已经比较过了
         }

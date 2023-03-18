@@ -2,7 +2,6 @@
 #define APP_WEATHER_H
 
 #include "sys/interface.h"
-#include "ESP32Time.h"
 #include "weather_gui.h"
 
 struct WEATHER_APP_CONFIG {
@@ -15,27 +14,27 @@ struct WEATHER_APP_CONFIG {
 
 class WeatherApp{
 public:
-    ESP32Time m_rtcTime;
     unsigned long preWeatherMillis; // 上一回更新天气时的毫秒数
     unsigned long m_lastUpdateTimeMillis;    // 更新时间计数器
     unsigned long m_lastUpdateLocalTimeMillis;    // 上一次的本地机器时间戳
-    uint8_t m_wifiStatus; // wifi标志
+    WIFI_STATUS m_wifiStatus; // wifi标志
+    uint8_t m_wifiRetryCnt;
     boolean m_weatherUpdateFlag;
     boolean m_timeUpdateFlag;
     boolean m_forceUpdate;
     unsigned long m_lastKeepWifiMillis;
 
-    struct tm m_timeInfo;
+    struct tm *m_timeInfo;
     struct WEATHER_STRUCT m_weatherInfo;     // 保存天气状况
 public:
     WeatherApp();
-
     ~WeatherApp();
 
     void WeatherAppDataInit(void);
-    void UpdateTimeInfo(void);
-    void UpdateTimeInfo(unsigned long timestamp);
-    unsigned long GetNetworkTime(void);
+    void UpdateTimeInfo(struct timeval *tv = NULL);
+    void GetNowWeather(void);
+    void GetDailyWeather(short maxT[], short minT[]);
+    struct timeval GetNetworkTime(void);
 
 private:
 

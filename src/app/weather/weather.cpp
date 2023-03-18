@@ -2,17 +2,10 @@
 #include "ArduinoJson.h"
 #include "sys/app_controller.h"
 #include <esp32-hal-timer.h>
-#include <map>
 
 #define WEATHER_APP_NAME "Weather"
-#define WEATHER_NOW_API "https://www.yiketianqi.com/free/day?appid=%s&appsecret=%s&unescape=1&city=%s"
-#define WEATHER_NOW_API_UPDATE "https://yiketianqi.com/api?unescape=1&version=v6&appid=%s&appsecret=%s&city=%s"
 #define WEATHER_DALIY_API "https://www.yiketianqi.com/free/week?unescape=1&appid=%s&appsecret=%s&city=%s"
 #define TIME_API "http://api.m.taobao.com/rest/api3.do?api=mtop.common.gettimestamp"
-#define WEATHER_PAGE_SIZE 2
-#define UPDATE_WEATHER 0x01       // 更新天气
-#define UPDATE_DALIY_WEATHER 0x02 // 更新每天天气
-#define UPDATE_TIME 0x04          // 更新时间
 
 // 天气的持久化配置
 #define WEATHER_CONFIG_PATH "/weather_app.cfg"
@@ -20,11 +13,6 @@
 WeatherApp *g_weatherApp = NULL;
 // app cfg一定保证静态全局，防止被外部访问出错
 static WEATHER_APP_CONFIG g_weatherAppCfg;
-
-enum wea_event_Id { UPDATE_NOW, UPDATE_NTP, UPDATE_DAILY };
-
-std::map<String, int> weatherMap = {{"qing", 0}, {"yin", 1},     {"yu", 2},  {"yun", 3}, {"bingbao", 4},
-                                    {"wu", 5},   {"shachen", 6}, {"lei", 7}, {"xue", 8}};
 
 static int8_t WriteConfigToFlash(WEATHER_APP_CONFIG *cfg)
 {
@@ -97,67 +85,67 @@ static void SetParam(const char *key, const char *value)
     }
 }
 
-WeatherApp::WeatherApp() {}
-WeatherApp::~WeatherApp() {}
-
-static int WindLevel(String str)
-{
-    int ret = 0;
-    for (char ch : str) {
-        if (ch >= '0' && ch <= '9') {
-            ret = ret * 10 + (ch - '0');
-        }
-    }
-    return ret;
-}
-
 static int AirQulityLevel(int q)
 {
     int ret = q / 50;
     return ret > 5 ? 5 : ret;
 }
 
-static void get_weather(void)
-{
-    if (WL_CONNECTED != WiFi.status())
-        return;
+WeatherApp::WeatherApp() {}
+WeatherApp::~WeatherApp() {}
 
+void WeatherApp::GetNowWeather(void)
+{
     HTTPClient http;
-    http.setTimeout(1000);
-    char api[128] = {0};
-    // snprintf(api, 128, WEATHER_NOW_API, g_weatherAppCfg.weatherApiAppId, g_weatherAppCfg.weatherApiAppSecret,
-    // g_weatherAppCfg.weatherApiCityAddr);
-    snprintf(api, 128, WEATHER_NOW_API_UPDATE, g_weatherAppCfg.weatherApiAppId.c_str(),
-             g_weatherAppCfg.weatherApiAppSecret.c_str(), g_weatherAppCfg.weatherApiCityAddr.c_str());
-    Serial.print("API = ");
-    Serial.println(api);
+    http.setTimeout(500);
+    String api = "https://www.yiketianqi.com/free/day?unescape=1&appid=" + g_weatherAppCfg.weatherApiAppId +
+                 "&appsecret=" + g_weatherAppCfg.weatherApiAppSecret + "&city=" + g_weatherAppCfg.weatherApiCityAddr;
+    Serial.printf("API = %s", api.c_str());
     http.begin(api);
 
     int httpCode = http.GET();
-    if (httpCode > 0) {
-        // file found at server
-        if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
-            String payload = http.getString();
-            Serial.println(payload);
-            DynamicJsonDocument doc(1024);
-            deserializeJson(doc, payload);
-            JsonObject sk = doc.as<JsonObject>();
-            g_weatherApp->m_weatherInfo.cityName = sk["city"].as<String>();
-            g_weatherApp->m_weatherInfo.weatherCode = weatherMap[sk["wea_img"].as<String>()];
-            g_weatherApp->m_weatherInfo.temperature = sk["tem"].as<int>();
+    if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
+        String payload = http.getString();
+        Serial.println(payload);
+        DynamicJsonDocument doc(1024);
+        deserializeJson(doc, payload);
+        JsonObject sk = doc.as<JsonObject>();
+        g_weatherApp->m_weatherInfo.cityName = sk["city"].as<String>();
+        g_weatherApp->m_weatherInfo.weatherCode = sk["wea_img"].as<String>();
+        g_weatherApp->m_weatherInfo.temperature = sk["tem"].as<int>();
+        String humidity = sk["humidity"].as<String>();
+        g_weatherApp->m_weatherInfo.humidity = atoi(humidity.substring(0, humidity.length() - 1).c_str());
 
-            // 获取湿度
-            g_weatherApp->m_weatherInfo.humidity = 50;
-            char humidity[8] = {0};
-            strncpy(humidity, sk["humidity"].as<String>().c_str(), 8);
-            humidity[strlen(humidity) - 1] = 0; // 去除尾部的 % 号
-            g_weatherApp->m_weatherInfo.humidity = atoi(humidity);
+        g_weatherApp->m_weatherInfo.maxTemp = sk["tem_day"].as<int>();
+        g_weatherApp->m_weatherInfo.minTemp = sk["tem_night"].as<int>();
+        g_weatherApp->m_weatherInfo.windDir = sk["win"].as<String>();
+        g_weatherApp->m_weatherInfo.windSpeed = sk["win_speed"].as<String>();
+        g_weatherApp->m_weatherInfo.airQulity = AirQulityLevel(sk["air"].as<int>());
+    } else {
+        Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
+    }
+    http.end();
+}
 
-            g_weatherApp->m_weatherInfo.maxTemp = sk["tem1"].as<int>();
-            g_weatherApp->m_weatherInfo.minTemp = sk["tem2"].as<int>();
-            g_weatherApp->m_weatherInfo.windDir = sk["win"].as<String>();
-            g_weatherApp->m_weatherInfo.windLevel = WindLevel(sk["win_speed"].as<String>());
-            g_weatherApp->m_weatherInfo.airQulity = AirQulityLevel(sk["air"].as<int>());
+void WeatherApp::GetDailyWeather(short maxT[], short minT[])
+{
+    HTTPClient http;
+    http.setTimeout(500);
+    String api = "https://www.yiketianqi.com/free/week?unescape=1&appid=" + g_weatherAppCfg.weatherApiAppId +
+                 "&appsecret=" + g_weatherAppCfg.weatherApiAppSecret + "&city=" + g_weatherAppCfg.weatherApiCityAddr;
+    Serial.printf("API = %s", api.c_str());
+    http.begin(api);
+
+    int httpCode = http.GET();
+    if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
+        String payload = http.getString();
+        Serial.println(payload);
+        DynamicJsonDocument doc(2048);
+        deserializeJson(doc, payload);
+        JsonObject sk = doc.as<JsonObject>();
+        for (int i = 0; i < 7; ++i) {
+            maxT[i] = sk["data"][i]["tem_day"].as<int>();
+            minT[i] = sk["data"][i]["tem_night"].as<int>();
         }
     } else {
         Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
@@ -165,12 +153,12 @@ static void get_weather(void)
     http.end();
 }
 
-unsigned long WeatherApp::GetNetworkTime(void)
+struct timeval WeatherApp::GetNetworkTime(void)
 {
     HTTPClient http;
     http.setTimeout(500);
     http.begin(TIME_API);
-    unsigned long ret;
+    struct timeval tv;
 
     int httpCode = http.GET();
     if (httpCode == HTTP_CODE_OK) {
@@ -181,50 +169,26 @@ unsigned long WeatherApp::GetNetworkTime(void)
         JsonObject timeObj = doc.as<JsonObject>();
         long long timestamp = timeObj["data"]["t"];
         timestamp += TIMEZERO_OFFSIZE;
-        ret = (unsigned long)(timestamp / 1000);
+        tv.tv_sec = (unsigned long)(timestamp / 1000);
+        tv.tv_usec = (unsigned long)(timestamp % 1000);
     } else {
         Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
         // 得不到网络时间戳时
-        ret = m_rtcTime.getMillis();
-
+        gettimeofday(&tv, NULL);
     }
     http.end();
 
-    return ret;
+    return tv;
 }
 
-static void get_daliyWeather(short maxT[], short minT[])
+void WeatherApp::UpdateTimeInfo(struct timeval *tv)
 {
-    if (WL_CONNECTED != WiFi.status())
-        return;
-
-    HTTPClient http;
-    http.setTimeout(1000);
-    char api[128] = {0};
-    snprintf(api, 128, WEATHER_DALIY_API, g_weatherAppCfg.weatherApiAppId.c_str(),
-             g_weatherAppCfg.weatherApiAppSecret.c_str(), g_weatherAppCfg.weatherApiCityAddr.c_str());
-    Serial.print("API = ");
-    Serial.println(api);
-    http.begin(api);
-
-    int httpCode = http.GET();
-    if (httpCode > 0) {
-        // file found at server
-        if (httpCode == HTTP_CODE_OK || httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
-            String payload = http.getString();
-            Serial.println(payload);
-            DynamicJsonDocument doc(2048);
-            deserializeJson(doc, payload);
-            JsonObject sk = doc.as<JsonObject>();
-            for (int gDW_i = 0; gDW_i < 7; ++gDW_i) {
-                maxT[gDW_i] = sk["data"][gDW_i]["tem_day"].as<int>();
-                minT[gDW_i] = sk["data"][gDW_i]["tem_night"].as<int>();
-            }
-        }
-    } else {
-        Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
+    if (tv != NULL) {
+        settimeofday(tv, NULL);
     }
-    http.end();
+    time_t now;
+    time(&now);
+    m_timeInfo = localtime(&now);
 }
 
 void WeatherApp::ValidateConfig(struct WEATHER_APP_CONFIG *cfg, const struct WEATHER_APP_CONFIG *defaultConfig)
@@ -246,17 +210,6 @@ void WeatherApp::ValidateConfig(struct WEATHER_APP_CONFIG *cfg, const struct WEA
     }
 }
 
-void WeatherApp::UpdateTimeInfo(unsigned long timestamp)
-{
-    m_rtcTime.setTime(timestamp);
-    m_timeInfo = m_rtcTime.getTimeStruct();
-}
-
-void WeatherApp::UpdateTimeInfo()
-{
-    m_timeInfo = m_rtcTime.getTimeStruct();
-}
-
 void WeatherApp::WeatherAppDataInit(void)
 {
     struct WEATHER_APP_CONFIG defaultConfig = {
@@ -267,21 +220,21 @@ void WeatherApp::WeatherAppDataInit(void)
         .timeUpdataInterval = 900000,
     };
     struct WEATHER_STRUCT defaultWeather = {
-        .weatherCode = 0,
+        .weatherCode = "qing",
         .temperature = 18,
         .humidity = 38,
         .maxTemp = 25,
         .minTemp = 13,
         .windDir = "西北风",
+        .windSpeed = "3级",
         .cityName = "武冈",
-        .windLevel = 3,
         .airQulity = 0,
 
         .dailyHighTemp = {23, 24, 26, 24, 23, 25, 22},
         .dailyLowTemp = {13, 15, 14, 12, 15, 16, 12},
     };
     ValidateConfig(&g_weatherAppCfg, &defaultConfig);
-    m_timeInfo = m_rtcTime.getTimeStruct();
+    UpdateTimeInfo();
     memcpy(&m_weatherInfo, &defaultWeather, sizeof(struct WEATHER_STRUCT));
     m_weatherInfo.cityName = g_weatherAppCfg.weatherApiCityAddr;
     m_lastUpdateLocalTimeMillis = millis(); // 上一次的本地机器时间戳
@@ -289,6 +242,7 @@ void WeatherApp::WeatherAppDataInit(void)
     preWeatherMillis = 0;
     m_lastUpdateTimeMillis = 0;
     m_wifiStatus = WIFI_STATUS::WIFI_DISCONNECTED;
+    m_wifiRetryCnt = 0;
     m_weatherUpdateFlag = false;
     m_timeUpdateFlag = false;
     m_forceUpdate = true;
@@ -299,7 +253,7 @@ static int WeatherAppInit(AppController *sys)
     g_weatherApp = new WeatherApp();
     ReadConfigFromFlash(&g_weatherAppCfg);
     g_weatherApp->WeatherAppDataInit();
-    weatherAppGuiInit(g_weatherApp->m_weatherInfo, g_weatherApp->m_timeInfo);
+    WeatherAppGuiInit(g_weatherApp->m_weatherInfo, *g_weatherApp->m_timeInfo);
 
     return 0;
 }
@@ -321,7 +275,7 @@ static void WeatherAppMainProcess(AppController *sys, const ImuAction *act_info)
             DisplayCurve(g_weatherApp->m_weatherInfo.dailyHighTemp, g_weatherApp->m_weatherInfo.dailyLowTemp);
             g_weatherApp->m_weatherUpdateFlag = true;
         } else if (curPage == WEATHER_APP_PAGE::CURVE_PAGE) {
-            DisplayTime(g_weatherApp->m_timeInfo);
+            DisplayTime(*g_weatherApp->m_timeInfo);
             DisplayWeather(g_weatherApp->m_weatherInfo);
             DisplaySpaceMan();
             g_weatherApp->m_weatherUpdateFlag = true;
@@ -338,9 +292,13 @@ static void WeatherAppMainProcess(AppController *sys, const ImuAction *act_info)
             DisplayWeather(g_weatherApp->m_weatherInfo);
             g_weatherApp->m_weatherUpdateFlag = false;
         }
-        if (g_weatherApp->m_timeUpdateFlag || DoDelayMillisTime(400, &g_weatherApp->m_lastUpdateLocalTimeMillis)) {
+        if (g_weatherApp->m_timeUpdateFlag || DoDelayMillisTime(500, &g_weatherApp->m_lastUpdateLocalTimeMillis)) {
             g_weatherApp->UpdateTimeInfo();
-            DisplayTime(g_weatherApp->m_timeInfo);
+            Serial.printf("%d:%d:%d %d-%d-%d %d\n", g_weatherApp->m_timeInfo->tm_hour, g_weatherApp->m_timeInfo->tm_min,
+                          g_weatherApp->m_timeInfo->tm_sec, g_weatherApp->m_timeInfo->tm_year,
+                          g_weatherApp->m_timeInfo->tm_mon, g_weatherApp->m_timeInfo->tm_mday,
+                          g_weatherApp->m_timeInfo->tm_wday);
+            DisplayTime(*g_weatherApp->m_timeInfo);
             g_weatherApp->m_timeUpdateFlag = false;
         }
         DisplaySpaceMan();
@@ -354,14 +312,16 @@ static void WeatherAppMainProcess(AppController *sys, const ImuAction *act_info)
     if (g_weatherApp->m_wifiStatus == WIFI_STATUS::WIFI_CONNECTED) {
         if (g_weatherApp->m_forceUpdate == true ||
             DoDelayMillisTime(g_weatherAppCfg.weatherUpdataInterval, &g_weatherApp->preWeatherMillis)) {
-            get_weather();
-            get_daliyWeather(g_weatherApp->m_weatherInfo.dailyHighTemp, g_weatherApp->m_weatherInfo.dailyLowTemp);
+            g_weatherApp->GetNowWeather();
+            g_weatherApp->GetDailyWeather(g_weatherApp->m_weatherInfo.dailyHighTemp,
+                                          g_weatherApp->m_weatherInfo.dailyLowTemp);
             g_weatherApp->m_weatherUpdateFlag = true;
         }
         if (g_weatherApp->m_forceUpdate == true ||
             DoDelayMillisTime(g_weatherAppCfg.timeUpdataInterval, &g_weatherApp->m_lastUpdateTimeMillis)) {
             // 尝试同步网络上的时钟
-            g_weatherApp->UpdateTimeInfo(g_weatherApp->GetNetworkTime());
+            struct timeval tv = g_weatherApp->GetNetworkTime();
+            g_weatherApp->UpdateTimeInfo(&tv);
             g_weatherApp->m_lastUpdateLocalTimeMillis = millis();
             g_weatherApp->m_timeUpdateFlag = true;
         }
@@ -371,7 +331,7 @@ static void WeatherAppMainProcess(AppController *sys, const ImuAction *act_info)
     if (DoDelayMillisTime(30000, &g_weatherApp->m_lastKeepWifiMillis)) {
         if (g_weatherApp->m_wifiStatus == WIFI_STATUS::WIFI_CONNECTED) {
             sys->SendRequestEvent(WEATHER_APP_NAME, CTRL_NAME, APP_MESSAGE_WIFI_KEEP_ALIVE, NULL, NULL);
-        } else {
+        } else if (++g_weatherApp->m_wifiRetryCnt <= 3) {
             sys->SendRequestEvent(WEATHER_APP_NAME, CTRL_NAME, APP_MESSAGE_WIFI_CONNECT, NULL, NULL);
         }
     }
