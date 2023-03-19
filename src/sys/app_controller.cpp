@@ -132,7 +132,7 @@ void AppController::WifiRequestDeal(APP_MESSAGE_TYPE type)
                 m_wifiSsidItem = 0;
                 m_network.ConnectWifi(m_sysCfg.ssid[m_wifiSsidItem].c_str(), m_sysCfg.password[m_wifiSsidItem].c_str());
                 m_wifiStatus = WIFI_STATUS::WIFI_CONNECTING;
-            } else if (m_wifiStatus == WIFI_STATUS::WIFI_CONNECTING) {
+            } else if (m_wifiStatus == WIFI_STATUS::WIFI_CONNECTING && strcmp(m_requestFrom, CTRL_NAME) == 0) {
                 m_network.ConnectWifi(m_sysCfg.ssid[m_wifiSsidItem].c_str(), m_sysCfg.password[m_wifiSsidItem].c_str());
             }
             m_preWifiReqMillis = millis();
