@@ -95,7 +95,41 @@ static int AirQulityLevel(int q)
     return ret > 5 ? 5 : ret;
 }
 
-WeatherApp::WeatherApp() {}
+WeatherApp::WeatherApp() {
+    struct WEATHER_APP_CONFIG defaultConfig = {
+        .weatherApiAppId = "22513773",
+        .weatherApiAppSecret = "rq2r6sXd",
+        .weatherApiCityAddr = "武冈",
+        .httpUpdataInterval = 900000,
+    };
+    struct WEATHER_STRUCT defaultWeather = {
+        .weatherCode = "qing",
+        .temperature = 18,
+        .humidity = 38,
+        .maxTemp = 25,
+        .minTemp = 13,
+        .windDir = "西北风",
+        .windSpeed = "3级",
+        .cityName = "武冈",
+        .airQulity = 0,
+
+        .dailyHighTemp = {23, 24, 26, 24, 23, 25, 22},
+        .dailyLowTemp = {13, 15, 14, 12, 15, 16, 12},
+    };
+    ValidateConfig(&g_weatherAppCfg, &defaultConfig);
+    UpdateTimeInfo();
+    memcpy(&m_weatherInfo, &defaultWeather, sizeof(struct WEATHER_STRUCT));
+    m_weatherInfo.cityName = g_weatherAppCfg.weatherApiCityAddr;
+    m_lastUpdateLocalTimeMillis = millis(); // 上一次的本地机器时间戳
+    m_lastKeepWifiMillis = 0;
+    m_lastHttpUpdateMillis = 0;
+    m_wifiStatus = WIFI_STATUS::WIFI_DISCONNECTED;
+    m_wifiRetryCnt = 0;
+    m_weatherUpdateFlag = false;
+    m_timeUpdateFlag = false;
+    m_forceUpdate = true;
+    m_updateTaskHandle = NULL;
+}
 WeatherApp::~WeatherApp() {}
 
 void WeatherApp::GetNowWeather(void)
@@ -211,48 +245,11 @@ void WeatherApp::ValidateConfig(struct WEATHER_APP_CONFIG *cfg, const struct WEA
     }
 }
 
-void WeatherApp::WeatherAppDataInit(void)
-{
-    struct WEATHER_APP_CONFIG defaultConfig = {
-        .weatherApiAppId = "22513773",
-        .weatherApiAppSecret = "rq2r6sXd",
-        .weatherApiCityAddr = "武冈",
-        .httpUpdataInterval = 900000,
-    };
-    struct WEATHER_STRUCT defaultWeather = {
-        .weatherCode = "qing",
-        .temperature = 18,
-        .humidity = 38,
-        .maxTemp = 25,
-        .minTemp = 13,
-        .windDir = "西北风",
-        .windSpeed = "3级",
-        .cityName = "武冈",
-        .airQulity = 0,
-
-        .dailyHighTemp = {23, 24, 26, 24, 23, 25, 22},
-        .dailyLowTemp = {13, 15, 14, 12, 15, 16, 12},
-    };
-    ValidateConfig(&g_weatherAppCfg, &defaultConfig);
-    UpdateTimeInfo();
-    memcpy(&m_weatherInfo, &defaultWeather, sizeof(struct WEATHER_STRUCT));
-    m_weatherInfo.cityName = g_weatherAppCfg.weatherApiCityAddr;
-    m_lastUpdateLocalTimeMillis = millis(); // 上一次的本地机器时间戳
-    m_lastKeepWifiMillis = 0;
-    m_lastHttpUpdateMillis = 0;
-    m_wifiStatus = WIFI_STATUS::WIFI_DISCONNECTED;
-    m_wifiRetryCnt = 0;
-    m_weatherUpdateFlag = false;
-    m_timeUpdateFlag = false;
-    m_forceUpdate = true;
-    m_updateTaskHandle = NULL;
-}
 
 static int WeatherAppInit(AppController *sys)
 {
-    g_weatherApp = new WeatherApp();
     ReadConfigFromFlash(&g_weatherAppCfg);
-    g_weatherApp->WeatherAppDataInit();
+    g_weatherApp = new WeatherApp();
     WeatherAppGuiInit(g_weatherApp->m_weatherInfo, *g_weatherApp->m_timeInfo);
 
     return 0;
@@ -317,11 +314,11 @@ static void WeatherAppMainProcess(AppController *sys, const ImuAction *act_info)
 
     if (DoDelayMillisTime(45000, &g_weatherApp->m_lastKeepWifiMillis)) {
         if (g_weatherApp->m_wifiStatus == WIFI_STATUS::WIFI_CONNECTED) {
-            sys->SendRequestEvent(WEATHER_APP_NAME, CTRL_NAME, APP_MESSAGE_WIFI_KEEP_ALIVE, NULL, NULL);
+            sys->SendRequestEvent(WEATHER_APP_NAME, MJT_APP_CTRL, APP_MESSAGE_WIFI_KEEP_ALIVE, NULL, NULL);
             g_weatherApp->m_wifiRetryCnt = 0;
         } else if (++g_weatherApp->m_wifiRetryCnt <= 3) {
             Serial.printf("[Weather] try to connect wifi: %d...", g_weatherApp->m_wifiRetryCnt);
-            sys->SendRequestEvent(WEATHER_APP_NAME, CTRL_NAME, APP_MESSAGE_WIFI_CONNECT, NULL, NULL);
+            sys->SendRequestEvent(WEATHER_APP_NAME, MJT_APP_CTRL, APP_MESSAGE_WIFI_CONNECT, NULL, NULL);
         }
     }
 }
@@ -333,9 +330,11 @@ static int WeatherAppExit(void *param)
     if (g_weatherApp->m_updateTaskHandle != NULL) {
         vTaskDelete(g_weatherApp->m_updateTaskHandle);
     }
+    if (g_weatherApp != NULL) {
+        delete (g_weatherApp);
+        g_weatherApp = NULL;
+    }
 
-    delete (g_weatherApp);
-    g_weatherApp = NULL;
     return 0;
 }
 
@@ -369,5 +368,5 @@ static void WeatherAppMessageHandle(const char *from, const char *to, APP_MESSAG
     }
 }
 
-APP_OBJ weather_app = {WEATHER_APP_NAME, &WeatherAppLogo,        "", WeatherAppInit, WeatherAppMainProcess, NULL,
+APP_OBJ WEATHER_APP = {WEATHER_APP_NAME, &WeatherAppLogo,        "", WeatherAppInit, WeatherAppMainProcess, NULL,
                        WeatherAppExit,   WeatherAppMessageHandle};

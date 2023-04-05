@@ -243,7 +243,7 @@ static void anniversary_process(AppController *sys, const ImuAction *act_info)
         run_data->anniversary_day_count =
             dateDiff(&(cfg_data.current_date), &(cfg_data.target_date[run_data->cur_anniversary]));
         // 尝试同步网络上的时钟
-        sys->SendRequestEvent(ANNIVERSARY_APP_NAME, CTRL_NAME, APP_MESSAGE_WIFI_CONNECT, NULL, NULL);
+        sys->SendRequestEvent(ANNIVERSARY_APP_NAME, MJT_APP_CTRL, APP_MESSAGE_WIFI_CONNECT, NULL, NULL);
         run_data->coactusUpdateFlag = 0x00;
         WriteConfig(&cfg_data);
     } else {
@@ -261,7 +261,7 @@ static void anniversary_process(AppController *sys, const ImuAction *act_info)
     anniversary_gui_display_date(&(cfg_data.target_date[run_data->cur_anniversary]), run_data->anniversary_day_count,
                                  cfg_data.event_name[run_data->cur_anniversary].c_str());
     // 发送请求。如果是wifi相关的消息，当请求完成后自动会调用 anniversary_message_handle 函数
-    // sys->SendRequestEvent(ANNIVERSARY_APP_NAME, CTRL_NAME,
+    // sys->SendRequestEvent(ANNIVERSARY_APP_NAME, MJT_APP_CTRL,
     //              APP_MESSAGE_WIFI_CONN, (void *)run_data->val1, NULL);
 
     // 程序需要时可以适当加延时

@@ -41,7 +41,7 @@ void HeartbeatAppForeverData::callback(char *topic, byte *payload, unsigned int 
     }
     Serial.println();
 
-    g_appController->SendRequestEvent(HEARTBEAT_APP_NAME, CTRL_NAME, APP_MESSAGE_MQTT_DATA, NULL, NULL);
+    g_appController->SendRequestEvent(HEARTBEAT_APP_NAME, MJT_APP_CTRL, APP_MESSAGE_MQTT_DATA, NULL, NULL);
 }
 
 HeartbeatAppForeverData hb_cfg;
@@ -223,7 +223,7 @@ static int heartbeat_init(AppController *sys)
             // hb_cfg.espClient);
         }
         // 连接wifi，并开启mqtt客户端
-        sys->SendRequestEvent(HEARTBEAT_APP_NAME, CTRL_NAME, APP_MESSAGE_WIFI_CONNECT, NULL, NULL);
+        sys->SendRequestEvent(HEARTBEAT_APP_NAME, MJT_APP_CTRL, APP_MESSAGE_WIFI_CONNECT, NULL, NULL);
     }
     return 0;
 }
@@ -268,7 +268,7 @@ static void heartbeat_process(AppController *sys, const ImuAction *act_info)
         if (DoDelayMillisTime(run_data->timeUpdataInterval, &run_data->preUpdataMillis)) {
             // 发送请求。如果是wifi相关的消息，
             // 当请求完成后自动会调用 heartbeat_message_handle 函数
-            sys->SendRequestEvent(HEARTBEAT_APP_NAME, CTRL_NAME, APP_MESSAGE_WIFI_KEEP_ALIVE, NULL, NULL);
+            sys->SendRequestEvent(HEARTBEAT_APP_NAME, MJT_APP_CTRL, APP_MESSAGE_WIFI_KEEP_ALIVE, NULL, NULL);
         }
     }
 

@@ -341,5 +341,5 @@ void DisplayWeather(struct WEATHER_STRUCT weatherInfo)
     lv_bar_set_value(lv_tempBar, weatherInfo.temperature, LV_ANIM_ON);
     lv_label_set_text_fmt(lv_tempLabel, "%2d°C", weatherInfo.temperature);
     lv_bar_set_value(lv_humiBar, weatherInfo.humidity, LV_ANIM_ON);
-    lv_label_set_text_fmt(lv_humiLabel, "%d%%", weatherInfo.humidity);
+    lv_label_set_text_fmt(lv_humiLabel, "%d%", weatherInfo.humidity);
 }

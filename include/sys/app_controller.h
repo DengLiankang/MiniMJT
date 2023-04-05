@@ -6,7 +6,7 @@
 #include "interface.h"
 #include <vector>
 
-#define CTRL_NAME "MJT_AppCtrl"
+#define MJT_APP_CTRL "MJT_AppCtrl"
 #define APP_MAX_NUM 10             // 最大的可运行的APP数量
 #define WIFI_LIFE_CYCLE 60000      // wifi的生命周期（60s）
 #define MQTT_ALIVE_CYCLE 1000      // mqtt重连周期
@@ -25,7 +25,7 @@ enum MJT_SYS_STATE {
 class AppController
 {
 public:
-    AppController(const char *name = CTRL_NAME);
+    AppController(const char *name = MJT_APP_CTRL);
     ~AppController();
 
     // 初始化

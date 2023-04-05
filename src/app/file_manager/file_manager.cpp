@@ -54,12 +54,12 @@ static void file_maneger_process(AppController *sys, const ImuAction *action)
         display_file_manager("File Manager", WiFi.softAPIP().toString().c_str(), "21", "Wait connect ....",
                              LV_SCR_LOAD_ANIM_NONE);
         // 如果web服务没有开启 且 ap开启的请求没有发送 event_id这边没有作用（填0）
-        sys->SendRequestEvent(FILE_MANAGER_APP_NAME, CTRL_NAME, APP_MESSAGE_WIFI_CONNECT, NULL, NULL);
+        sys->SendRequestEvent(FILE_MANAGER_APP_NAME, MJT_APP_CTRL, APP_MESSAGE_WIFI_CONNECT, NULL, NULL);
         run_data->req_sent = 1; // 标志为 ap开启请求已发送
     } else if (1 == run_data->tcp_start) {
         if (DoDelayMillisTime(SHARE_WIFI_ALIVE, &run_data->apAlivePreMillis)) {
             // 发送wifi维持的心跳
-            sys->SendRequestEvent(FILE_MANAGER_APP_NAME, CTRL_NAME, APP_MESSAGE_WIFI_KEEP_ALIVE, NULL, NULL);
+            sys->SendRequestEvent(FILE_MANAGER_APP_NAME, MJT_APP_CTRL, APP_MESSAGE_WIFI_KEEP_ALIVE, NULL, NULL);
         }
         ftpSrv.handleFTP(); // make sure in loop you call handleFTP()!!
     }

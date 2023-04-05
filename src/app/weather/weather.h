@@ -29,7 +29,6 @@ public:
     WeatherApp();
     ~WeatherApp();
 
-    void WeatherAppDataInit(void);
     void UpdateTimeInfo(struct timeval *tv = NULL);
     void GetNowWeather(void);
     void GetDailyWeather(short maxT[], short minT[]);
@@ -40,6 +39,6 @@ private:
     void ValidateConfig(struct WEATHER_APP_CONFIG *cfg, const struct WEATHER_APP_CONFIG *defaultConfig);
 };
 
-extern APP_OBJ weather_app;
+extern APP_OBJ WEATHER_APP;
 
 #endif

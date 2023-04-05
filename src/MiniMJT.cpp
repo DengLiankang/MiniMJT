@@ -26,10 +26,10 @@ void setup()
 
     // 将APP"安装"到controller里
 #if APP_WEATHER_USE
-    g_appController->AppInstall(&weather_app);
+    g_appController->AppInstall(&WEATHER_APP);
 #endif
 #if APP_PICTURE_USE
-    g_appController->AppInstall(&picture_app);
+    g_appController->AppInstall(&PICTURE_APP);
 #endif
 #if APP_MEDIA_PLAYER_USE
     g_appController->AppInstall(&media_app);

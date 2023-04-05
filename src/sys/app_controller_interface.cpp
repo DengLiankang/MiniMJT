@@ -19,11 +19,11 @@ int AppController::SendRequestEvent(const char *from, const char *to, APP_MESSAG
     APP_OBJ *fromApp = GetAppByName(from); // 来自谁 有可能为空
     APP_OBJ *toApp = GetAppByName(to);     // 发送给谁 有可能为空
 
-    if ((strcmp(from, CTRL_NAME) && fromApp == NULL) || ((strcmp(to, CTRL_NAME) && toApp == NULL)))
+    if ((strcmp(from, MJT_APP_CTRL) && fromApp == NULL) || ((strcmp(to, MJT_APP_CTRL) && toApp == NULL)))
         return -1;
 
     Serial.printf("[Massage]%s To %s: %s\n", from, to, AppMessageEventStr[type]);
-    if (strcmp(to, CTRL_NAME) == 0) {
+    if (strcmp(to, MJT_APP_CTRL) == 0) {
         m_requestFrom = from;
         RequestProcess(type, data, extData);
     } else if (toApp->MessageHandle != NULL) {

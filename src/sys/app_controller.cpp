@@ -132,7 +132,7 @@ void AppController::WifiRequestDeal(APP_MESSAGE_TYPE type)
                 m_wifiSsidItem = 0;
                 m_network.ConnectWifi(m_sysCfg.ssid[m_wifiSsidItem].c_str(), m_sysCfg.password[m_wifiSsidItem].c_str());
                 m_wifiStatus = WIFI_STATUS::WIFI_CONNECTING;
-            } else if (m_wifiStatus == WIFI_STATUS::WIFI_CONNECTING && strcmp(m_requestFrom, CTRL_NAME) == 0) {
+            } else if (m_wifiStatus == WIFI_STATUS::WIFI_CONNECTING && strcmp(m_requestFrom, MJT_APP_CTRL) == 0) {
                 m_network.ConnectWifi(m_sysCfg.ssid[m_wifiSsidItem].c_str(), m_sysCfg.password[m_wifiSsidItem].c_str());
             }
             m_preWifiReqMillis = millis();
@@ -170,7 +170,7 @@ void AppController::UpdateWifiStatus(void)
     if (m_wifiStatus == WIFI_STATUS::WIFI_CONNECTING && (WiFi.getMode() & WIFI_MODE_STA) &&
         WiFi.status() != WL_CONNECTED && millis() - m_preWifiReqMillis >= 10000) {
         if (++m_wifiSsidItem < 3) {
-            SendRequestEvent(CTRL_NAME, CTRL_NAME, APP_MESSAGE_WIFI_CONNECT, NULL, NULL);
+            SendRequestEvent(MJT_APP_CTRL, MJT_APP_CTRL, APP_MESSAGE_WIFI_CONNECT, NULL, NULL);
             return;
         }
         m_wifiStatus = WIFI_STATUS::WIFI_DISCONNECTED;
@@ -178,19 +178,19 @@ void AppController::UpdateWifiStatus(void)
     }
     if (m_wifiStatus == WIFI_STATUS::WIFI_CONNECTED && (WiFi.getMode() & WIFI_MODE_STA) &&
         WiFi.status() != WL_CONNECTED) {
-        SendRequestEvent(CTRL_NAME, m_requestFrom, APP_MESSAGE_WIFI_DISCONNECT, NULL, NULL);
+        SendRequestEvent(MJT_APP_CTRL, m_requestFrom, APP_MESSAGE_WIFI_DISCONNECT, NULL, NULL);
         m_wifiStatus = WIFI_STATUS::WIFI_DISCONNECTED;
         return;
     }
     if (m_wifiStatus == WIFI_STATUS::WIFI_CONNECTING && (WiFi.getMode() & WIFI_MODE_STA) &&
         WiFi.status() == WL_CONNECTED) {
-        SendRequestEvent(CTRL_NAME, m_requestFrom, APP_MESSAGE_WIFI_CONNECTED, NULL, NULL);
+        SendRequestEvent(MJT_APP_CTRL, m_requestFrom, APP_MESSAGE_WIFI_CONNECTED, NULL, NULL);
         m_wifiStatus = WIFI_STATUS::WIFI_CONNECTED;
         return;
     }
     if (m_wifiStatus != WIFI_STATUS::WIFI_DISCONNECTED && DoDelayMillisTime(WIFI_LIFE_CYCLE, &m_preWifiReqMillis)) {
         Serial.println("\nwifi not in use, auto disconnect...");
-        SendRequestEvent(CTRL_NAME, CTRL_NAME, APP_MESSAGE_WIFI_DISCONNECT, NULL, NULL);
+        SendRequestEvent(MJT_APP_CTRL, MJT_APP_CTRL, APP_MESSAGE_WIFI_DISCONNECT, NULL, NULL);
         return;
     }
 }
