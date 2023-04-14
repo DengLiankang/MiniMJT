@@ -39,9 +39,22 @@ static int16_t ReadConfigFromFlash(PICTURE_APP_CONFIG *cfg)
     return 0;
 }
 
-PictureApp::PictureApp() {}
+static File_Info *get_next_file(File_Info *p_cur_file, int direction)
+{
+    // 得到 p_cur_file 的下一个 类型为FILE_TYPE_FILE 的文件（即下一个非文件夹文件）
+    if (NULL == p_cur_file) {
+        return NULL;
+    }
 
-PictureApp::~PictureApp() {}
+    File_Info *pfile = direction == 1 ? p_cur_file->next_node : p_cur_file->front_node;
+    while (pfile != p_cur_file) {
+        if (FILE_TYPE_FILE == pfile->file_type) {
+            break;
+        }
+        pfile = direction == 1 ? pfile->next_node : pfile->front_node;
+    }
+    return pfile;
+}
 
 // This next function will be called during decoding of the jpeg file to
 // render each block to the TFT.  If you use a different TFT library
@@ -62,22 +75,28 @@ bool tft_output(int16_t x, int16_t y, uint16_t w, uint16_t h, uint16_t *bitmap)
     return 1;
 }
 
-static File_Info *get_next_file(File_Info *p_cur_file, int direction)
-{
-    // 得到 p_cur_file 的下一个 类型为FILE_TYPE_FILE 的文件（即下一个非文件夹文件）
-    if (NULL == p_cur_file) {
-        return NULL;
+PictureApp::PictureApp() {
+    pic_perMillis = 0;
+    image_file = NULL;
+    pfile = NULL;
+    image_pos_increate = 1;
+    // 保存系统的tft设置参数 用于退出时恢复设置
+    tftSwapStatus = tft->getSwapBytes();
+    tft->setSwapBytes(true); // We need to swap the colour bytes (endianess)
+    // TODO 实现文件获取
+    // run_data->image_file = g_tfCard.ListDir(IMAGE_PATH);
+    if (NULL != image_file) {
+        pfile = get_next_file(image_file->next_node, 1);
     }
+    // g_tfCard.ListDir("/image", 1);
 
-    File_Info *pfile = direction == 1 ? p_cur_file->next_node : p_cur_file->front_node;
-    while (pfile != p_cur_file) {
-        if (FILE_TYPE_FILE == pfile->file_type) {
-            break;
-        }
-        pfile = direction == 1 ? pfile->next_node : pfile->front_node;
-    }
-    return pfile;
+    // The jpeg image can be scaled by a factor of 1, 2, 4, or 8
+    TJpgDec.setJpgScale(1);
+    // The decoder must be given the exact name of the rendering function above
+    TJpgDec.setCallback(tft_output);
 }
+
+PictureApp::~PictureApp() {}
 
 static int PictureAppInit(AppController *sys)
 {

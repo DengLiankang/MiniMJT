@@ -34,6 +34,8 @@ public:
 
     void Init(void);
 
+    using MiniMjtFs::ListDir;
+
     File_Info *ListDir(const char *dirName);
 };
 

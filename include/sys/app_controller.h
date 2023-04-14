@@ -77,7 +77,7 @@ private:
 
     IMU m_imu;
     Network m_network; // 网络连接
-    Display screen;    // 屏幕对象
+    Display m_screen;    // 屏幕对象
 
 public:
     SysUtilConfig m_sysCfg;

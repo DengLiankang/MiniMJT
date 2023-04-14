@@ -319,7 +319,7 @@ void AppController::Init(void)
 
     /*** Init screen ***/
     tft = new TFT_eSPI(SCREEN_HOR_RES, SCREEN_VER_RES);
-    screen.init(m_sysCfg.rotation, m_sysCfg.backlight);
+    m_screen.init(m_sysCfg.rotation, m_sysCfg.backlight);
 
     InitLvglTaskSetup("LvglTask");
 
