@@ -12,37 +12,37 @@
 // 在开发新的app时，可以先把其他所有APP关闭，这样烧录速度也比较快
 
 // 纪念日APP
-#define APP_ANNIVERSARY_USE 1
+#define APP_ANNIVERSARY_USE 0
 #if APP_ANNIVERSARY_USE
 #include "app/anniversary/anniversary.h"
 #endif
 
 // 文件管理器APP
-#define APP_FILE_MANAGER_USE 1
+#define APP_FILE_MANAGER_USE 0
 #if APP_FILE_MANAGER_USE
 #include "app/file_manager/file_manager.h"
 #endif
 
 // 2048游戏APP
-#define APP_GAME_2048_USE 1
+#define APP_GAME_2048_USE 0
 #if APP_GAME_2048_USE
 #include "app/game_2048/game_2048.h"
 #endif
 
 // 心跳APP
-#define APP_HEARTBEAT_USE 1
+#define APP_HEARTBEAT_USE 0
 #if APP_HEARTBEAT_USE
 #include "app/heartbeat/heartbeat.h"
 #endif
 
 // 特效动画APP
-#define APP_IDEA_ANIM_USE 1
+#define APP_IDEA_ANIM_USE 0
 #if APP_IDEA_ANIM_USE
 #include "app/idea_anim/idea.h"
 #endif
 
 // 视频播放器APP
-#define APP_MEDIA_PLAYER_USE 1
+#define APP_MEDIA_PLAYER_USE 0
 #if APP_MEDIA_PLAYER_USE
 #include "app/media_player/media_player.h"
 #endif
@@ -61,7 +61,7 @@
 #endif
 
 // 设置APP
-#define APP_SETTING_USE 1
+#define APP_SETTING_USE 0
 #if APP_SETTING_USE
 #include "app/settings/settings.h"
 #endif

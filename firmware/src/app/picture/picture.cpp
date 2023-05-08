@@ -88,7 +88,7 @@ PictureApp::PictureApp() {
     if (NULL != image_file) {
         pfile = get_next_file(image_file->next_node, 1);
     }
-    // g_tfCard.ListDir("/image", 1);
+    g_tfCard.ListDir("/image", 1);
 
     // The jpeg image can be scaled by a factor of 1, 2, 4, or 8
     TJpgDec.setJpgScale(1);
@@ -103,6 +103,7 @@ static int PictureAppInit(AppController *sys)
     ReadConfigFromFlash(&g_pictureAppCfg);
     g_pictureApp = new PictureApp();
     photo_gui_init();
+    display_photo("/image/pig.png", LV_SCR_LOAD_ANIM_FADE_ON);
 
     return 0;
 }

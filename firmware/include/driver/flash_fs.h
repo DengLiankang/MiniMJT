@@ -9,5 +9,5 @@ public:
 
     ~FlashFs();
 
-    void Init(void);
+    int8_t Init(void);
 };

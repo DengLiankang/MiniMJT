@@ -4,12 +4,13 @@ FlashFs::FlashFs() {}
 
 FlashFs::~FlashFs() {}
 
-void FlashFs::Init(void)
+int8_t FlashFs::Init(void)
 {
     if (!SPIFFS.begin(true)) {
         Serial.println("SPIFFS Mount Failed");
-        return;
+        return -1;
     }
     m_fs = &SPIFFS;
     Serial.printf("SPIFFS Mount Success\nTotal Space: %u\n", SPIFFS.totalBytes());
+    return 0;
 }

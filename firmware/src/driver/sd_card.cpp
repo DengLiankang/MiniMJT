@@ -62,21 +62,21 @@ SdCard::SdCard() {}
 
 SdCard::~SdCard() {}
 
-void SdCard::Init()
+int8_t SdCard::Init()
 {
     SPIClass *sdSpi = new SPIClass(HSPI);          // another SPI
     sdSpi->begin(SD_SCK, SD_MISO, SD_MOSI, SD_SS); // Replace default HSPI pins
     if (!SD.begin(SD_SS, *sdSpi, 80000000))        // SD-Card SS pin is 15
     {
         Serial.println("Card Mount Failed");
-        return;
+        return -1;
     }
     m_fs = &SD;
     uint8_t cardType = SD.cardType();
 
     if (cardType == CARD_NONE) {
         Serial.println("No SD card attached");
-        return;
+        return -1;
     }
 
     Serial.print("SD Card Type: ");
@@ -91,6 +91,7 @@ void SdCard::Init()
     }
 
     Serial.printf("SD Card Size: %uMB\n", (uint32_t)(SD.cardSize() >> 20));
+    return 0;
 }
 
 File_Info *SdCard::ListDir(const char *dirName)

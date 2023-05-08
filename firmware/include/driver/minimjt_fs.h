@@ -12,13 +12,13 @@
 class MiniMjtFs
 {
 public:
-    fs::FS *m_fs;    
+    fs::FS *m_fs;
 public:
     MiniMjtFs();
 
     ~MiniMjtFs();
 
-    virtual void Init(void) = 0;
+    virtual int8_t Init(void) = 0;
 
     int8_t ListDir(const char *dirName, uint8_t levels);
 

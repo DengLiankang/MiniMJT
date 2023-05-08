@@ -1,0 +1,16 @@
+{
+    "files.associations": {
+        "*.nas": "bat",
+        "*.nc": "c",
+        "app_controller_gui.h": "c",
+        "*.tcc": "cpp",
+        "unordered_map": "cpp",
+        "fstream": "cpp",
+        "istream": "cpp",
+        "ostream": "cpp",
+        "sstream": "cpp",
+        "new": "cpp",
+        "lv_port_fs.h": "c",
+        "lvgl.h": "c"
+    }
+}

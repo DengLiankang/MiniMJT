@@ -32,7 +32,7 @@ public:
 
     ~SdCard();
 
-    void Init(void);
+    int8_t Init(void);
 
     using MiniMjtFs::ListDir;
 

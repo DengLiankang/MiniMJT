@@ -314,9 +314,6 @@ void AppController::Init(void)
     Serial.print(F(", CpuFrequencyMhz: "));
     Serial.println(getCpuFrequencyMhz());
 
-    /*** Init micro SD-Card ***/
-    g_tfCard.Init();
-
     /*** Init screen ***/
     tft = new TFT_eSPI(SCREEN_HOR_RES, SCREEN_VER_RES);
     m_screen.init(m_sysCfg.rotation, m_sysCfg.backlight);
@@ -325,6 +322,14 @@ void AppController::Init(void)
 
     MJT_LVGL_OPERATE_LOCK(AppCtrlLoadingGuiInit());
     MJT_LVGL_OPERATE_LOCK(AppCtrlLoadingDisplay(10, NULL, true));
+
+    /*** Init micro SD-Card ***/
+    if (g_tfCard.Init() == -1) {
+        MJT_LVGL_OPERATE_LOCK(AppCtrlLoadingDisplay(20, "#ff0000 " LV_SYMBOL_WARNING "# no sdcard!", true));
+        while (1) {
+            delay(1000);
+        }
+    }
 
     /*** Init IMU as input device ***/
     // lv_port_indev_init();
