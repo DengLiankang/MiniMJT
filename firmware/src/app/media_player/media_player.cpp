@@ -14,46 +14,57 @@
 #define NO_TRIGGER_ENTER_FREQ_160M 90000UL // 无操作规定时间后进入设置160M主频（90s）
 #define NO_TRIGGER_ENTER_FREQ_80M 120000UL // 无操作规定时间后进入设置160M主频（120s）
 
-// 天气的持久化配置
-#define MEDIA_CONFIG_PATH "/media.cfg"
 struct MP_Config {
     uint8_t switchFlag; // 是否自动播放下一个（0不切换 1自动切换）
     uint8_t powerFlag;  // 功耗控制（0低发热 1性能优先）
 };
 
+static void ToString(MP_Config *cfg, String &result)
+{
+    if (cfg == NULL) {
+        Serial.println("[ERROR] cfg is NULL");
+        return;
+    }
+    result = "";
+    result += "autoSwitch:" + String(cfg->switchFlag);
+    result += "\npowerMode:" + String(cfg->powerFlag);
+}
+
+static void fromString(const char *cfgStr, MP_Config *cfg)
+{
+    String tmpStr(cfgStr);
+    cfg->switchFlag = SplitCfgString(tmpStr).toInt();
+    cfg->powerFlag = SplitCfgString(tmpStr).toInt();
+}
+
 static void WriteConfig(MP_Config *cfg)
 {
-    char tmp[16];
-    // 将配置数据保存在文件中（持久化）
-    String w_data;
-    memset(tmp, 0, 16);
-    snprintf(tmp, 16, "%u\n", cfg->switchFlag);
-    w_data += tmp;
-    memset(tmp, 0, 16);
-    snprintf(tmp, 16, "%u\n", cfg->powerFlag);
-    w_data += tmp;
-    g_flashFs.WriteFile(MEDIA_CONFIG_PATH, w_data.c_str());
+    if (cfg == NULL) {
+        return;
+    }
+    String cfgStr;
+    ToString(cfg, cfgStr);
+    WriteConfigToCard(MEDIA_PLAYER_APP_NAME, cfgStr.c_str());
 }
 
 static void ReadConfig(MP_Config *cfg)
 {
     // 如果有需要持久化配置文件 可以调用此函数将数据存在flash中
     // 配置文件名最好以APP名为开头 以".cfg"结尾，以免多个APP读取混乱
-    char info[128] = {0};
-    uint16_t size = g_flashFs.ReadFile(MEDIA_CONFIG_PATH, (uint8_t *)info);
-    info[size] = 0;
-    if (size == 0) {
+    if (cfg == NULL) {
+        return;
+    }
+    String cfgStr;
+    uint8_t tmpStr[100];
+    int16_t size = ReadConfigFromCard(MEDIA_PLAYER_APP_NAME, tmpStr);
+    if (size <= 0) {
         // 默认值
         cfg->switchFlag = 1; // 是否自动播放下一个（0不切换 1自动切换）
         cfg->powerFlag = 0;  // 功耗控制（0低发热 1性能优先）
         WriteConfig(cfg);
-    } else {
-        // 解析数据
-        char *param[2] = {0};
-        ParseParam(info, 2, param);
-        cfg->switchFlag = atol(param[0]);
-        cfg->powerFlag = atol(param[1]);
+        return;
     }
+    fromString((const char *)tmpStr, cfg);
 }
 
 struct MediaAppRunData {
@@ -193,12 +204,10 @@ static void media_player_process(AppController *sys, const ImuAction *act_info)
 
     // 主频控制 为了降低发热量
     if (getCpuFrequencyMhz() > 80 && 0 == cfg_data.powerFlag) {
-        if (getCpuFrequencyMhz() > 160 &&
-            millis() - run_data->preTriggerKeyMillis >= NO_TRIGGER_ENTER_FREQ_160M) {
+        if (getCpuFrequencyMhz() > 160 && millis() - run_data->preTriggerKeyMillis >= NO_TRIGGER_ENTER_FREQ_160M) {
             // 设置CPU主频
             setCpuFrequencyMhz(160);
-        } else if (getCpuFrequencyMhz() > 80 &&
-                   millis() - run_data->preTriggerKeyMillis >= NO_TRIGGER_ENTER_FREQ_80M) {
+        } else if (getCpuFrequencyMhz() > 80 && millis() - run_data->preTriggerKeyMillis >= NO_TRIGGER_ENTER_FREQ_80M) {
             setCpuFrequencyMhz(80);
         }
     }
@@ -284,7 +293,6 @@ static void media_player_message_handle(const char *from, const char *to, APP_ME
 }
 
 APP_OBJ media_app = {MEDIA_PLAYER_APP_NAME,
-                     &VideoAppLogo,
                      "",
                      media_player_init,
                      media_player_process,

@@ -4,21 +4,52 @@
 #include "sys/app_controller_gui.h"
 #include "sys/interface.h"
 
-// 文件名称限制在32个字符内
-#define SYS_CONFIG_PATH "/mjt_sys.cfg"
-
 // global
 AppController *g_appController = NULL;          // APP控制器
 volatile static bool g_timerHandleFlag = false; // imu数据更新标志
 
+const char *AppMessageEventStr[] = {"APP_MESSAGE_WIFI_CONNECT",    // 开启连接
+                                    "APP_MESSAGE_WIFI_CONNECTED",  // 连接成功
+                                    "APP_MESSAGE_WIFI_AP_START",   // 开启AP事件
+                                    "APP_MESSAGE_WIFI_KEEP_ALIVE", // wifi开关的心跳维持
+                                    "APP_MESSAGE_WIFI_DISCONNECT", // 连接断开
+                                    "APP_MESSAGE_MQTT_DATA",       // MQTT客户端收到消息
+                                    "APP_MESSAGE_GET_PARAM",       // 获取参数
+                                    "APP_MESSAGE_SET_PARAM",       // 设置参数
+                                    "APP_MESSAGE_READ_CFG",        // 向磁盘读取参数
+                                    "APP_MESSAGE_WRITE_CFG",       // 向磁盘写入参数
+                                    "APP_MESSAGE_NONE"};
+
 void TimerAppCtrlHandle(TimerHandle_t xTimer) { g_timerHandleFlag = true; }
 
-void AppController::ReadConfigFromFlash(SysUtilConfig *cfg)
+// request interface
+int AppController::SendRequestEvent(const char *from, const char *to, APP_MESSAGE_TYPE type, void *data, void *extData)
 {
-    // 如果有需要持久化配置文件 可以调用此函数将数据存在flash中
-    // 配置文件名最好以APP名为开头 以".cfg"结尾，以免多个APP读取混乱
-    char cfgInfo[MAX_CFG_INFO_LENGTH];
-    int16_t size = g_flashFs.ReadFile(SYS_CONFIG_PATH, (uint8_t *)cfgInfo);
+    APP_OBJ *fromApp = GetAppByName(from); // 来自谁 有可能为空
+    APP_OBJ *toApp = GetAppByName(to);     // 发送给谁 有可能为空
+
+    if ((strcmp(from, MJT_APP_CTRL) && fromApp == NULL) || ((strcmp(to, MJT_APP_CTRL) && toApp == NULL)))
+        return -1;
+
+    Serial.printf("[Massage]%s To %s: %s\n", from, to, AppMessageEventStr[type]);
+    if (strcmp(to, MJT_APP_CTRL) == 0) {
+        m_requestFrom = from;
+        RequestProcess(type, data, extData);
+    } else if (toApp->MessageHandle != NULL) {
+        toApp->MessageHandle(from, to, type, data, extData);
+    }
+
+    return 0;
+}
+
+void AppController::ReadConfig(SysUtilConfig *cfg)
+{
+    if (cfg == NULL) {
+        return;
+    }
+    String cfgStr;
+    uint8_t tmpStr[300];
+    int16_t size = ReadConfigFromCard(MJT_APP_CTRL, tmpStr);
     if (size <= 0) {
         // 默认值
         cfg->ssid[0] = "Mate 50 Pro";
@@ -29,95 +60,20 @@ void AppController::ReadConfigFromFlash(SysUtilConfig *cfg)
         cfg->imuAutoCalibration = 1;    // 是否自动校准陀螺仪 0关闭自动校准 1打开自动校准
         cfg->imuOrder = 0;              // 操作方向
         cfg->autoStartAppName = "None"; // 无指定开机自启APP
-        this->WriteConfigToFlash(cfg);
-    } else {
-        cfgInfo[size] = 0;
-        // 解析数据
-        char *param[18] = {0};
-        ParseParam(cfgInfo, 18, param);
-        cfg->ssid[0] = param[0];
-        cfg->password[0] = param[1];
-        cfg->ssid[1] = param[2];
-        cfg->password[1] = param[3];
-        cfg->ssid[2] = param[4];
-        cfg->password[2] = param[5];
-        cfg->autoStartAppName = param[6]; // 开机自启APP的name
-        cfg->powerMode = atol(param[7]);
-        cfg->backlight = atol(param[8]);
-        cfg->rotation = atol(param[9]);
-        cfg->imuAutoCalibration = atol(param[10]);
-        cfg->imuOrder = atol(param[11]);
-        cfg->imuOffsets.imuGyroOffsetX = atol(param[12]);
-        cfg->imuOffsets.imuGyroOffsetY = atol(param[13]);
-        cfg->imuOffsets.imuGyroOffsetZ = atol(param[14]);
-        cfg->imuOffsets.imuAccelOffsetX = atol(param[15]);
-        cfg->imuOffsets.imuAccelOffsetY = atol(param[16]);
-        cfg->imuOffsets.imuAccelOffsetZ = atol(param[17]);
+        ToString(cfg, cfgStr);
+        WriteConfigToCard(MJT_APP_CTRL, cfgStr.c_str());
     }
+    fromString((const char *)tmpStr, cfg);
 }
 
-void AppController::WriteConfigToFlash(SysUtilConfig *cfg)
+void AppController::WriteConfig(SysUtilConfig *cfg)
 {
-    char tmp[25];
-    // 将配置数据保存在文件中（持久化）
-    String wData;
-    wData += cfg->ssid[0] + "\n";
-    wData += cfg->password[0] + "\n";
-    wData += cfg->ssid[1] + "\n";
-    wData += cfg->password[1] + "\n";
-    wData += cfg->ssid[2] + "\n";
-    wData += cfg->password[2] + "\n";
-    wData += cfg->autoStartAppName + "\n";
-    memset(tmp, 0, 25);
-    snprintf(tmp, 25, "%u\n", cfg->powerMode);
-    wData += tmp;
-
-    memset(tmp, 0, 25);
-    snprintf(tmp, 25, "%u\n", cfg->backlight);
-    wData += tmp;
-
-    memset(tmp, 0, 25);
-    snprintf(tmp, 25, "%u\n", cfg->rotation);
-    wData += tmp;
-
-    memset(tmp, 0, 25);
-    snprintf(tmp, 25, "%u\n", cfg->imuAutoCalibration);
-    wData += tmp;
-
-    memset(tmp, 0, 25);
-    snprintf(tmp, 25, "%u\n", cfg->imuOrder);
-    wData += tmp;
-
-    memset(tmp, 0, 25);
-    snprintf(tmp, 25, "%u\n", cfg->imuOffsets.imuGyroOffsetX);
-    wData += tmp;
-
-    memset(tmp, 0, 25);
-    snprintf(tmp, 25, "%u\n", cfg->imuOffsets.imuGyroOffsetY);
-    wData += tmp;
-
-    memset(tmp, 0, 25);
-    snprintf(tmp, 25, "%u\n", cfg->imuOffsets.imuGyroOffsetZ);
-    wData += tmp;
-
-    memset(tmp, 0, 25);
-    snprintf(tmp, 25, "%u\n", cfg->imuOffsets.imuAccelOffsetX);
-    wData += tmp;
-
-    memset(tmp, 0, 25);
-    snprintf(tmp, 25, "%u\n", cfg->imuOffsets.imuAccelOffsetY);
-    wData += tmp;
-
-    memset(tmp, 0, 25);
-    snprintf(tmp, 25, "%u\n", cfg->imuOffsets.imuAccelOffsetZ);
-    wData += tmp;
-
-    g_flashFs.WriteFile(SYS_CONFIG_PATH, (const char *)wData.c_str());
-
-    // 立即生效相关配置
-    // screen.setBackLight(cfg->backlight / 100.0);
-    // tft->setRotation(cfg->rotation);
-    // m_imusetOrder(cfg->imuOrder);
+    if (cfg == NULL) {
+        return;
+    }
+    String cfgStr;
+    ToString(cfg, cfgStr);
+    WriteConfigToCard(MJT_APP_CTRL, cfgStr.c_str());
 }
 
 void AppController::WifiRequestDeal(APP_MESSAGE_TYPE type)
@@ -189,7 +145,7 @@ void AppController::UpdateWifiStatus(void)
         return;
     }
     if (m_wifiStatus != WIFI_STATUS::WIFI_DISCONNECTED && DoDelayMillisTime(WIFI_LIFE_CYCLE, &m_preWifiReqMillis)) {
-        Serial.println("\nwifi not in use, auto disconnect...");
+        Serial.println(F("\nwifi not in use, auto disconnect..."));
         SendRequestEvent(MJT_APP_CTRL, MJT_APP_CTRL, APP_MESSAGE_WIFI_DISCONNECT, NULL, NULL);
         return;
     }
@@ -269,10 +225,10 @@ void AppController::RequestProcess(APP_MESSAGE_TYPE type, void *data, void *extD
             SetParam((const char *)data, (const char *)extData);
             break;
         case APP_MESSAGE_READ_CFG:
-            ReadConfigFromFlash(&m_sysCfg);
+            ReadConfig(&m_sysCfg);
             break;
         case APP_MESSAGE_WRITE_CFG:
-            WriteConfigToFlash(&m_sysCfg);
+            WriteConfig(&m_sysCfg);
             break;
         default:
             break;
@@ -298,10 +254,9 @@ AppController::~AppController() {}
 
 void AppController::Init(void)
 {
-    // FlashFs init first
-    g_flashFs.Init();
-
-    this->ReadConfigFromFlash(&m_sysCfg);
+    /*** Init micro SD-Card ***/
+    g_tfCard.Init();
+    this->ReadConfig(&m_sysCfg);
 
     // 设置CPU主频
     if (1 == m_sysCfg.powerMode) {
@@ -323,8 +278,7 @@ void AppController::Init(void)
     MJT_LVGL_OPERATE_LOCK(AppCtrlLoadingGuiInit());
     MJT_LVGL_OPERATE_LOCK(AppCtrlLoadingDisplay(10, NULL, true));
 
-    /*** Init micro SD-Card ***/
-    if (g_tfCard.Init() == -1) {
+    if (g_tfCard.CardIsExist() == false) {
         MJT_LVGL_OPERATE_LOCK(AppCtrlLoadingDisplay(20, "#ff0000 " LV_SYMBOL_WARNING "# no sdcard!", true));
         while (1) {
             delay(1000);
@@ -352,8 +306,7 @@ void AppController::ExitLoadingGui(void)
     MJT_LVGL_OPERATE_LOCK(AppCtrlLoadingDisplay(100, "finished.", true));
     DeleteLvglTask();
     MJT_LVGL_OPERATE_LOCK(AppCtrlMenuGuiInit());
-    MJT_LVGL_OPERATE_LOCK(AppCtrlMenuDisplay(m_appList[m_currentAppItem]->appLogo, m_appList[m_currentAppItem]->appName,
-                                             LV_SCR_LOAD_ANIM_FADE_IN, true));
+    MJT_LVGL_OPERATE_LOCK(AppCtrlMenuDisplay(m_appList[m_currentAppItem]->appName, LV_SCR_LOAD_ANIM_FADE_IN, true));
 
     SetSystemState(STATE_APP_MENU);
 }
@@ -414,6 +367,12 @@ void AppController::MainProcess(void)
         return;
     }
 
+    if (unlikely(g_tfCard.CardIsExist() == false)) {
+        delay(500);
+        Serial.println(F("Card Plug Out"));
+        return;
+    }
+
     if (g_timerHandleFlag) {
         g_timerHandleFlag = false;
         m_imuActionData = m_imu.getAction();
@@ -421,7 +380,7 @@ void AppController::MainProcess(void)
     }
 
     if (ACTIVE_TYPE::UNKNOWN != m_imuActionData->active && ACTIVE_TYPE::SHAKE != m_imuActionData->active) {
-        Serial.print("[Operate] ");
+        Serial.print(F("[Operate] "));
         Serial.println(active_type_info[m_imuActionData->active]);
     }
 
@@ -430,13 +389,11 @@ void AppController::MainProcess(void)
 
         if (m_imuActionData->active == ACTIVE_TYPE::TURN_LEFT) {
             m_currentAppItem = (m_currentAppItem + 1) % m_appNum;
-            AppCtrlMenuDisplay(m_appList[m_currentAppItem]->appLogo, m_appList[m_currentAppItem]->appName,
-                               LV_SCR_LOAD_ANIM_MOVE_LEFT, false);
+            AppCtrlMenuDisplay(m_appList[m_currentAppItem]->appName, LV_SCR_LOAD_ANIM_MOVE_LEFT, false);
             Serial.println(String("Current App: ") + m_appList[m_currentAppItem]->appName);
         } else if (m_imuActionData->active == ACTIVE_TYPE::TURN_RIGHT) {
             m_currentAppItem = (m_currentAppItem + m_appNum - 1) % m_appNum;
-            AppCtrlMenuDisplay(m_appList[m_currentAppItem]->appLogo, m_appList[m_currentAppItem]->appName,
-                               LV_SCR_LOAD_ANIM_MOVE_RIGHT, false);
+            AppCtrlMenuDisplay(m_appList[m_currentAppItem]->appName, LV_SCR_LOAD_ANIM_MOVE_RIGHT, false);
             Serial.println(String("Current App: ") + m_appList[m_currentAppItem]->appName);
         } else if (m_imuActionData->active == ACTIVE_TYPE::GO_FORWORD) {
             if (m_appList[m_currentAppItem]->AppInit != NULL) {
@@ -476,8 +433,7 @@ int AppController::GetAppIndexByName(const char *name)
 void AppController::AppExit(void)
 {
     lv_anim_del_all();
-    AppCtrlMenuDisplay(m_appList[m_currentAppItem]->appLogo, m_appList[m_currentAppItem]->appName,
-                       LV_SCR_LOAD_ANIM_FADE_IN, false);
+    AppCtrlMenuDisplay(m_appList[m_currentAppItem]->appName, LV_SCR_LOAD_ANIM_FADE_IN, false);
 
     if (NULL != m_appList[m_currentAppItem]->AppExit) {
         // 执行APP退出回调

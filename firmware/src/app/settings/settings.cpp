@@ -181,6 +181,5 @@ static int settings_exit_callback(void *param)
     return 0;
 }
 
-APP_OBJ settings_app = {SETTINGS_APP_NAME,      &app_settings,          "",
-                        settings_init,          settings_process,       settings_background_task,
+APP_OBJ settings_app = {SETTINGS_APP_NAME,      "",  settings_init, settings_process, settings_background_task,
                         settings_exit_callback, NULL};

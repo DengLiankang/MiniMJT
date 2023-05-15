@@ -1,8 +1,8 @@
 #ifndef _SD_CARD_H_
 #define _SD_CARD_H_
 
-#include "driver/minimjt_fs.h"
 #include "SD.h"
+#include "driver/minimjt_fs.h"
 
 #define FILENAME_MAX_LEN 100
 
@@ -37,6 +37,11 @@ public:
     using MiniMjtFs::ListDir;
 
     File_Info *ListDir(const char *dirName);
+
+    bool CardIsExist(void);
+
+private:
+    SPIClass *m_spi;
 };
 
 #endif

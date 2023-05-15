@@ -3,16 +3,17 @@
 
 #include "FS.h"
 
-#define FS_IS_NULL(fs)                                                                                      \
-    if (NULL == fs) {                                                                                       \
-        Serial.println("FS not Mounted");                                                                   \
-        return -1;                                                                                          \
+#define FS_IS_NULL(fs)                                                                                                 \
+    if (NULL == fs) {                                                                                                  \
+        Serial.println(F("FS not Mounted"));                                                                           \
+        return -1;                                                                                                     \
     }
 
 class MiniMjtFs
 {
 public:
     fs::FS *m_fs;
+
 public:
     MiniMjtFs();
 
@@ -31,6 +32,8 @@ public:
     int8_t RenameFile(const char *src, const char *dst);
 
     int8_t DeleteFile(const char *path);
+
+    bool FileExists(const char *path);
 };
 
 #endif

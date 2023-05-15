@@ -3,13 +3,14 @@
 
 #include "Arduino.h"
 #include "driver/display.h"
-#include "driver/flash_fs.h"
 #include "driver/imu.h"
-#include "driver/sd_card.h"
 #include "driver/network.h"
+#include "driver/sd_card.h"
 #include <TFT_eSPI.h>
 
 #define MJT_VERSION "2.1.13"
+
+#define MJT_APP_CTRL "MJT_AppCtrl"
 
 // SD_Card
 #define SD_SCK 14
@@ -50,7 +51,6 @@ struct SysUtilConfig {
 };
 
 extern SdCard g_tfCard;
-extern FlashFs g_flashFs; // flash中的文件系统
 extern TFT_eSPI *tft;
 extern SemaphoreHandle_t lvgl_mutex; // lvgl 操作的锁
 
@@ -66,6 +66,17 @@ extern SemaphoreHandle_t lvgl_mutex; // lvgl 操作的锁
 void InitLvglTaskSetup(const char *name);
 void DeleteLvglTask(void);
 boolean DoDelayMillisTime(unsigned long interval, unsigned long *previousMillis);
-void ParseParam(char *src, int argc, char **dst);
+int16_t ReadConfigFromCard(const char *appName, uint8_t *cfg);
+int8_t WriteConfigToCard(const char *appName, const char *cfg);
+void ToString(SysUtilConfig *cfg, String &result);
+void fromString(const char *cfgStr, SysUtilConfig *cfg);
+
+inline String SplitCfgString(String &str)
+{
+    uint16_t flag = str.indexOf(":");
+    str = str.substring(flag + 1);
+    flag = str.indexOf("\n");
+    return str.substring(0, flag);
+}
 
 #endif

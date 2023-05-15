@@ -13,6 +13,7 @@ static struct AppCtrlMenuPage g_appMenuPage2;
 static struct AppCtrlMenuPage *g_nextMenuPage;
 
 LV_IMG_DECLARE(minimjt_logo);
+LV_IMG_DECLARE(default_app_icon);
 LV_FONT_DECLARE(lv_font_montserrat_24);
 
 void AppCtrlLoadingGuiInit(void)
@@ -37,7 +38,7 @@ void AppCtrlLoadingGuiInit(void)
     lv_obj_align(gLv_scrLoading, LV_ALIGN_CENTER, 0, 0);
 
     gLv_barLoading = lv_bar_create(gLv_scrLoading);
-    lv_obj_remove_style_all(gLv_barLoading);  /*To have a clean start*/
+    lv_obj_remove_style_all(gLv_barLoading); /*To have a clean start*/
     lv_obj_add_style(gLv_barLoading, &BarBoderStyle, LV_PART_MAIN);
     lv_obj_add_style(gLv_barLoading, &BarIndicStyle, LV_PART_INDICATOR);
     lv_obj_set_size(gLv_barLoading, 120, 10);
@@ -114,9 +115,17 @@ void AppCtrlMenuGuiInit(void)
     g_nextMenuPage = &g_appMenuPage1;
 }
 
-void AppCtrlMenuDisplay(const void *appImg, const char *appName, lv_scr_load_anim_t anim, bool delPre)
+void AppCtrlMenuDisplay(const char *appName, lv_scr_load_anim_t anim, bool delPre)
 {
-    lv_img_set_src(g_nextMenuPage->appImg, appImg);
+    String appNameStr(appName);
+    appNameStr.toLowerCase();
+    String appIconPath = LV_FS_FATFS_LETTER + ":/system/" + appNameStr + "/logo.bin";
+    if (g_tfCard.FileExists(appIconPath.c_str()) == true) {
+        lv_img_set_src(g_nextMenuPage->appImg, appIconPath.c_str());
+    }
+    else {
+        lv_img_set_src(g_nextMenuPage->appImg, &default_app_icon);
+    }
     lv_label_set_text(g_nextMenuPage->appName, appName);
 
     lv_scr_load_anim(g_nextMenuPage->appMenuScr, anim, 500, 500, delPre);

@@ -58,36 +58,38 @@ static const char *get_file_basename(const char *path)
     return ret;
 }
 
-SdCard::SdCard() {}
+SdCard::SdCard()
+{
+    m_spi = new SPIClass(HSPI);
+    m_spi->begin(SD_SCK, SD_MISO, SD_MOSI, SD_SS); // Replace default HSPI pins
+}
 
-SdCard::~SdCard() {}
+SdCard::~SdCard() { delete (m_spi); }
 
 int8_t SdCard::Init()
 {
-    SPIClass *sdSpi = new SPIClass(HSPI);          // another SPI
-    sdSpi->begin(SD_SCK, SD_MISO, SD_MOSI, SD_SS); // Replace default HSPI pins
-    if (!SD.begin(SD_SS, *sdSpi, 80000000))        // SD-Card SS pin is 15
+    if (!SD.begin(SD_SS, *m_spi, 80000000)) // SD-Card SS pin is 15
     {
-        Serial.println("Card Mount Failed");
+        Serial.println(F("Card Mount Failed"));
         return -1;
     }
     m_fs = &SD;
     uint8_t cardType = SD.cardType();
 
     if (cardType == CARD_NONE) {
-        Serial.println("No SD card attached");
+        Serial.println(F("No SD card attached"));
         return -1;
     }
 
-    Serial.print("SD Card Type: ");
+    Serial.print(F("SD Card Type: "));
     if (cardType == CARD_MMC) {
-        Serial.println("MMC");
+        Serial.println(F("MMC"));
     } else if (cardType == CARD_SD) {
-        Serial.println("SDSC");
+        Serial.println(F("SDSC"));
     } else if (cardType == CARD_SDHC) {
-        Serial.println("SDHC");
+        Serial.println(F("SDHC"));
     } else {
-        Serial.println("UNKNOWN");
+        Serial.println(F("UNKNOWN"));
     }
 
     Serial.printf("SD Card Size: %uMB\n", (uint32_t)(SD.cardSize() >> 20));
@@ -100,11 +102,11 @@ File_Info *SdCard::ListDir(const char *dirName)
 
     File root = m_fs->open(dirName);
     if (!root) {
-        Serial.println("Failed to open directory");
+        Serial.println(F("Failed to open directory"));
         return NULL;
     }
     if (!root.isDirectory()) {
-        Serial.println("Not a directory");
+        Serial.println(F("Not a directory"));
         return NULL;
     }
 
@@ -132,7 +134,7 @@ File_Info *SdCard::ListDir(const char *dirName)
         // 字符数组长度为实际字符串长度+1
         int filename_len = strlen(fn);
         if (filename_len > FILENAME_MAX_LEN - 10) {
-            Serial.println("Filename is too long.");
+            Serial.println(F("Filename is too long."));
         }
 
         // 创建新节点
@@ -156,14 +158,14 @@ File_Info *SdCard::ListDir(const char *dirName)
         if (file.isDirectory()) {
             file_node->file_type = FILE_TYPE_FOLDER;
             // 类型为文件夹
-            Serial.print("  DIR : ");
+            Serial.print(F("  DIR : "));
             Serial.println(tmp_file_name);
         } else {
             file_node->file_type = FILE_TYPE_FILE;
             // 类型为文件
-            Serial.print("  FILE: ");
+            Serial.print(F("  FILE: "));
             Serial.print(tmp_file_name);
-            Serial.print("  SIZE: ");
+            Serial.print(F("  SIZE: "));
             Serial.println(file.size());
         }
 
@@ -177,4 +179,11 @@ File_Info *SdCard::ListDir(const char *dirName)
         head_file->next_node->front_node = file_node;
     }
     return head_file;
+}
+
+bool SdCard::CardIsExist(void) {
+    if (digitalRead(SD_SS) == LOW) {
+        return false;
+    }
+    return true;
 }

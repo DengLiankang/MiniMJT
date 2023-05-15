@@ -18,21 +18,21 @@ Network::Network()
 
 void Network::SearchWifi(void)
 {
-    Serial.println("scan start");
+    Serial.println(F("scan start"));
     int wifi_num = WiFi.scanNetworks();
-    Serial.println("scan done");
+    Serial.println(F("scan done"));
     if (0 == wifi_num) {
-        Serial.println("no networks found");
+        Serial.println(F("no networks found"));
     } else {
         Serial.print(wifi_num);
-        Serial.println(" networks found");
+        Serial.println(F(" networks found"));
         for (int cnt = 0; cnt < wifi_num; ++cnt) {
             Serial.print(cnt + 1);
-            Serial.print(": ");
+            Serial.print(F(": "));
             Serial.print(WiFi.SSID(cnt));
-            Serial.print(" (");
+            Serial.print(F(" ("));
             Serial.print(WiFi.RSSI(cnt));
-            Serial.print(")");
+            Serial.print(F(")"));
             Serial.println((WiFi.encryptionType(cnt) == WIFI_AUTH_OPEN) ? " " : "*");
         }
     }

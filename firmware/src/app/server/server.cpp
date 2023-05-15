@@ -169,6 +169,6 @@ static void server_message_handle(const char *from, const char *to, APP_MESSAGE_
     }
 }
 
-APP_OBJ server_app = {SERVER_APP_NAME,      &app_server,          "",
-                      server_init,          server_process,       server_background_task,
-                      server_exit_callback, server_message_handle};
+APP_OBJ server_app = {
+    SERVER_APP_NAME,      "", server_init, server_process, server_background_task, server_exit_callback,
+    server_message_handle};

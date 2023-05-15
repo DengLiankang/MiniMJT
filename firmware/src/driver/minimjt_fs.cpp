@@ -11,26 +11,26 @@ int8_t MiniMjtFs::ListDir(const char *dirName, uint8_t levels)
 
     File root = m_fs->open(dirName);
     if (!root) {
-        Serial.println("- failed to open directory");
+        Serial.println(F("- failed to open directory"));
         return -1;
     }
     if (!root.isDirectory()) {
-        Serial.println("- not a directory");
+        Serial.println(F("- not a directory"));
         return -1;
     }
 
     File file = root.openNextFile();
     while (file) {
         if (file.isDirectory()) {
-            Serial.print("  DIR : ");
+            Serial.print(F("  DIR : "));
             Serial.println(file.name());
             if (levels) {
                 ListDir(file.path(), levels - 1);
             }
         } else {
-            Serial.print("  FILE: ");
+            Serial.print(F("  FILE: "));
             Serial.print(file.name());
-            Serial.print("\tSIZE: ");
+            Serial.print(F("\tSIZE: "));
             Serial.println(file.size());
         }
         file = root.openNextFile();
@@ -46,7 +46,7 @@ int16_t MiniMjtFs::ReadFile(const char *path, uint8_t *info)
     File file = m_fs->open(path);
     uint16_t retLen = -1;
     if (!file || file.isDirectory()) {
-        Serial.println("- failed to open file for reading");
+        Serial.println(F("- failed to open file for reading"));
         return retLen;
     }
     retLen = 0;
@@ -65,14 +65,14 @@ int8_t MiniMjtFs::WriteFile(const char *path, const char *message)
 
     File file = m_fs->open(path, FILE_WRITE);
     if (!file) {
-        Serial.println("- failed to open file for writing");
+        Serial.println(F("- failed to open file for writing"));
         return ret;
     }
     if (file.print(message)) {
-        Serial.println("- file written");
+        Serial.println(F("- file written"));
         ret = 0;
     } else {
-        Serial.println("- write failed");
+        Serial.println(F("- write failed"));
     }
     file.close();
     return ret;
@@ -86,14 +86,14 @@ int8_t MiniMjtFs::AppendFile(const char *path, const char *message)
 
     File file = m_fs->open(path, FILE_APPEND);
     if (!file) {
-        Serial.println("- failed to open file for appending");
+        Serial.println(F("- failed to open file for appending"));
         return ret;
     }
     if (file.print(message)) {
-        Serial.println("- message appended");
+        Serial.println(F("- message appended"));
         ret = 0;
     } else {
-        Serial.println("- append failed");
+        Serial.println(F("- append failed"));
     }
     file.close();
     return ret;
@@ -105,9 +105,9 @@ int8_t MiniMjtFs::RenameFile(const char *path1, const char *path2)
     int8_t ret = 0;
     Serial.printf("Renaming file %s to %s\r\n", path1, path2);
     if (m_fs->rename(path1, path2)) {
-        Serial.println("- file renamed");
+        Serial.println(F("- file renamed"));
     } else {
-        Serial.println("- rename failed");
+        Serial.println(F("- rename failed"));
         ret = -1;
     }
     return ret;
@@ -119,10 +119,16 @@ int8_t MiniMjtFs::DeleteFile(const char *path)
     int8_t ret = 0;
     Serial.printf("Deleting file: %s\r\n", path);
     if (m_fs->remove(path)) {
-        Serial.println("- file deleted");
+        Serial.println(F("- file deleted"));
     } else {
-        Serial.println("- delete failed");
+        Serial.println(F("- delete failed"));
         ret = -1;
     }
     return ret;
+}
+
+bool MiniMjtFs::FileExists(const char *path)
+{
+    FS_IS_NULL(m_fs)
+    return m_fs->exists(path);
 }

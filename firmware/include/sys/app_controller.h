@@ -6,7 +6,6 @@
 #include "interface.h"
 #include <vector>
 
-#define MJT_APP_CTRL "MJT_AppCtrl"
 #define APP_MAX_NUM 10             // 最大的可运行的APP数量
 #define WIFI_LIFE_CYCLE 60000      // wifi的生命周期（60s）
 #define MQTT_ALIVE_CYCLE 1000      // mqtt重连周期
@@ -50,8 +49,8 @@ private:
     // 设置系统当前状态
     void SetSystemState(MJT_SYS_STATE state);
 
-    void ReadConfigFromFlash(SysUtilConfig *cfg);
-    void WriteConfigToFlash(SysUtilConfig *cfg);
+    void ReadConfig(SysUtilConfig *cfg);
+    void WriteConfig(SysUtilConfig *cfg);
     APP_OBJ *GetAppByName(const char *name);
     int GetAppIndexByName(const char *name);
     int AppIsLegal(const APP_OBJ *appObj);

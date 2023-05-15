@@ -112,5 +112,5 @@ static void idea_message_handle(const char *from, const char *to, APP_MESSAGE_TY
 {
 }
 
-APP_OBJ idea_app = {IDEA_APP_NAME,      &app_idea,          "", idea_init, idea_process, idea_background_task,
-                    idea_exit_callback, idea_message_handle};
+APP_OBJ idea_app = {IDEA_APP_NAME,      "", idea_init, idea_process, idea_background_task, idea_exit_callback,
+                    idea_message_handle};

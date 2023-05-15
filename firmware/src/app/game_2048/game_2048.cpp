@@ -157,6 +157,5 @@ static int game_2048_exit_callback(void *param)
     return 0;
 }
 
-APP_OBJ game_2048_app = {G2048_APP_NAME,          &app_game_2048,          "",
-                         game_2048_init,          game_2048_process,       game_2048_background_task,
+APP_OBJ game_2048_app = {G2048_APP_NAME,          "",  game_2048_init, game_2048_process, game_2048_background_task,
                          game_2048_exit_callback, NULL};

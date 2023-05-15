@@ -10,8 +10,6 @@
 
 bool tmfromString(const char *date_str, struct tm *date);
 
-// 纪念日的持久化配置
-#define ANNIVERSARY_CONFIG_PATH "/anniversary.cfg"
 struct AN_Config {
     unsigned long anniversary_cnt;              // 事件个数
     String event_name[MAX_ANNIVERSARY_CNT];     // 事件名称
@@ -19,38 +17,59 @@ struct AN_Config {
     struct tm current_date;
 };
 
-// static long long get_timestamp(String url);
+static void ToString(AN_Config *cfg, String &result)
+{
+    if (cfg == NULL) {
+        Serial.println("[ERROR] cfg is NULL");
+        return;
+    }
+    result = "";
+    result += "aniCount:" + String(cfg->anniversary_cnt);
+    result += "\nani0Name:" + cfg->event_name[0];
+    result += "\n  year:" + String(cfg->target_date[0].tm_year);
+    result += "\n  month:" + String(cfg->target_date[0].tm_mon);
+    result += "\n  month:" + String(cfg->target_date[0].tm_mday);
+    result += "\nani1Name:" + cfg->event_name[1];
+    result += "\n  year:" + String(cfg->target_date[1].tm_year);
+    result += "\n  month:" + String(cfg->target_date[1].tm_mon);
+    result += "\n  month:" + String(cfg->target_date[1].tm_mday);
+}
+
+static void fromString(const char *cfgStr, AN_Config *cfg)
+{
+    String tmpStr(cfgStr);
+    cfg->anniversary_cnt = SplitCfgString(tmpStr).toInt();
+    cfg->event_name[0] = SplitCfgString(tmpStr);
+    cfg->target_date[0].tm_year = SplitCfgString(tmpStr).toInt();
+    cfg->target_date[0].tm_mon = SplitCfgString(tmpStr).toInt();
+    cfg->target_date[0].tm_mday = SplitCfgString(tmpStr).toInt();
+    cfg->event_name[1] = SplitCfgString(tmpStr);
+    cfg->target_date[1].tm_year = SplitCfgString(tmpStr).toInt();
+    cfg->target_date[1].tm_mon = SplitCfgString(tmpStr).toInt();
+    cfg->target_date[1].tm_mday = SplitCfgString(tmpStr).toInt();
+}
 
 static void WriteConfig(AN_Config *cfg)
 {
-    char tmp[16];
-    // 将配置数据保存在文件中（持久化）
-    String w_data;
-    memset(tmp, 0, 16);
-    snprintf(tmp, 16, "%lu\n", cfg->anniversary_cnt);
-    w_data += tmp;
-    for (int i = 0; i < MAX_ANNIVERSARY_CNT; ++i) {
-        w_data = w_data + cfg->event_name[i] + "\n";
-        memset(tmp, 0, 16);
-        snprintf(tmp, 16, "%d.%d.%d\n", cfg->target_date[i].tm_year, cfg->target_date[i].tm_mon,
-                 cfg->target_date[i].tm_mday);
-        w_data += tmp;
+    if (cfg == NULL) {
+        return;
     }
-    memset(tmp, 0, 16);
-    snprintf(tmp, 16, "%d.%d.%d\n", cfg->current_date.tm_year, cfg->current_date.tm_mon, cfg->current_date.tm_mday);
-    w_data += tmp;
-    g_flashFs.WriteFile(ANNIVERSARY_CONFIG_PATH, w_data.c_str());
+    String cfgStr;
+    ToString(cfg, cfgStr);
+    WriteConfigToCard(ANNIVERSARY_APP_NAME, cfgStr.c_str());
 }
 
 static void ReadConfig(AN_Config *cfg)
 {
     // 如果有需要持久化配置文件 可以调用此函数将数据存在flash中
     // 配置文件名最好以APP名为开头 以".cfg"结尾，以免多个APP读取混乱
-    char info[128] = {0};
-    uint16_t size = g_flashFs.ReadFile(ANNIVERSARY_CONFIG_PATH, (uint8_t *)info);
-    Serial.printf("size %d\n", size);
-    info[size] = 0;
-    if (size == 0) {
+    if (cfg == NULL) {
+        return;
+    }
+    String cfgStr;
+    uint8_t tmpStr[200];
+    int16_t size = ReadConfigFromCard(ANNIVERSARY_APP_NAME, tmpStr);
+    if (size <= 0) {
         // 默认值
         cfg->anniversary_cnt = 2;
         cfg->event_name[0] = "生日还有";
@@ -62,30 +81,21 @@ static void ReadConfig(AN_Config *cfg)
         cfg->target_date[1].tm_mon = 7;
         cfg->target_date[1].tm_mday = 4;
         WriteConfig(cfg);
-        Serial.printf("Write config successful\n");
-    } else {
-        // 解析数据
-        char *param[MAX_ANNIVERSARY_CNT * 2 + 2] = {0};
-        ParseParam(info, MAX_ANNIVERSARY_CNT * 2 + 2, param);
-        cfg->anniversary_cnt = atol(param[0]);
-        for (int i = 0; i < MAX_ANNIVERSARY_CNT; ++i) {
-            cfg->event_name[i] = param[2 * i + 1];
-            tmfromString(param[2 * i + 2], &(cfg->target_date[i]));
-        }
-        tmfromString(param[MAX_ANNIVERSARY_CNT * 2 + 1], &(cfg->current_date));
+        return;
     }
+    fromString((const char *)tmpStr, cfg);
 }
 
 // 动态数据，APP的生命周期结束也需要释放它
 struct AnniversaryAppRunData {
     int cur_anniversary; // 当前显示第几个纪念日
     int anniversary_day_count;
-    unsigned long preWeatherMillis; // 上一回更新天气时的毫秒数
-    unsigned long m_lastUpdateTimeMillis;    // 更新时间计数器
-    long long preNetTimestamp;      // 上一次的网络时间戳
-    long long errorNetTimestamp;    // 网络到显示过程中的时间误差
-    long long m_lastUpdateLocalTimeMillis;    // 上一次的本地机器时间戳
-    unsigned int coactusUpdateFlag; // 强制更新标志
+    unsigned long preWeatherMillis;        // 上一回更新天气时的毫秒数
+    unsigned long m_lastUpdateTimeMillis;  // 更新时间计数器
+    long long preNetTimestamp;             // 上一次的网络时间戳
+    long long errorNetTimestamp;           // 网络到显示过程中的时间误差
+    long long m_lastUpdateLocalTimeMillis; // 上一次的本地机器时间戳
+    unsigned int coactusUpdateFlag;        // 强制更新标志
 };
 
 static AN_Config cfg_data;
@@ -342,6 +352,10 @@ static void anniversary_message_handle(const char *from, const char *to, APP_MES
     }
 }
 
-APP_OBJ anniversary_app = {ANNIVERSARY_APP_NAME,      &app_anniversary,          "Author Hu Qianjiang\nVersion 0.0.1\n",
-                           anniversary_init,          anniversary_process,       anniversary_background_task,
-                           anniversary_exit_callback, anniversary_message_handle};
+APP_OBJ anniversary_app = {ANNIVERSARY_APP_NAME,
+                           "Author Hu Qianjiang\nVersion 0.0.1\n",
+                           anniversary_init,
+                           anniversary_process,
+                           anniversary_background_task,
+                           anniversary_exit_callback,
+                           anniversary_message_handle};

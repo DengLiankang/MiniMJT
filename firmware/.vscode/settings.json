@@ -11,6 +11,11 @@
         "sstream": "cpp",
         "new": "cpp",
         "lv_port_fs.h": "c",
-        "lvgl.h": "c"
+        "lvgl.h": "c",
+        "string": "cpp",
+        "unordered_set": "cpp",
+        "string_view": "cpp",
+        "cstdio": "cpp",
+        "system_error": "cpp"
     }
 }

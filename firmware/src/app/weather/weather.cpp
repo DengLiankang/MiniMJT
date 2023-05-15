@@ -7,9 +7,6 @@
 #define WEATHER_DALIY_API "https://www.yiketianqi.com/free/week?unescape=1&appid=%s&appsecret=%s&city=%s"
 #define TIME_API "http://api.m.taobao.com/rest/api3.do?api=mtop.common.gettimestamp"
 
-// 天气的持久化配置
-#define WEATHER_CONFIG_PATH "/weather_app.cfg"
-
 WeatherApp *g_weatherApp = NULL;
 // app cfg一定保证静态全局，防止被外部访问出错
 static WEATHER_APP_CONFIG g_weatherAppCfg;
@@ -26,39 +23,50 @@ static void UpdateTask(void *pvParameters)
     vTaskDelete(g_weatherApp->m_updateTaskHandle);
 }
 
-static int8_t WriteConfigToFlash(WEATHER_APP_CONFIG *cfg)
+static void ToString(WEATHER_APP_CONFIG *cfg, String &result)
 {
-    char tmp[16];
-    // 将配置数据保存在文件中（持久化）
-    String w_data;
-    w_data = w_data + cfg->weatherApiAppId + "\n";
-    w_data = w_data + cfg->weatherApiAppSecret + "\n";
-    w_data = w_data + cfg->weatherApiCityAddr + "\n";
-    memset(tmp, 0, 16);
-    snprintf(tmp, 16, "%lu\n", cfg->httpUpdataInterval);
-    w_data += tmp;
-    return g_flashFs.WriteFile(WEATHER_CONFIG_PATH, w_data.c_str());
+    if (cfg == NULL) {
+        Serial.println("[ERROR] cfg is NULL");
+        return;
+    }
+    result = "";
+    result += "appID:" + cfg->weatherApiAppId;
+    result += "\nappSecret:" + cfg->weatherApiAppSecret;
+    result += "\ncityAddr:" + cfg->weatherApiCityAddr;
+    result += "\nupdateInterval:" + String(cfg->httpUpdataInterval);
 }
 
-static int16_t ReadConfigFromFlash(WEATHER_APP_CONFIG *cfg)
+static void fromString(const char *cfgStr, WEATHER_APP_CONFIG *cfg)
 {
-    // 如果有需要持久化配置文件 可以调用此函数将数据存在flash中
-    // 配置文件名最好以APP名为开头 以".cfg"结尾，以免多个APP读取混乱
-    char info[128] = {0};
-    int16_t size = g_flashFs.ReadFile(WEATHER_CONFIG_PATH, (uint8_t *)info);
-    if (size >= 0) {
-        info[size] = 0;
-        // 解析数据
-        char *param[4] = {0};
-        ParseParam(info, 4, param);
-        cfg->weatherApiAppId = param[0];
-        cfg->weatherApiAppSecret = param[1];
-        cfg->weatherApiCityAddr = param[2];
-        cfg->httpUpdataInterval = atol(param[3]);
-    } else {
-        return size;
+    String tmpStr(cfgStr);
+    cfg->weatherApiAppId = SplitCfgString(tmpStr);
+    cfg->weatherApiAppSecret = SplitCfgString(tmpStr);
+    cfg->weatherApiCityAddr = SplitCfgString(tmpStr);
+    cfg->httpUpdataInterval = SplitCfgString(tmpStr).toInt();
+}
+
+static int8_t WriteConfig(WEATHER_APP_CONFIG *cfg)
+{
+    if (cfg == NULL) {
+        return -1;
     }
-    return 0;
+    String cfgStr;
+    ToString(cfg, cfgStr);
+    return WriteConfigToCard(WEATHER_APP_NAME, cfgStr.c_str());
+}
+
+static int16_t ReadConfig(WEATHER_APP_CONFIG *cfg)
+{
+    if (cfg == NULL) {
+        return -1;
+    }
+    String cfgStr;
+    uint8_t tmpStr[100];
+    int16_t size = ReadConfigFromCard(WEATHER_APP_NAME, tmpStr);
+    if (size > 0) {
+        fromString((const char *)tmpStr, cfg);
+    }
+    return size;
 }
 
 static void GetParam(const char *key, char *value)
@@ -95,7 +103,8 @@ static int AirQulityLevel(int q)
     return ret > 5 ? 5 : ret;
 }
 
-WeatherApp::WeatherApp() {
+WeatherApp::WeatherApp()
+{
     struct WEATHER_APP_CONFIG defaultConfig = {
         .weatherApiAppId = "22513773",
         .weatherApiAppSecret = "rq2r6sXd",
@@ -245,10 +254,9 @@ void WeatherApp::ValidateConfig(struct WEATHER_APP_CONFIG *cfg, const struct WEA
     }
 }
 
-
 static int WeatherAppInit(AppController *sys)
 {
-    ReadConfigFromFlash(&g_weatherAppCfg);
+    ReadConfig(&g_weatherAppCfg);
     g_weatherApp = new WeatherApp();
     WeatherAppGuiInit(g_weatherApp->m_weatherInfo, *g_weatherApp->m_timeInfo);
 
@@ -326,7 +334,7 @@ static void WeatherAppMainProcess(AppController *sys, const ImuAction *act_info)
 static int WeatherAppExit(void *param)
 {
     WeatherAppGuiRelease();
-    WriteConfigToFlash(&g_weatherAppCfg);
+    WriteConfig(&g_weatherAppCfg);
     if (g_weatherApp->m_updateTaskHandle != NULL) {
         vTaskDelete(g_weatherApp->m_updateTaskHandle);
     }
@@ -358,15 +366,15 @@ static void WeatherAppMessageHandle(const char *from, const char *to, APP_MESSAG
             SetParam((const char *)data, (const char *)extData);
             break;
         case APP_MESSAGE_READ_CFG:
-            ReadConfigFromFlash(&g_weatherAppCfg);
+            ReadConfig(&g_weatherAppCfg);
             break;
         case APP_MESSAGE_WRITE_CFG:
-            WriteConfigToFlash(&g_weatherAppCfg);
+            WriteConfig(&g_weatherAppCfg);
             break;
         default:
             break;
     }
 }
 
-APP_OBJ WEATHER_APP = {WEATHER_APP_NAME, &WeatherAppLogo,        "", WeatherAppInit, WeatherAppMainProcess, NULL,
-                       WeatherAppExit,   WeatherAppMessageHandle};
+APP_OBJ WEATHER_APP = {WEATHER_APP_NAME,       "", WeatherAppInit, WeatherAppMainProcess, NULL, WeatherAppExit,
+                       WeatherAppMessageHandle};

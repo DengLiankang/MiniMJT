@@ -41,9 +41,6 @@ struct APP_OBJ {
     // 应用程序名称 及title
     const char *appName;
 
-    // APP的图片存放地址    APP应用图标 128*128
-    const void *appLogo;
-
     // 应用程序的其他信息 如作者、版本号等等
     const char *appDesc;
 

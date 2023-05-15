@@ -3,40 +3,50 @@
 
 #define PICTURE_APP_NAME "Picture"
 
-// 相册的持久化配置
-#define PICTURE_CONFIG_PATH "/picture.cfg"
-
 static PICTURE_APP_CONFIG g_pictureAppCfg;
 PictureApp *g_pictureApp = NULL;
 
-static int8_t WriteConfigToFlash(PICTURE_APP_CONFIG *cfg)
+static void ToString(PICTURE_APP_CONFIG *cfg, String &result)
 {
-    char tmp[16];
-    // 将配置数据保存在文件中（持久化）
-    String w_data;
-    memset(tmp, 0, 16);
-    snprintf(tmp, 16, "%lu\n", cfg->autoSwitchInterval);
-    w_data += tmp;
-    return g_flashFs.WriteFile(PICTURE_CONFIG_PATH, w_data.c_str());
+    if (cfg == NULL) {
+        Serial.println("[ERROR] cfg is NULL");
+        return;
+    }
+    result = "";
+    result += "autoSwitchInterval:" + String(cfg->autoSwitchInterval);
 }
 
-static int16_t ReadConfigFromFlash(PICTURE_APP_CONFIG *cfg)
+static void fromString(const char *cfgStr, PICTURE_APP_CONFIG *cfg)
 {
-    // 如果有需要持久化配置文件 可以调用此函数将数据存在flash中
-    // 配置文件名最好以APP名为开头 以".cfg"结尾，以免多个APP读取混乱
-    char info[128] = {0};
-    int16_t size = g_flashFs.ReadFile(PICTURE_CONFIG_PATH, (uint8_t *)info);
-    if (size >= 0) {
-        info[size] = 0;
-        // 解析数据
-        char *param[1] = {0};
-        ParseParam(info, 1, param);
-        cfg->autoSwitchInterval = atol(param[0]);
+    String tmpStr(cfgStr);
+    cfg->autoSwitchInterval = SplitCfgString(tmpStr).toInt();
+}
 
-    } else {
-        cfg->autoSwitchInterval = 10000;
+static void WriteConfig(PICTURE_APP_CONFIG *cfg)
+{
+    if (cfg == NULL) {
+        return;
     }
-    return 0;
+    String cfgStr;
+    ToString(cfg, cfgStr);
+    WriteConfigToCard(PICTURE_APP_NAME, cfgStr.c_str());
+}
+
+static void ReadConfig(PICTURE_APP_CONFIG *cfg)
+{
+    if (cfg == NULL) {
+        return;
+    }
+    String cfgStr;
+    uint8_t tmpStr[50];
+    int16_t size = ReadConfigFromCard(PICTURE_APP_NAME, tmpStr);
+    if (size <= 0) {
+        // 默认值
+        cfg->autoSwitchInterval = 10000;
+        WriteConfig(cfg);
+        return;
+    }
+    fromString((const char *)tmpStr, cfg);
 }
 
 static File_Info *get_next_file(File_Info *p_cur_file, int direction)
@@ -75,7 +85,8 @@ bool tft_output(int16_t x, int16_t y, uint16_t w, uint16_t h, uint16_t *bitmap)
     return 1;
 }
 
-PictureApp::PictureApp() {
+PictureApp::PictureApp()
+{
     pic_perMillis = 0;
     image_file = NULL;
     pfile = NULL;
@@ -100,7 +111,7 @@ PictureApp::~PictureApp() {}
 
 static int PictureAppInit(AppController *sys)
 {
-    ReadConfigFromFlash(&g_pictureAppCfg);
+    ReadConfig(&g_pictureAppCfg);
     g_pictureApp = new PictureApp();
     photo_gui_init();
     display_photo("/image/pig.png", LV_SCR_LOAD_ANIM_FADE_ON);
@@ -170,11 +181,11 @@ static int PictureAppExit(void *param)
     // 恢复此前的驱动参数
     tft->setSwapBytes(g_pictureApp->tftSwapStatus);
 
-    WriteConfigToFlash(&g_pictureAppCfg);
+    WriteConfig(&g_pictureAppCfg);
 
     // 释放运行数据
     if (NULL != g_pictureApp) {
-        delete(g_pictureApp);
+        delete (g_pictureApp);
         g_pictureApp = NULL;
     }
     return 0;
@@ -200,15 +211,15 @@ static void PictureAppMessageHandle(const char *from, const char *to, APP_MESSAG
             }
         } break;
         case APP_MESSAGE_READ_CFG: {
-            ReadConfigFromFlash(&g_pictureAppCfg);
+            ReadConfig(&g_pictureAppCfg);
         } break;
         case APP_MESSAGE_WRITE_CFG: {
-            WriteConfigToFlash(&g_pictureAppCfg);
+            WriteConfig(&g_pictureAppCfg);
         } break;
         default:
             break;
     }
 }
 
-APP_OBJ PICTURE_APP = {PICTURE_APP_NAME, &PictureAppLogo,        "", PictureAppInit, PictureAppMainPorcess, NULL,
-                       PictureAppExit,   PictureAppMessageHandle};
+APP_OBJ PICTURE_APP = {PICTURE_APP_NAME,       "", PictureAppInit, PictureAppMainPorcess, NULL, PictureAppExit,
+                       PictureAppMessageHandle};
