@@ -1,3 +1,6 @@
 [submodule "00.software/firmware"]
 	path = 00.software/firmware
 	url = https://github.com/DengLiankang/MiniMJT_firmware.git
+[submodule "02.reference/HoloCubic_AIO"]
+	path = 02.reference/HoloCubic_AIO
+	url = https://github.com/ClimbSnail/HoloCubic_AIO.git
