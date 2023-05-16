@@ -1,0 +1,3 @@
+[submodule "00.software/firmware"]
+	path = 00.software/firmware
+	url = https://github.com/DengLiankang/MiniMJT_firmware.git
